@@ -1,0 +1,8 @@
+# Copy to android/key.properties and fill in. NEVER commit key.properties or the .jks file.
+# Generate an upload keystore with:
+#   keytool -genkey -v -keystore ~/rentdo-upload.jks -keyalg RSA -keysize 2048 \
+#           -validity 10000 -alias rentdo
+storeFile=/absolute/path/to/rentdo-upload.jks
+storePassword=CHANGE_ME
+keyAlias=rentdo
+keyPassword=CHANGE_ME

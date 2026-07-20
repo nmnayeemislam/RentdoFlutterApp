@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze *)",
+      "Bash(dart fix *)",
+      "Bash(flutter test *)",
+      "Bash(wc -l routes/*.php)",
+      "Bash(ls -la .scribe/)",
+      "Bash(ls -la postman/)",
+      "Bash(curl -s -m 25 -H 'Accept: application/json' https://rentdonew.razinsoft.com/api/v1/config/bootstrap)",
+      "Bash(curl -s -m 25 -H 'Accept: application/json' https://rentdonew.razinsoft.com/api/v1/listings/66)",
+      "Bash(curl -s -m 25 -H \"Accept: application/json\" \"https://rentdonew.razinsoft.com/api/v1/config/bootstrap\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\)['data']; print\\(list\\(d.keys\\(\\)\\)\\); print\\('SETTINGS:', d.get\\('settings'\\)\\); print\\('FEATURES:', d.get\\('features'\\)\\)\")",
+      "Bash(grep -nE 'sort|match|case '\\\\''|=> \\\\$q|orderBy' app/Http/Controllers/Api/V1/Listing/ListingController.php)"
+    ]
+  }
+}
