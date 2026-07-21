@@ -10,6 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Localization + RTL (Material/Cupertino/Widgets localizations)
+  flutter_localizations:
+    sdk: flutter
+
   cupertino_icons: ^1.0.8
 
   # State management
@@ -29,10 +33,12 @@ dependencies:
   cached_network_image: ^3.4.1
 
   # Utils
-  intl: ^0.19.0
+  intl: ^0.20.2
   equatable: ^2.0.5
   image_picker: ^1.2.3
   share_plus: ^12.0.2
+  google_fonts: ^8.2.0
+  webview_flutter: ^4.14.1
 
 dev_dependencies:
   flutter_test:

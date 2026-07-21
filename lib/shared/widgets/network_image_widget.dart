@@ -33,13 +33,27 @@ class NetworkImageWidget extends StatelessWidget {
     if (url == null || url!.isEmpty) {
       child = _fallback(placeholder);
     } else {
-      child = CachedNetworkImage(
-        imageUrl: url!,
-        width: width,
-        height: height,
-        fit: fit,
-        placeholder: (_, _) => Container(color: placeholder),
-        errorWidget: (_, _, _) => _fallback(placeholder),
+      final double dpr = MediaQuery.devicePixelRatioOf(context);
+      // Decode each image at its on-screen size instead of the source's full
+      // resolution. This is the single biggest memory/scroll-jank win: a 4000px
+      // photo shown in a 280px card otherwise decodes a ~30 MB bitmap.
+      child = LayoutBuilder(
+        builder: (context, constraints) {
+          final double target = constraints.maxWidth.isFinite
+              ? constraints.maxWidth
+              : (width ?? 400);
+          final int memW = (target * dpr).clamp(64, 2000).round();
+          return CachedNetworkImage(
+            imageUrl: url!,
+            width: width,
+            height: height,
+            fit: fit,
+            memCacheWidth: memW,
+            fadeInDuration: const Duration(milliseconds: 180),
+            placeholder: (_, _) => Container(color: placeholder),
+            errorWidget: (_, _, _) => _fallback(placeholder),
+          );
+        },
       );
     }
 

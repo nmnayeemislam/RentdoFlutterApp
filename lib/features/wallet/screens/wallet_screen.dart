@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -53,17 +54,35 @@ class _BalanceCard extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: AppRadius.brLg,
+        gradient: AppColors.heroGradient,
+        borderRadius: AppRadius.brXl,
+        boxShadow: AppShadows.raised,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Text(
+                'RENTDO WALLET',
+                style: AppTextStyles.caption.copyWith(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Icon(Icons.account_balance_wallet_rounded,
+                  color: Colors.white.withValues(alpha: 0.85), size: 22),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
           Text(
             'Available balance',
-            style: AppTextStyles.bodySm.copyWith(color: Colors.white70),
+            style: AppTextStyles.bodySm
+                .copyWith(color: Colors.white.withValues(alpha: 0.7)),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.xs),
           balance.when(
             loading: () => const Padding(
               padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),

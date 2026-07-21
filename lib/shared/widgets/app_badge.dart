@@ -9,9 +9,10 @@ class AppBadge extends StatelessWidget {
   const AppBadge({
     super.key,
     required this.label,
-    this.color = AppColors.primary,
+    this.color = AppColors.navy,
     this.background,
     this.icon,
+    this.iconColor,
     this.filled = true,
   });
 
@@ -19,20 +20,25 @@ class AppBadge extends StatelessWidget {
   final Color color;
   final Color? background;
   final IconData? icon;
+
+  /// Overrides the icon tint (defaults to the label colour).
+  final Color? iconColor;
   final bool filled;
 
   const AppBadge.verified({super.key})
       : label = 'Verified',
-        color = Colors.white,
-        background = AppColors.verified,
+        color = AppColors.navy,
+        background = Colors.white,
         icon = Icons.verified_rounded,
+        iconColor = AppColors.verified,
         filled = true;
 
   const AppBadge.featured({super.key})
       : label = 'Featured',
-        color = AppColors.ink,
-        background = AppColors.accent,
+        color = Colors.white,
+        background = AppColors.navy,
         icon = Icons.star_rounded,
+        iconColor = null,
         filled = true;
 
   const AppBadge.isNew({super.key})
@@ -40,6 +46,7 @@ class AppBadge extends StatelessWidget {
         color = Colors.white,
         background = AppColors.info,
         icon = null,
+        iconColor = null,
         filled = true;
 
   @override
@@ -60,7 +67,7 @@ class AppBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 13, color: fg),
+            Icon(icon, size: 13, color: iconColor ?? fg),
             const SizedBox(width: 4),
           ],
           Text(

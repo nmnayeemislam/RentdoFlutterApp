@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/constants/app_strings.dart';
@@ -11,10 +12,32 @@ import 'routes/app_router.dart';
 class RentdoApp extends ConsumerWidget {
   const RentdoApp({super.key});
 
+  /// Locales the UI can render (drives Material/Cupertino translations and,
+  /// for RTL scripts like Arabic/Hebrew/Urdu, mirrors the whole layout).
+  /// The selected code comes from [localeControllerProvider] and can be any
+  /// backend language; [_resolveLocale] maps it onto the closest entry here.
+  static const List<Locale> supportedLocales = [
+    Locale('en'), Locale('ar'), Locale('bn'), Locale('hi'), Locale('ur'),
+    Locale('fa'), Locale('he'), Locale('es'), Locale('fr'), Locale('de'),
+    Locale('pt'), Locale('ru'), Locale('tr'), Locale('id'), Locale('ms'),
+    Locale('zh'), Locale('ja'), Locale('vi'), Locale('th'),
+  ];
+
+  static Locale _resolveLocale(Locale? locale, Iterable<Locale> supported) {
+    if (locale != null) {
+      for (final s in supported) {
+        if (s.languageCode == locale.languageCode) return s;
+      }
+    }
+    return const Locale('en');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final localeCode =
+        ref.watch(localeControllerProvider.select((s) => s.locale));
 
     // Warm the public app-config (currencies/locale/property types) once at
     // startup; it seeds the currency/locale sent on subsequent requests.
@@ -26,6 +49,14 @@ class RentdoApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
+      locale: Locale(localeCode),
+      supportedLocales: supportedLocales,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      localeResolutionCallback: _resolveLocale,
       routerConfig: router,
       builder: (context, child) {
         // Anchor the ambient text color to the theme's on-surface so the

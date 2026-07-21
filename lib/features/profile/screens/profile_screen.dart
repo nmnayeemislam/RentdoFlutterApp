@@ -39,6 +39,7 @@ class ProfileScreen extends ConsumerWidget {
               const _GuestHeader(),
             AppSpacing.vGapXl,
             const _MenuGroup(
+              title: 'Activity',
               items: [
                 (Icons.chat_bubble_outline_rounded, 'Messages', AppRoutes.conversations),
                 (Icons.hotel_outlined, 'My Bookings', AppRoutes.myBookings),
@@ -51,6 +52,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
             AppSpacing.vGapLg,
             const _MenuGroup(
+              title: 'Lists',
               items: [
                 (Icons.favorite_border_rounded, 'Saved Properties', AppRoutes.saved),
                 (Icons.bookmark_border_rounded, 'Saved Searches', AppRoutes.savedSearches),
@@ -59,6 +61,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
             AppSpacing.vGapLg,
             const _MenuGroup(
+              title: 'Owner',
               items: [
                 (Icons.home_work_outlined, 'My Listings', AppRoutes.myListings),
                 (Icons.insights_outlined, 'Leads & Activity', AppRoutes.ownerLeads),
@@ -70,6 +73,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
             AppSpacing.vGapLg,
             const _MenuGroup(
+              title: 'Billing',
               items: [
                 (Icons.account_balance_wallet_outlined, 'Wallet', AppRoutes.wallet),
                 (Icons.workspace_premium_outlined, 'Membership', AppRoutes.plans),
@@ -78,6 +82,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
             AppSpacing.vGapLg,
             const _MenuGroup(
+              title: 'Account',
               items: [
                 (Icons.person_outline_rounded, 'Edit Profile', AppRoutes.editProfile),
                 (Icons.notifications_none_rounded, 'Notifications', AppRoutes.notifications),
@@ -128,26 +133,33 @@ class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: AppRadius.brLg,
+        gradient: AppColors.heroGradient,
+        borderRadius: AppRadius.brXl,
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 32,
-            backgroundColor: Colors.white24,
-            backgroundImage: user.avatarUrl != null
-                ? CachedNetworkImageProvider(user.avatarUrl!)
-                : null,
-            child: user.avatarUrl == null
-                ? Text(user.initials,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700))
-                : null,
+          Container(
+            padding: const EdgeInsets.all(2.5),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+            ),
+            child: CircleAvatar(
+              radius: 32,
+              backgroundColor: Colors.white24,
+              backgroundImage: user.avatarUrl != null
+                  ? CachedNetworkImageProvider(user.avatarUrl!)
+                  : null,
+              child: user.avatarUrl == null
+                  ? Text(user.initials,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700))
+                  : null,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -155,14 +167,23 @@ class _ProfileHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(user.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.headingMd
                         .copyWith(color: Colors.white)),
                 const SizedBox(height: 2),
                 Text(user.email ?? user.phone ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.bodySm
-                        .copyWith(color: Colors.white70)),
+                        .copyWith(color: Colors.white.withValues(alpha: 0.75))),
               ],
             ),
+          ),
+          IconButton(
+            onPressed: () => context.push(AppRoutes.editProfile),
+            icon: const Icon(Icons.edit_outlined, color: Colors.white, size: 20),
+            tooltip: 'Edit profile',
           ),
         ],
       ),
@@ -237,41 +258,69 @@ class _AppearanceToggle extends ConsumerWidget {
 }
 
 class _MenuGroup extends StatelessWidget {
-  const _MenuGroup({required this.items});
+  const _MenuGroup({this.title, required this.items});
+
+  final String? title;
 
   /// `(icon, label, route?)` — a null route shows a "coming soon" note.
   final List<(IconData, String, String?)> items;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: AppRadius.brLg,
-        border: Border.all(color: context.colors.outline),
-      ),
-      child: Column(
-        children: [
-          for (var i = 0; i < items.length; i++) ...[
-            ListTile(
-              leading: Icon(items[i].$1, color: AppColors.primary),
-              title: Text(items[i].$2, style: AppTextStyles.titleSm),
-              trailing: const Icon(Icons.chevron_right_rounded,
-                  color: AppColors.textTertiary),
-              onTap: () {
-                final route = items[i].$3;
-                if (route == null) {
-                  context.showSnack('Coming soon');
-                } else {
-                  context.push(route);
-                }
-              },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (title != null)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 4, bottom: 8),
+            child: Text(
+              title!.toUpperCase(),
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textTertiary,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
+              ),
             ),
-            if (i != items.length - 1)
-              const Divider(height: 1, indent: 56, endIndent: 16),
-          ],
-        ],
-      ),
+          ),
+        Container(
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            borderRadius: AppRadius.brLg,
+            border: Border.all(color: context.colors.outline),
+          ),
+          child: Column(
+            children: [
+              for (var i = 0; i < items.length; i++) ...[
+                ListTile(
+                  leading: Container(
+                    height: 38,
+                    width: 38,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.12),
+                      borderRadius: AppRadius.brSm,
+                    ),
+                    child: Icon(items[i].$1, color: AppColors.primary, size: 20),
+                  ),
+                  title: Text(items[i].$2, style: AppTextStyles.titleSm),
+                  trailing: const Icon(Icons.chevron_right_rounded,
+                      color: AppColors.textTertiary),
+                  onTap: () {
+                    final route = items[i].$3;
+                    if (route == null) {
+                      context.showSnack('Coming soon');
+                    } else {
+                      context.push(route);
+                    }
+                  },
+                ),
+                if (i != items.length - 1)
+                  const Divider(height: 1, indent: 66, endIndent: 16),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

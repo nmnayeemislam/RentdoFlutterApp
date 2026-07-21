@@ -134,11 +134,11 @@ class _MessageBubble extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: isMine ? AppColors.primary : context.colors.surface,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(AppRadius.lg),
-                  topRight: const Radius.circular(AppRadius.lg),
-                  bottomLeft: Radius.circular(isMine ? AppRadius.lg : 0),
-                  bottomRight: Radius.circular(isMine ? 0 : AppRadius.lg),
+                borderRadius: BorderRadiusDirectional.only(
+                  topStart: const Radius.circular(AppRadius.lg),
+                  topEnd: const Radius.circular(AppRadius.lg),
+                  bottomStart: Radius.circular(isMine ? AppRadius.lg : 0),
+                  bottomEnd: Radius.circular(isMine ? 0 : AppRadius.lg),
                 ),
                 border: isMine
                     ? null
@@ -151,7 +151,7 @@ class _MessageBubble extends StatelessWidget {
                     message.body,
                     style: AppTextStyles.bodyMd.copyWith(
                       color:
-                          isMine ? Colors.white : AppColors.textPrimary,
+                          isMine ? Colors.white : context.colors.onSurface,
                     ),
                   ),
                   if (time.isNotEmpty) ...[
@@ -203,32 +203,68 @@ class _InputBar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
-              child: TextField(
-                controller: controller,
-                minLines: 1,
-                maxLines: 4,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => onSend(),
-                style: AppTextStyles.bodyMd
-                    .copyWith(color: context.colors.onSurface),
-                decoration: const InputDecoration(
-                  hintText: 'Type a message…',
+              child: Container(
+                decoration: BoxDecoration(
+                  color: context.isDark
+                      ? AppColors.surfaceAltDark
+                      : AppColors.surfaceAltLight,
+                  borderRadius: AppRadius.brXl,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: TextField(
+                  controller: controller,
+                  minLines: 1,
+                  maxLines: 4,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => onSend(),
+                  style: AppTextStyles.bodyMd
+                      .copyWith(color: context.colors.onSurface),
+                  decoration: const InputDecoration(
+                    hintText: 'Type a message…',
+                    filled: false,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 12),
+                  ),
                 ),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            IconButton(
-              onPressed: sending ? null : onSend,
-              icon: sending
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2.4),
-                    )
-                  : const Icon(Icons.send_rounded, color: AppColors.primary),
-            ),
+            _SendButton(sending: sending, onSend: onSend),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Circular indigo send button used in the chat input bar.
+class _SendButton extends StatelessWidget {
+  const _SendButton({required this.sending, required this.onSend});
+  final bool sending;
+  final VoidCallback onSend;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: sending ? null : onSend,
+      child: Container(
+        height: 46,
+        width: 46,
+        decoration: const BoxDecoration(
+          gradient: AppColors.primaryGradient,
+          shape: BoxShape.circle,
+        ),
+        child: sending
+            ? const Padding(
+                padding: EdgeInsets.all(13),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                ),
+              )
+            : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
       ),
     );
   }

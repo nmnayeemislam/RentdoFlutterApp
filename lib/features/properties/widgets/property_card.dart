@@ -29,7 +29,10 @@ class PropertyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Pressable(
+    // Each card paints into its own layer so scrolling a long list — and the
+    // favorite-toggle animation on one card — doesn't repaint its neighbours.
+    return RepaintBoundary(
+      child: Pressable(
       onTap: onTap,
       child: Container(
         width: width,
@@ -84,6 +87,7 @@ class PropertyCard extends StatelessWidget {
           ],
         ),
       ),
+      ),
     );
   }
 }
@@ -102,6 +106,17 @@ class _ImageHeader extends StatelessWidget {
           Hero(
             tag: 'listing-img-${property.id}',
             child: NetworkImageWidget(url: property.imageUrl),
+          ),
+          // Subtle top scrim so white badges stay legible over bright photos.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0x4D000000), Colors.transparent],
+                stops: [0, 0.4],
+              ),
+            ),
           ),
           Positioned(
             top: 10,

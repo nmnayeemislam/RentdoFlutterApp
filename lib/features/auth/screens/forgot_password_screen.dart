@@ -9,6 +9,7 @@ import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/otp_field.dart';
+import '../../../shared/widgets/phone_field.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../controllers/auth_controller.dart';
 import '../models/auth_request.dart';
@@ -179,13 +180,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   List<Widget> _phoneFields(bool isSubmitting) {
     return [
-      AppTextField(
+      PhoneField(
         label: AppStrings.phone,
-        hint: '+1 415 555 0100',
+        hint: '1711 223344',
         controller: _phone,
         enabled: !_otpSent,
-        keyboardType: TextInputType.phone,
-        prefixIcon: Icons.phone_outlined,
         textInputAction: TextInputAction.next,
         validator: Validators.phone,
       ),

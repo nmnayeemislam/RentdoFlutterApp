@@ -5,12 +5,15 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/animations.dart';
+import '../../../shared/widgets/app_search_bar.dart';
 import '../../../shared/widgets/section_header.dart';
+import '../../../shared/widgets/skeletons.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../properties/controllers/property_list_controller.dart';
@@ -23,7 +26,7 @@ import '../../zones/providers/zone_providers.dart';
 import '../widgets/category_grid.dart';
 import '../widgets/home_hero.dart';
 
-/// Home tab: hero search, categories, featured listings and trust highlights.
+/// Home tab: light header, search, trust stats, categories, featured listings.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -50,92 +53,197 @@ class HomeScreen extends ConsumerWidget {
     final featured = ref.watch(featuredPropertiesProvider);
 
     return Scaffold(
-      body: RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: () async => ref.invalidate(featuredPropertiesProvider),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            HomeHero(
-              userName: userName?.split(' ').first,
-              onSearchTap: () => _goToList(ref, context),
-            ),
-            AppSpacing.vGapXl,
-            const _StatsRow(),
-            AppSpacing.vGapXxl,
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: SectionHeader(
-                title: 'Categories',
-                subtitle: 'Browse by property type',
+      body: SafeArea(
+        bottom: false,
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () async => ref.invalidate(featuredPropertiesProvider),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Column(
+                  children: [
+                    HomeHeader(userName: userName?.split(' ').first),
+                    AppSpacing.vGapLg,
+                    AppSearchBar(
+                      readOnly: true,
+                      onTap: () => _goToList(ref, context),
+                      onFilterTap: () => _goToList(ref, context),
+                    ),
+                    AppSpacing.vGapLg,
+                    const _StatsCard(),
+                  ],
+                ),
               ),
-            ),
-            AppSpacing.vGapMd,
-            CategoryRail(
-              onSelected: (type) => _goToList(ref, context, type: type),
-            ),
-            AppSpacing.vGapXxl,
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SectionHeader(
-                title: 'Featured Properties',
-                subtitle: 'Hand-picked listings for you',
-                actionLabel: 'View all',
-                onAction: () => _goToList(ref, context),
+              AppSpacing.vGapXxl,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SectionHeader(
+                  title: 'Categories',
+                  actionLabel: 'View all',
+                  onAction: () => _goToList(ref, context),
+                ),
               ),
-            ),
-            AppSpacing.vGapMd,
-            _FeaturedRail(async: featured),
-            AppSpacing.vGapXxl,
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: SectionHeader(
-                title: 'Property by Location',
-                subtitle: 'Explore homes in top cities',
+              AppSpacing.vGapMd,
+              CategoryRail(
+                onSelected: (type) => _goToList(ref, context, type: type),
               ),
-            ),
-            AppSpacing.vGapMd,
-            _LocationRail(onSelected: (city) => _goToLocation(ref, context, city)),
-            AppSpacing.vGapXxl,
-            const _WhyChoose(),
-            const SizedBox(height: 24),
-          ],
+              AppSpacing.vGapXxl,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SectionHeader(
+                  title: 'Featured Properties',
+                  subtitle: 'Hand-picked listings for you',
+                  actionLabel: 'View all',
+                  onAction: () => _goToList(ref, context),
+                ),
+              ),
+              AppSpacing.vGapMd,
+              _FeaturedRail(async: featured),
+              AppSpacing.vGapXl,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _CtaBanner(onTap: () => _goToList(ref, context)),
+              ),
+              AppSpacing.vGapXxl,
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: SectionHeader(
+                  title: 'Property by Location',
+                  subtitle: 'Explore homes in top cities',
+                ),
+              ),
+              AppSpacing.vGapMd,
+              _LocationRail(
+                  onSelected: (city) => _goToLocation(ref, context, city)),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _StatsRow extends StatelessWidget {
-  const _StatsRow();
+/// White trust-stats card with colored icon chips and dividers.
+class _StatsCard extends StatelessWidget {
+  const _StatsCard();
 
-  static const _stats = [
-    ('60+', 'Properties'),
-    ('30+', 'Cities'),
-    ('Verified', 'Listings'),
-    ('24/7', 'Support'),
+  static const _stats = <(IconData, Color, String, String)>[
+    (Icons.home_rounded, AppColors.info, '60+', 'Properties'),
+    (Icons.location_on_rounded, AppColors.primary, '30+', 'Cities'),
+    (Icons.verified_rounded, AppColors.success, 'Verified', 'Listings'),
+    (Icons.headset_mic_rounded, AppColors.warning, '24/7', 'Support'),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: AppRadius.brLg,
+        border: Border.all(color: context.colors.outline),
+        boxShadow: context.isDark ? null : AppShadows.soft,
+      ),
       child: Row(
         children: [
-          for (final s in _stats)
+          for (var i = 0; i < _stats.length; i++) ...[
+            if (i > 0)
+              Container(width: 1, height: 32, color: context.colors.outline),
             Expanded(
               child: Column(
                 children: [
-                  Text(s.$1,
-                      style: AppTextStyles.headingMd
-                          .copyWith(color: AppColors.primary)),
-                  const SizedBox(height: 2),
-                  Text(s.$2,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.caption),
+                  Container(
+                    height: 34,
+                    width: 34,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: _stats[i].$2.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(_stats[i].$1, color: _stats[i].$2, size: 18),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(_stats[i].$3,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.titleSm),
+                  Text(_stats[i].$4,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.textTertiary)),
                 ],
               ),
             ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// "Not sure where to start?" prompt banner.
+class _CtaBanner extends StatelessWidget {
+  const _CtaBanner({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: context.isDark
+            ? AppColors.surfaceAltDark
+            : AppColors.surfaceAltLight,
+        borderRadius: AppRadius.brLg,
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 44,
+            width: 44,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: AppColors.navy,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.travel_explore_rounded,
+                color: Colors.white, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Not sure where to start?',
+                    style: AppTextStyles.titleSm),
+                const SizedBox(height: 2),
+                Text('Let us help you find the perfect place.',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bodySm
+                        .copyWith(color: AppColors.textSecondary)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: const BoxDecoration(
+                color: AppColors.navy,
+                borderRadius: AppRadius.brMd,
+              ),
+              child: Text('Explore Now',
+                  style: AppTextStyles.titleSm.copyWith(color: Colors.white)),
+            ),
+          ),
         ],
       ),
     );
@@ -149,7 +257,7 @@ class _FeaturedRail extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return async.when(
-      loading: () => const SizedBox(height: 300, child: LoadingWidget()),
+      loading: () => const PropertyRailSkeleton(),
       error: (e, _) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: _InlineRetry(
@@ -218,7 +326,7 @@ class _LocationRail extends ConsumerWidget {
                   width: 150,
                   padding: const EdgeInsets.all(14),
                   decoration: const BoxDecoration(
-                    gradient: AppColors.primaryGradient,
+                    gradient: AppColors.heroGradient,
                     borderRadius: AppRadius.brLg,
                   ),
                   child: Column(
@@ -275,69 +383,6 @@ class _InlineRetry extends StatelessWidget {
                 style: AppTextStyles.bodySm),
           ),
           TextButton(onPressed: onRetry, child: const Text('Retry')),
-        ],
-      ),
-    );
-  }
-}
-
-class _WhyChoose extends StatelessWidget {
-  const _WhyChoose();
-
-  static const _items = [
-    (Icons.verified_outlined, 'Verified Listings',
-        'All listings verified for your safety.'),
-    (Icons.handshake_outlined, 'Trusted Agents',
-        'Work with professional, trusted agents.'),
-    (Icons.lock_outline_rounded, 'Secure Transactions',
-        'Transparent and secure throughout.'),
-    (Icons.event_available_outlined, 'Schedule Visits',
-        'Book property visits online with ease.'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Why choose Rentdo?', style: AppTextStyles.headingLg),
-          AppSpacing.vGapLg,
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 1.35,
-            children: [
-              for (final item in _items)
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: AppRadius.brMd,
-                    border: Border.all(
-                        color: Theme.of(context).colorScheme.outline),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(item.$1, color: AppColors.primary, size: 26),
-                      const SizedBox(height: 8),
-                      Text(item.$2, style: AppTextStyles.titleSm),
-                      const SizedBox(height: 2),
-                      Text(item.$3,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.bodySm),
-                    ],
-                  ),
-                ),
-            ],
-          ),
         ],
       ),
     );

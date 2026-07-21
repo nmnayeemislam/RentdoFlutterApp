@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_shadows.dart';
 
 /// App-wide filled call-to-action button with a built-in loading state.
 class PrimaryButton extends StatelessWidget {
@@ -25,11 +26,21 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool disabled = isLoading || onPressed == null;
-    return SizedBox(
+    return Container(
       height: height,
       width: expanded ? double.infinity : null,
+      // Indigo lift for the primary action — dropped while disabled.
+      decoration: BoxDecoration(
+        borderRadius: AppRadius.brMd,
+        boxShadow: disabled ? null : AppShadows.raised,
+      ),
       child: ElevatedButton(
-        onPressed: disabled ? null : onPressed,
+        onPressed: disabled
+            ? null
+            : () {
+                HapticFeedback.lightImpact();
+                onPressed!();
+              },
         child: isLoading
             ? SizedBox(
                 height: 22,
@@ -80,7 +91,7 @@ class SecondaryButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: AppColors.border),
+          side: BorderSide(color: Theme.of(context).colorScheme.outline),
           shape:
               const RoundedRectangleBorder(borderRadius: AppRadius.brMd),
         ),

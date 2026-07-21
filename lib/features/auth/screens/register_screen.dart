@@ -10,6 +10,7 @@ import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/otp_field.dart';
+import '../../../shared/widgets/phone_field.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_header.dart';
@@ -44,16 +45,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   String? get _errorMessage => ref.read(authControllerProvider).error?.message;
-
-  String? _optionalEmail(String? value) {
-    if (value == null || value.trim().isEmpty) return null;
-    return Validators.email(value);
-  }
-
-  String? _optionalPassword(String? value) {
-    if (value == null || value.isEmpty) return null;
-    return Validators.password(value);
-  }
 
   Future<void> _sendOtp() async {
     if (!_collectFormKey.currentState!.validate()) return;
@@ -144,16 +135,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           AppSpacing.vGapXxl,
           AppTextField(
-            label: AppStrings.phone,
-            hint: '+1 415 555 0100',
-            controller: _phone,
-            keyboardType: TextInputType.phone,
-            prefixIcon: Icons.phone_outlined,
-            textInputAction: TextInputAction.next,
-            validator: Validators.phone,
-          ),
-          AppSpacing.vGapLg,
-          AppTextField(
             label: AppStrings.fullName,
             hint: 'Jane Doe',
             controller: _name,
@@ -163,23 +144,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: '${AppStrings.email} (optional)',
+            label: AppStrings.email,
             hint: 'you@example.com',
             controller: _email,
             keyboardType: TextInputType.emailAddress,
             prefixIcon: Icons.mail_outline_rounded,
             textInputAction: TextInputAction.next,
-            validator: _optionalEmail,
+            validator: Validators.email,
+          ),
+          AppSpacing.vGapLg,
+          PhoneField(
+            label: AppStrings.phone,
+            hint: '1711 223344',
+            controller: _phone,
+            textInputAction: TextInputAction.next,
+            validator: Validators.phone,
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: '${AppStrings.password} (optional)',
+            label: AppStrings.password,
             hint: '••••••••',
             controller: _password,
             obscure: true,
             prefixIcon: Icons.lock_outline_rounded,
             textInputAction: TextInputAction.done,
-            validator: _optionalPassword,
+            validator: Validators.password,
           ),
           AppSpacing.vGapXl,
           PrimaryButton(

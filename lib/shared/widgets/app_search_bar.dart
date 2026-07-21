@@ -17,6 +17,7 @@ class AppSearchBar extends StatelessWidget {
     this.onTap,
     this.readOnly = false,
     this.onFilterTap,
+    this.filterActive = false,
   });
 
   final String hint;
@@ -27,6 +28,9 @@ class AppSearchBar extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onFilterTap;
 
+  /// When true, a dot badge is shown on the filter button.
+  final bool filterActive;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -34,12 +38,12 @@ class AppSearchBar extends StatelessWidget {
       children: [
         Expanded(
           child: Container(
-            height: 52,
+            height: 56,
             decoration: BoxDecoration(
               color: theme.brightness == Brightness.dark
                   ? AppColors.surfaceAltDark
                   : AppColors.surfaceLight,
-              borderRadius: AppRadius.brMd,
+              borderRadius: AppRadius.brLg,
               border: Border.all(color: theme.colorScheme.outline),
             ),
             child: TextField(
@@ -68,15 +72,35 @@ class AppSearchBar extends StatelessWidget {
           const SizedBox(width: 10),
           InkWell(
             onTap: onFilterTap,
-            borderRadius: AppRadius.brMd,
-            child: Container(
-              height: 52,
-              width: 52,
-              decoration: const BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: AppRadius.brMd,
-              ),
-              child: const Icon(Icons.tune_rounded, color: Colors.white),
+            borderRadius: AppRadius.brLg,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  height: 56,
+                  width: 56,
+                  decoration: const BoxDecoration(
+                    color: AppColors.navy,
+                    borderRadius: AppRadius.brLg,
+                  ),
+                  child: const Icon(Icons.tune_rounded, color: Colors.white),
+                ),
+                if (filterActive)
+                  Positioned(
+                    top: -3,
+                    right: -3,
+                    child: Container(
+                      height: 14,
+                      width: 14,
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: theme.scaffoldBackgroundColor, width: 2),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],

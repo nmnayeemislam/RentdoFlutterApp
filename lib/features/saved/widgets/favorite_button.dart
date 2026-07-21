@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -50,6 +51,7 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
     }
 
     final desired = !_isFavorite;
+    unawaited(HapticFeedback.lightImpact());
     setState(() {
       _isFavorite = desired;
       _busy = true;
@@ -80,7 +82,10 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
       color: _isFavorite ? AppColors.error : null,
     );
 
-    return InkResponse(
+    return Semantics(
+      button: true,
+      label: _isFavorite ? 'Remove from saved' : 'Save property',
+      child: InkResponse(
       onTap: _toggle,
       radius: widget.size + 8,
       child: widget.filledBackground
@@ -96,6 +101,7 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
               ),
             )
           : icon,
+      ),
     );
   }
 }

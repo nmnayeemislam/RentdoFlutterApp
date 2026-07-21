@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 import 'app_radius.dart';
@@ -49,15 +50,19 @@ abstract final class AppTheme {
       outlineVariant: outline,
     );
 
-    final TextTheme textTheme =
-        AppTextStyles.textTheme(onSurface, onSurfaceVariant);
+    // Apply the Plus Jakarta Sans brand face to the token text theme. This
+    // registers the family globally so plain `AppTextStyles.*` usages (which
+    // carry no family of their own) inherit it via the ambient text style too.
+    final TextTheme textTheme = GoogleFonts.plusJakartaSansTextTheme(
+      AppTextStyles.textTheme(onSurface, onSurfaceVariant),
+    );
 
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
       scaffoldBackgroundColor: scaffold,
-      fontFamily: AppTextStyles.fontFamily,
+      fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
       textTheme: textTheme,
       splashFactory: InkSparkle.splashFactory,
       appBarTheme: AppBarTheme(

@@ -3,57 +3,56 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../routes/app_routes.dart';
 import '../controllers/notifications_controller.dart';
 
-/// Notification bell with an unread-count badge; navigates to the
-/// notifications screen. Designed to sit on the home hero's gradient.
+/// Notification bell with an unread dot; navigates to the notifications
+/// screen. A bordered white tile that sits on the light home header.
 class NotificationBell extends ConsumerWidget {
   const NotificationBell({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unread = ref.watch(unreadNotificationsProvider).valueOrNull ?? 0;
+    final theme = Theme.of(context);
 
-    return GestureDetector(
-      onTap: () => context.push(AppRoutes.notifications),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            height: 42,
-            width: 42,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(12),
+    return Semantics(
+      button: true,
+      label: unread > 0 ? 'Notifications, $unread unread' : 'Notifications',
+      child: GestureDetector(
+        onTap: () => context.push(AppRoutes.notifications),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              height: 46,
+              width: 46,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: AppRadius.brMd,
+                border: Border.all(color: theme.colorScheme.outline),
+              ),
+              child: Icon(Icons.notifications_none_rounded,
+                  color: theme.colorScheme.onSurface, size: 22),
             ),
-            child: const Icon(Icons.notifications_none_rounded,
-                color: Colors.white, size: 22),
-          ),
-          if (unread > 0)
-            Positioned(
-              top: -3,
-              right: -3,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                constraints: const BoxConstraints(minWidth: 18),
-                decoration: BoxDecoration(
-                  color: AppColors.error,
-                  borderRadius: BorderRadius.circular(9),
-                  border: Border.all(color: Colors.white, width: 1.5),
-                ),
-                child: Text(
-                  unread > 99 ? '99+' : '$unread',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
+            if (unread > 0)
+              Positioned(
+                top: -2,
+                right: -2,
+                child: Container(
+                  height: 12,
+                  width: 12,
+                  decoration: BoxDecoration(
+                    color: AppColors.error,
+                    shape: BoxShape.circle,
+                    border:
+                        Border.all(color: theme.colorScheme.surface, width: 2),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

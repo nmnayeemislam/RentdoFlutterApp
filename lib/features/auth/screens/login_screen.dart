@@ -10,7 +10,9 @@ import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/otp_field.dart';
+import '../../../shared/widgets/phone_field.dart';
 import '../../../shared/widgets/primary_button.dart';
+import '../../../shared/widgets/segmented_control.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_header.dart';
 
@@ -131,19 +133,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       subtitle: 'Log in to continue exploring properties.',
                     ),
                     AppSpacing.vGapXxl,
+                    SegmentedControl(
+                      labels: const ['Email', 'Phone'],
+                      selected: _phoneMode ? 1 : 0,
+                      onChanged: isSubmitting
+                          ? (_) {}
+                          : (i) {
+                              if ((i == 1) != _phoneMode) _switchMode();
+                            },
+                    ),
+                    AppSpacing.vGapXl,
                     if (_phoneMode)
                       ..._phoneFields(isSubmitting)
                     else
                       ..._emailFields(isSubmitting),
-                    AppSpacing.vGapMd,
-                    TextButton(
-                      onPressed: isSubmitting ? null : _switchMode,
-                      child: Text(
-                        _phoneMode
-                            ? AppStrings.useEmailInstead
-                            : AppStrings.usePhoneInstead,
-                      ),
-                    ),
                     AppSpacing.vGapMd,
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -211,13 +214,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   List<Widget> _phoneFields(bool isSubmitting) {
     return [
-      AppTextField(
+      PhoneField(
         label: AppStrings.phone,
-        hint: '+1 415 555 0100',
+        hint: '1711 223344',
         controller: _phone,
         enabled: !_otpSent,
-        keyboardType: TextInputType.phone,
-        prefixIcon: Icons.phone_outlined,
         textInputAction: TextInputAction.next,
         validator: Validators.phone,
       ),

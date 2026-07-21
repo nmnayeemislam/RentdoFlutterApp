@@ -10,7 +10,9 @@ import 'app_colors.dart';
 abstract final class AppTextStyles {
   AppTextStyles._();
 
-  static const String fontFamily = 'Roboto';
+  /// Brand face. Loaded via `google_fonts` (Plus Jakarta Sans) in
+  /// [AppTheme]; individual token styles carry no family and inherit it.
+  static const String fontFamily = 'Plus Jakarta Sans';
 
   static const TextStyle displayLarge = TextStyle(
     fontSize: 34,

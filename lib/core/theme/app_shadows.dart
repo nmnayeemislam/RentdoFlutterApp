@@ -6,7 +6,7 @@ abstract final class AppShadows {
 
   static const List<BoxShadow> card = [
     BoxShadow(
-      color: Color(0x0F14211D),
+      color: Color(0x120E1424),
       blurRadius: 16,
       offset: Offset(0, 6),
     ),
@@ -14,17 +14,18 @@ abstract final class AppShadows {
 
   static const List<BoxShadow> soft = [
     BoxShadow(
-      color: Color(0x0A14211D),
+      color: Color(0x0C0E1424),
       blurRadius: 10,
       offset: Offset(0, 3),
     ),
   ];
 
+  /// Indigo-tinted lift used for primary/floating elements.
   static const List<BoxShadow> raised = [
     BoxShadow(
-      color: Color(0x1A0B7E68),
-      blurRadius: 22,
-      offset: Offset(0, 10),
+      color: Color(0x2E4F52E8),
+      blurRadius: 24,
+      offset: Offset(0, 12),
     ),
   ];
 

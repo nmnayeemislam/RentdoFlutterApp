@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/animations.dart';
 import '../../properties/models/property_model.dart';
 import '../models/category_item.dart';
@@ -31,21 +32,24 @@ class CategoryRail extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    height: 62,
-                    width: 62,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primarySurface,
-                      borderRadius: AppRadius.brMd,
+                    height: 64,
+                    width: 64,
+                    decoration: BoxDecoration(
+                      color: context.colors.surface,
+                      borderRadius: AppRadius.brLg,
+                      border: Border.all(color: context.colors.outline),
+                      boxShadow: context.isDark ? null : AppShadows.soft,
                     ),
-                    child: Icon(item.icon, color: AppColors.primary, size: 28),
+                    child: Icon(item.icon,
+                        color: context.colors.onSurface, size: 26),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     item.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.caption
-                        .copyWith(fontWeight: FontWeight.w600),
+                        .copyWith(fontWeight: FontWeight.w700),
                   ),
                 ],
               ),

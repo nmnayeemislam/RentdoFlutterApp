@@ -12,6 +12,7 @@ import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/animations.dart';
 import '../../../shared/widgets/app_search_bar.dart';
+import '../../../shared/widgets/skeletons.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../saved_searches/controllers/saved_search_controller.dart';
@@ -72,10 +73,17 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              child: AppSearchBar(
-                controller: _searchController,
-                onSubmitted: controller.setSearch,
-                onFilterTap: _openFilters,
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final active = ref.watch(propertyListControllerProvider
+                      .select((s) => s.filter.hasActiveFilters));
+                  return AppSearchBar(
+                    controller: _searchController,
+                    onSubmitted: controller.setSearch,
+                    onFilterTap: _openFilters,
+                    filterActive: active,
+                  );
+                },
               ),
             ),
             Consumer(
@@ -113,7 +121,7 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
   }
 
   Widget _body(PropertyListState state, PropertyListController controller) {
-    if (state.isLoading) return const LoadingWidget();
+    if (state.isLoading) return const PropertyListSkeleton();
     if (state.isInitialError) {
       return AppErrorWidget(
         message: state.error?.message,
@@ -155,6 +163,9 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
           }
           final property = state.items[index];
           return FadeSlideIn(
+            // Windowed stagger so each visible batch cascades in without
+            // long delays deep in the list.
+            delay: Duration(milliseconds: (index % 6) * 55),
             child: PropertyCard(
               property: property,
               onTap: () => context.pushNamed(

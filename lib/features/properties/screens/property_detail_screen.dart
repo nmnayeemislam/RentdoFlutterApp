@@ -10,6 +10,7 @@ import '../../../core/constants/app_config.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -33,6 +34,8 @@ import '../../technicians/controllers/technician_controller.dart';
 import '../../visits/widgets/schedule_visit_sheet.dart';
 import '../controllers/property_providers.dart';
 import '../models/property_model.dart';
+import '../widgets/affordability_sheet.dart';
+import '../widgets/map_preview.dart';
 import '../widgets/property_card.dart';
 import '../widgets/property_feature_row.dart';
 
@@ -160,6 +163,12 @@ class _DetailBody extends StatelessWidget {
                 ),
                 AppSpacing.vGapXl,
                 _FeatureCards(property: property),
+                if (property.price != null &&
+                    property.type != ListingType.hotel &&
+                    property.type != ListingType.vacation) ...[
+                  AppSpacing.vGapLg,
+                  _CalculatorButton(property: property),
+                ],
                 if (property.description != null) ...[
                   AppSpacing.vGapXxl,
                   const Text('Description', style: AppTextStyles.headingMd),
@@ -212,27 +221,265 @@ class _DetailBody extends StatelessWidget {
   }
 }
 
-class _Gallery extends StatelessWidget {
+class _Gallery extends StatefulWidget {
   const _Gallery({required this.property});
   final PropertyModel property;
 
   @override
+  State<_Gallery> createState() => _GalleryState();
+}
+
+class _GalleryState extends State<_Gallery> {
+  final PageController _controller = PageController();
+  int _index = 0;
+
+  List<String> get _images => widget.property.gallery.isNotEmpty
+      ? widget.property.gallery
+      : [if (widget.property.imageUrl != null) widget.property.imageUrl!];
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _openViewer() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => _GalleryViewer(images: _images, initialIndex: _index),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final images = property.gallery.isNotEmpty
-        ? property.gallery
-        : [if (property.imageUrl != null) property.imageUrl!];
-    if (images.isEmpty) {
-      return const NetworkImageWidget(url: null);
-    }
-    return PageView.builder(
-      itemCount: images.length,
-      itemBuilder: (_, i) {
-        final image = NetworkImageWidget(url: images[i]);
-        // Only the first image participates in the shared-element transition.
-        return i == 0
-            ? Hero(tag: 'listing-img-${property.id}', child: image)
-            : image;
-      },
+    final images = _images;
+    if (images.isEmpty) return const NetworkImageWidget(url: null);
+
+    return GestureDetector(
+      onTap: _openViewer,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          PageView.builder(
+            controller: _controller,
+            onPageChanged: (i) => setState(() => _index = i),
+            itemCount: images.length,
+            itemBuilder: (_, i) {
+              final image = NetworkImageWidget(url: images[i]);
+              // Only the first image joins the shared-element transition.
+              return i == 0
+                  ? Hero(tag: 'listing-img-${widget.property.id}', child: image)
+                  : image;
+            },
+          ),
+          // Bottom scrim so page dots stay legible over bright photos.
+          const IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.center,
+                  colors: [Color(0x59000000), Colors.transparent],
+                ),
+              ),
+            ),
+          ),
+          if (images.length > 1) ...[
+            Positioned(
+              bottom: 14,
+              left: 0,
+              right: 0,
+              child: _Dots(count: images.length, index: _index),
+            ),
+            Positioned(
+              bottom: 12,
+              right: 14,
+              child: _CounterPill(text: '${_index + 1}/${images.length}'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Dots extends StatelessWidget {
+  const _Dots({required this.count, required this.index});
+  final int count;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (var i = 0; i < count; i++)
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            margin: const EdgeInsets.symmetric(horizontal: 3),
+            height: 6,
+            width: i == index ? 18 : 6,
+            decoration: BoxDecoration(
+              color: i == index ? Colors.white : Colors.white.withValues(alpha: 0.5),
+              borderRadius: AppRadius.brPill,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _CounterPill extends StatelessWidget {
+  const _CounterPill({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        borderRadius: AppRadius.brPill,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.photo_library_outlined, color: Colors.white, size: 13),
+          const SizedBox(width: 5),
+          Text(text,
+              style: AppTextStyles.caption.copyWith(color: Colors.white)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Full-screen, swipeable, pinch-to-zoom image viewer.
+class _GalleryViewer extends StatefulWidget {
+  const _GalleryViewer({required this.images, required this.initialIndex});
+  final List<String> images;
+  final int initialIndex;
+
+  @override
+  State<_GalleryViewer> createState() => _GalleryViewerState();
+}
+
+class _GalleryViewerState extends State<_GalleryViewer> {
+  late final PageController _controller =
+      PageController(initialPage: widget.initialIndex);
+  late int _index = widget.initialIndex;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _controller,
+            onPageChanged: (i) => setState(() => _index = i),
+            itemCount: widget.images.length,
+            itemBuilder: (_, i) => InteractiveViewer(
+              minScale: 1,
+              maxScale: 4,
+              child: Center(
+                child: NetworkImageWidget(
+                  url: widget.images[i],
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: AlignmentDirectional.topStart,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: IconButton(
+                  icon: const Icon(Icons.close_rounded, color: Colors.white),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ),
+          ),
+          if (widget.images.length > 1)
+            Positioned(
+              bottom: 30,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: _CounterPill(
+                    text: '${_index + 1}/${widget.images.length}'),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Entry point to the affordability / mortgage calculator sheet.
+class _CalculatorButton extends StatelessWidget {
+  const _CalculatorButton({required this.property});
+  final PropertyModel property;
+
+  @override
+  Widget build(BuildContext context) {
+    final isSale = property.type.pricePeriod.isEmpty;
+    return InkWell(
+      onTap: () => AffordabilitySheet.show(context, property),
+      borderRadius: AppRadius.brLg,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.08),
+          borderRadius: AppRadius.brLg,
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 42,
+              width: 42,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.15),
+                borderRadius: AppRadius.brSm,
+              ),
+              child: const Icon(Icons.calculate_outlined,
+                  color: AppColors.primary),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(isSale ? 'Mortgage calculator' : 'Rent calculator',
+                      style: AppTextStyles.titleSm),
+                  const SizedBox(height: 2),
+                  Text(
+                    isSale
+                        ? 'Estimate your monthly repayment'
+                        : 'Estimate your move-in cost',
+                    style: AppTextStyles.bodySm
+                        .copyWith(color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textTertiary),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -259,7 +506,7 @@ class _FeatureCards extends StatelessWidget {
         for (final item in items)
           Expanded(
             child: Container(
-              margin: const EdgeInsets.only(right: 10),
+              margin: const EdgeInsetsDirectional.only(end: 10),
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
                 color: context.colors.surface,
@@ -346,41 +593,50 @@ class _LocationCard extends StatelessWidget {
     final address = [property.address, property.zoneName]
         .where((e) => e != null && e.isNotEmpty)
         .join(', ');
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: AppRadius.brLg,
-        border: Border.all(color: context.colors.outline),
-      ),
-      child: Row(
-        children: [
-          Container(
-            height: 44,
-            width: 44,
-            decoration: const BoxDecoration(
-              color: AppColors.primarySurface,
-              borderRadius: AppRadius.brMd,
-            ),
-            child: const Icon(Icons.map_outlined, color: AppColors.primary),
+    final hasCoords = property.latitude != null && property.longitude != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (hasCoords) ...[
+          MapPreview(
+            lat: property.latitude!,
+            lng: property.longitude!,
+            label: address.isEmpty ? property.title : address,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(address.isEmpty ? 'Location' : address,
-                    style: AppTextStyles.titleSm),
-                if (property.latitude != null && property.longitude != null)
-                  Text(
-                    '${property.latitude!.toStringAsFixed(4)}, ${property.longitude!.toStringAsFixed(4)}',
-                    style: AppTextStyles.caption,
-                  ),
-              ],
-            ),
-          ),
+          AppSpacing.vGapMd,
         ],
-      ),
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            borderRadius: AppRadius.brLg,
+            border: Border.all(color: context.colors.outline),
+          ),
+          child: Row(
+            children: [
+              Container(
+                height: 44,
+                width: 44,
+                decoration: const BoxDecoration(
+                  color: AppColors.primarySurface,
+                  borderRadius: AppRadius.brMd,
+                ),
+                child: const Icon(Icons.place_outlined, color: AppColors.primary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(address.isEmpty ? 'Location' : address,
+                    style: AppTextStyles.titleSm),
+              ),
+              if (hasCoords)
+                Text('Map',
+                    style: AppTextStyles.titleSm
+                        .copyWith(color: AppColors.primary)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -726,10 +982,14 @@ class _ContactBar extends ConsumerWidget {
     final bookable = property.type == ListingType.hotel ||
         property.type == ListingType.vacation;
 
+    final period = property.type.pricePeriod;
+    final priceText = property.priceDisplay ?? Formatters.price(property.price);
+
     return Container(
       decoration: BoxDecoration(
         color: context.colors.surface,
         border: Border(top: BorderSide(color: context.colors.outline)),
+        boxShadow: context.isDark ? null : AppShadows.bottomBar,
       ),
       child: SafeArea(
         top: false,
@@ -737,17 +997,30 @@ class _ContactBar extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: Row(
             children: [
-              Expanded(
-                flex: 3,
-                child: OutlinedButton.icon(
-                  onPressed: () => _revealContact(context, ref),
-                  icon: const Icon(Icons.call_outlined),
-                  label: const Text('Call'),
-                ),
+              // Price block.
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(period.isEmpty ? 'Price' : 'Price / $period',
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.textTertiary)),
+                  const SizedBox(height: 2),
+                  Text(priceText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.headingMd
+                          .copyWith(color: AppColors.primary)),
+                ],
               ),
               const SizedBox(width: 12),
+              // Compact call action.
+              _SquareIconButton(
+                icon: Icons.call_outlined,
+                onTap: () => _revealContact(context, ref),
+              ),
+              const SizedBox(width: 10),
               Expanded(
-                flex: 5,
                 child: bookable
                     ? PrimaryButton(
                         label: 'Book now',
@@ -763,6 +1036,30 @@ class _ContactBar extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Square outlined icon button used in the sticky contact bar.
+class _SquareIconButton extends StatelessWidget {
+  const _SquareIconButton({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: AppRadius.brMd,
+      child: Container(
+        height: 52,
+        width: 52,
+        decoration: BoxDecoration(
+          borderRadius: AppRadius.brMd,
+          border: Border.all(color: context.colors.outline),
+        ),
+        child: Icon(icon, color: AppColors.primary),
       ),
     );
   }

@@ -133,7 +133,7 @@ class _ConversationTile extends StatelessWidget {
                         fontWeight:
                             hasUnread ? FontWeight.w600 : FontWeight.w400,
                         color: hasUnread
-                            ? AppColors.textPrimary
+                            ? Theme.of(context).colorScheme.onSurface
                             : AppColors.textSecondary,
                       ),
                     ),
