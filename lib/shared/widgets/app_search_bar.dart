@@ -80,7 +80,7 @@ class AppSearchBar extends StatelessWidget {
                   height: 56,
                   width: 56,
                   decoration: const BoxDecoration(
-                    color: AppColors.navy,
+                    color: AppColors.primary,
                     borderRadius: AppRadius.brLg,
                   ),
                   child: const Icon(Icons.tune_rounded, color: Colors.white),

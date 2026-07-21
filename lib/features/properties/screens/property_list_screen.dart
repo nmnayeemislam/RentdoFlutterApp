@@ -68,6 +68,13 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
     final controller = ref.read(propertyListControllerProvider.notifier);
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push(AppRoutes.mapSearch),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.map_outlined),
+        label: const Text('Map'),
+      ),
       body: SafeArea(
         child: Column(
           children: [

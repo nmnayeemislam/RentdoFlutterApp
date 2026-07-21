@@ -13,6 +13,7 @@ import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../auth/models/user_model.dart';
+import '../../config/providers/config_providers.dart';
 
 /// Profile tab: account header, settings menu and logout. Falls back to a
 /// sign-in prompt for guests.
@@ -26,6 +27,23 @@ class ProfileScreen extends ConsumerWidget {
     final isAuthenticated =
         ref.watch(authControllerProvider.select((s) => s.isAuthenticated));
     final user = ref.watch(authControllerProvider.select((s) => s.user));
+    final flags = ref.watch(featureFlagsProvider);
+
+    // Activity entries gated by server feature flags (chat / hotel bookings /
+    // technician marketplace) so a disabled module never shows a dead button.
+    final activityItems = <(IconData, String, String?)>[
+      if (flags.chat)
+        (Icons.chat_bubble_outline_rounded, 'Messages', AppRoutes.conversations),
+      if (flags.hotelBooking)
+        (Icons.hotel_outlined, 'My Bookings', AppRoutes.myBookings),
+      (Icons.calendar_today_outlined, 'My Visits', AppRoutes.myVisits),
+      if (flags.technicianMarketplace) ...[
+        (Icons.handyman_outlined, 'Find a Technician', AppRoutes.technicians),
+        (Icons.build_outlined, 'Service Bookings', AppRoutes.serviceBookings),
+        (Icons.engineering_outlined, 'Become a Technician', AppRoutes.becomeTechnician),
+        (Icons.badge_outlined, 'My Technician Profile', AppRoutes.technicianProfile),
+      ],
+    ];
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
@@ -38,17 +56,9 @@ class ProfileScreen extends ConsumerWidget {
             else
               const _GuestHeader(),
             AppSpacing.vGapXl,
-            const _MenuGroup(
+            _MenuGroup(
               title: 'Activity',
-              items: [
-                (Icons.chat_bubble_outline_rounded, 'Messages', AppRoutes.conversations),
-                (Icons.hotel_outlined, 'My Bookings', AppRoutes.myBookings),
-                (Icons.calendar_today_outlined, 'My Visits', AppRoutes.myVisits),
-                (Icons.handyman_outlined, 'Find a Technician', AppRoutes.technicians),
-                (Icons.build_outlined, 'Service Bookings', AppRoutes.serviceBookings),
-                (Icons.engineering_outlined, 'Become a Technician', AppRoutes.becomeTechnician),
-                (Icons.badge_outlined, 'My Technician Profile', AppRoutes.technicianProfile),
-              ],
+              items: activityItems,
             ),
             AppSpacing.vGapLg,
             const _MenuGroup(
@@ -91,7 +101,22 @@ class ProfileScreen extends ConsumerWidget {
                 (Icons.lock_outline_rounded, 'Change Password', AppRoutes.changePassword),
                 (Icons.block_rounded, 'Blocked Users', AppRoutes.blockedUsers),
                 (Icons.privacy_tip_outlined, 'Privacy & Data', AppRoutes.privacyData),
-                (Icons.help_outline_rounded, 'Help & Support', null),
+              ],
+            ),
+            AppSpacing.vGapLg,
+            const _MenuGroup(
+              title: 'Explore',
+              items: [
+                (Icons.article_outlined, 'Blog', AppRoutes.blog),
+              ],
+            ),
+            AppSpacing.vGapLg,
+            const _MenuGroup(
+              title: 'Support & Legal',
+              items: [
+                (Icons.help_outline_rounded, 'Help & Contact', AppRoutes.helpContact),
+                (Icons.shield_outlined, 'Privacy Policy', AppRoutes.privacyPolicy),
+                (Icons.description_outlined, 'Terms & Conditions', AppRoutes.termsConditions),
               ],
             ),
             AppSpacing.vGapLg,

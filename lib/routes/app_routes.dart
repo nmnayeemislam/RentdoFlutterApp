@@ -12,6 +12,7 @@ abstract final class AppRoutes {
 
   static const String home = '/home';
   static const String properties = '/properties';
+  static const String mapSearch = '/map-search';
   static const String saved = '/saved';
   static const String profile = '/profile';
 
@@ -43,6 +44,20 @@ abstract final class AppRoutes {
   static const String notificationPreferences = '/notification-preferences';
   static const String privacyData = '/privacy';
   static const String usageLimits = '/usage-limits';
+
+  // Legal / support content (CMS-backed)
+  static const String privacyPolicy = '/privacy-policy';
+  static const String termsConditions = '/terms-conditions';
+  static const String helpContact = '/help-contact';
+
+  // Blog
+  static const String blog = '/blog';
+  static const String blogDetailName = 'blog-detail';
+  static String blogDetailPath(String slug) => '/blog/$slug';
+
+  /// CMS page slugs on the backend (`GET /pages/{slug}`).
+  static const String privacyPolicySlug = 'privacy-policy';
+  static const String termsConditionsSlug = 'terms-of-service';
   static const String blockedUsers = '/blocked-users';
   static const String languageCurrency = '/language-currency';
 

@@ -95,9 +95,8 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    // Navy reads as brand in light; on the dark bar it vanishes, so use indigo.
-    final Color activeColor = isDark ? AppColors.primary : AppColors.navy;
+    // Active tab uses the brand primary (indigo) in both themes.
+    const Color activeColor = AppColors.primary;
     const Color idle = AppColors.textTertiary;
 
     return Semantics(

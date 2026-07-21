@@ -13,6 +13,16 @@ abstract final class ApiEndpoints {
   static const String propertyTypes = '/property-types';
   static const String amenities = '/amenities';
 
+  // ── Content / support (public) ──────────────────────────────────────────
+  static String page(String slug) => '/pages/$slug';
+  static const String faqs = '/faqs';
+  static const String contact = '/contact';
+
+  // ── Blog (public) ───────────────────────────────────────────────────────
+  static const String blog = '/blog';
+  static const String blogCategories = '/blog/categories';
+  static String blogPost(String slug) => '/blog/$slug';
+
   // ── Auth (public) ───────────────────────────────────────────────────────
   static const String registerStart = '/auth/register/start';
   static const String registerVerify = '/auth/register/verify';

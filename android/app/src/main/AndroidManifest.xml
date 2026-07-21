@@ -2,6 +2,8 @@
     <!-- Required in the main manifest: the debug-only declaration does NOT
          apply to release builds, which would otherwise have no network. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:label="Rentdo"
         android:name="${applicationName}"

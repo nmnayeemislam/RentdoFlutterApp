@@ -8,12 +8,14 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/constants/app_config.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/services/location_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/geo.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/animations.dart';
@@ -27,6 +29,7 @@ import '../../chat/widgets/start_conversation_sheet.dart';
 import '../../community/controllers/community_controller.dart';
 import '../../community/widgets/report_sheet.dart';
 import '../../compare/widgets/compare_button.dart';
+import '../../config/providers/config_providers.dart';
 import '../../reviews/controllers/reviews_controller.dart';
 import '../../reviews/widgets/write_review_sheet.dart';
 import '../../saved/widgets/favorite_button.dart';
@@ -584,16 +587,22 @@ class _SpecTable extends StatelessWidget {
   }
 }
 
-class _LocationCard extends StatelessWidget {
+class _LocationCard extends ConsumerWidget {
   const _LocationCard({required this.property});
   final PropertyModel property;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final address = [property.address, property.zoneName]
         .where((e) => e != null && e.isNotEmpty)
         .join(', ');
     final hasCoords = property.latitude != null && property.longitude != null;
+
+    final me = ref.watch(userLocationProvider);
+    final String? distance = (me != null && hasCoords)
+        ? Geo.label(Geo.distanceKm(
+            me.lat, me.lng, property.latitude!, property.longitude!))
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -626,8 +635,19 @@ class _LocationCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(address.isEmpty ? 'Location' : address,
-                    style: AppTextStyles.titleSm),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(address.isEmpty ? 'Location' : address,
+                        style: AppTextStyles.titleSm),
+                    if (distance != null) ...[
+                      const SizedBox(height: 2),
+                      Text('$distance away',
+                          style: AppTextStyles.bodySm
+                              .copyWith(color: AppColors.primary)),
+                    ],
+                  ],
+                ),
               ),
               if (hasCoords)
                 Text('Map',
@@ -717,6 +737,9 @@ class _SuggestedTechnicians extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(featureFlagsProvider).technicianMarketplace) {
+      return const SizedBox.shrink();
+    }
     return ref.watch(listingTechniciansProvider(listingId)).maybeWhen(
           data: (items) {
             if (items.isEmpty) return const SizedBox.shrink();
@@ -908,10 +931,11 @@ class _AgentCard extends ConsumerWidget {
               ],
             ),
           ),
-          IconButton.filledTonal(
-            onPressed: () => _startChat(context, ref),
-            icon: const Icon(Icons.chat_bubble_outline_rounded),
-          ),
+          if (ref.watch(featureFlagsProvider).chat)
+            IconButton.filledTonal(
+              onPressed: () => _startChat(context, ref),
+              icon: const Icon(Icons.chat_bubble_outline_rounded),
+            ),
         ],
       ),
     );
@@ -1083,6 +1107,9 @@ class _ReviewsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(featureFlagsProvider).reviews) {
+      return const SizedBox.shrink();
+    }
     final reviews = ref.watch(listingReviewsProvider(listingId));
 
     return Column(

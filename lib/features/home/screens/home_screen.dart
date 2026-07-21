@@ -1,21 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/services/location_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
-import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/animations.dart';
 import '../../../shared/widgets/app_search_bar.dart';
+import '../../../shared/widgets/network_image_widget.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/skeletons.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../auth/controllers/auth_controller.dart';
+import '../../blog/models/blog_post.dart';
+import '../../blog/providers/blog_providers.dart';
 import '../../properties/controllers/property_list_controller.dart';
 import '../../properties/controllers/property_providers.dart';
 import '../../properties/models/property_filter.dart';
@@ -57,7 +62,10 @@ class HomeScreen extends ConsumerWidget {
         bottom: false,
         child: RefreshIndicator(
           color: AppColors.primary,
-          onRefresh: () async => ref.invalidate(featuredPropertiesProvider),
+          onRefresh: () async {
+            ref.invalidate(featuredPropertiesProvider);
+            ref.invalidate(blogFeedProvider);
+          },
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
@@ -72,8 +80,8 @@ class HomeScreen extends ConsumerWidget {
                       onTap: () => _goToList(ref, context),
                       onFilterTap: () => _goToList(ref, context),
                     ),
-                    AppSpacing.vGapLg,
-                    const _StatsCard(),
+                    AppSpacing.vGapMd,
+                    const _UseMyLocationTile(),
                   ],
                 ),
               ),
@@ -108,6 +116,7 @@ class HomeScreen extends ConsumerWidget {
                 child: _CtaBanner(onTap: () => _goToList(ref, context)),
               ),
               AppSpacing.vGapXxl,
+              const _BlogSection(),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: SectionHeader(
@@ -127,60 +136,94 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-/// White trust-stats card with colored icon chips and dividers.
-class _StatsCard extends StatelessWidget {
-  const _StatsCard();
+/// "Use my current location" — resolves GPS → nearest city, then opens the
+/// property list filtered to that zone. Also seeds [userLocationProvider] so
+/// listings can show a "· X km away" label.
+class _UseMyLocationTile extends ConsumerStatefulWidget {
+  const _UseMyLocationTile();
 
-  static const _stats = <(IconData, Color, String, String)>[
-    (Icons.home_rounded, AppColors.info, '60+', 'Properties'),
-    (Icons.location_on_rounded, AppColors.primary, '30+', 'Cities'),
-    (Icons.verified_rounded, AppColors.success, 'Verified', 'Listings'),
-    (Icons.headset_mic_rounded, AppColors.warning, '24/7', 'Support'),
-  ];
+  @override
+  ConsumerState<_UseMyLocationTile> createState() =>
+      _UseMyLocationTileState();
+}
+
+class _UseMyLocationTileState extends ConsumerState<_UseMyLocationTile> {
+  bool _busy = false;
+
+  Future<void> _run() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final coords = await ref.read(locationServiceProvider).current();
+      ref.read(userLocationProvider.notifier).state = coords;
+
+      final zone = await ref
+          .read(zoneRepositoryProvider)
+          .resolve(lat: coords.lat, lng: coords.lng);
+
+      if (!mounted) return;
+      if (zone != null) {
+        unawaited(
+          ref.read(propertyListControllerProvider.notifier).applyFilter(
+                PropertyFilter(zoneId: zone.id, zoneName: zone.displayName),
+              ),
+        );
+        context.showSnack('Showing properties near ${zone.name}');
+      } else {
+        context.showSnack('Showing properties near you');
+      }
+      context.go(AppRoutes.properties);
+    } on LocationException catch (e) {
+      if (mounted) context.showSnack(e.message, error: true);
+    } catch (_) {
+      if (mounted) {
+        context.showSnack('Could not get your location.', error: true);
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: AppRadius.brLg,
-        border: Border.all(color: context.colors.outline),
-        boxShadow: context.isDark ? null : AppShadows.soft,
-      ),
-      child: Row(
-        children: [
-          for (var i = 0; i < _stats.length; i++) ...[
-            if (i > 0)
-              Container(width: 1, height: 32, color: context.colors.outline),
-            Expanded(
-              child: Column(
-                children: [
-                  Container(
-                    height: 34,
-                    width: 34,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: _stats[i].$2.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(_stats[i].$1, color: _stats[i].$2, size: 18),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(_stats[i].$3,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.titleSm),
-                  Text(_stats[i].$4,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.caption
-                          .copyWith(color: AppColors.textTertiary)),
-                ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _run,
+        borderRadius: AppRadius.brMd,
+        child: Container(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: AppRadius.brMd,
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                height: 18,
+                width: 18,
+                child: _busy
+                    ? const CircularProgressIndicator(
+                        strokeWidth: 2, color: AppColors.primary)
+                    : const Icon(Icons.my_location_rounded,
+                        size: 18, color: AppColors.primary),
               ),
-            ),
-          ],
-        ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  _busy ? 'Finding properties near you…' : 'Use my current location',
+                  style: AppTextStyles.titleSm
+                      .copyWith(color: AppColors.primary),
+                ),
+              ),
+              if (!_busy)
+                const Icon(Icons.chevron_right_rounded,
+                    size: 20, color: AppColors.primary),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -237,7 +280,7 @@ class _CtaBanner extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: const BoxDecoration(
-                color: AppColors.navy,
+                color: AppColors.primary,
                 borderRadius: AppRadius.brMd,
               ),
               child: Text('Explore Now',
@@ -350,6 +393,117 @@ class _LocationRail extends ConsumerWidget {
           );
         },
         orElse: () => const SizedBox.shrink(),
+      ),
+    );
+  }
+}
+
+/// "From the Blog" — a rail of the latest posts. Rendered only once posts have
+/// loaded so a slow/empty blog never leaves a dangling header on the home feed.
+class _BlogSection extends ConsumerWidget {
+  const _BlogSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final posts = ref.watch(blogFeedProvider).valueOrNull ?? const <BlogPost>[];
+    if (posts.isEmpty) return const SizedBox.shrink();
+
+    final items = posts.take(6).toList(growable: false);
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SectionHeader(
+            title: 'From the Blog',
+            subtitle: 'Tips & guides for renters and owners',
+            actionLabel: 'View all',
+            onAction: () => context.push(AppRoutes.blog),
+          ),
+        ),
+        AppSpacing.vGapMd,
+        SizedBox(
+          height: 250,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: items.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 14),
+            itemBuilder: (context, i) {
+              final post = items[i];
+              return FadeSlideIn(
+                delay: Duration(milliseconds: (i * 70).clamp(0, 500)),
+                child: _BlogRailCard(post: post),
+              );
+            },
+          ),
+        ),
+        AppSpacing.vGapXxl,
+      ],
+    );
+  }
+}
+
+class _BlogRailCard extends StatelessWidget {
+  const _BlogRailCard({required this.post});
+
+  final BlogPost post;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: AppRadius.brLg,
+      onTap: () => context.push(AppRoutes.blogDetailPath(post.slug)),
+      child: Container(
+        width: 260,
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: AppRadius.brLg,
+          border: Border.all(color: context.colors.outline),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: NetworkImageWidget(url: post.featuredImage),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (post.categoryName != null)
+                      Text(
+                        post.categoryName!.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                      post.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.titleSm,
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${post.readMinutes} min read',
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.textTertiary),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

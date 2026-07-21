@@ -33,6 +33,13 @@ final currencyOptionsProvider = Provider<List<CurrencyOption>>((ref) {
   return ref.watch(bootstrapProvider).valueOrNull?.currencies ?? const [];
 });
 
+/// Server-driven feature switches. Falls back to safe defaults while the
+/// bootstrap loads so core UI is never hidden mid-fetch.
+final featureFlagsProvider = Provider<FeatureFlags>((ref) {
+  return ref.watch(bootstrapProvider).valueOrNull?.features ??
+      FeatureFlags.defaults;
+});
+
 /// Convenience: the supported languages.
 final languageOptionsProvider = Provider<List<LanguageOption>>((ref) {
   return ref.watch(bootstrapProvider).valueOrNull?.languages ?? const [];

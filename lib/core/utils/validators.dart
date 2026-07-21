@@ -19,7 +19,7 @@ abstract final class Validators {
     return null;
   }
 
-  static String? password(String? value, {int min = 6}) {
+  static String? password(String? value, {int min = 4}) {
     if (value == null || value.isEmpty) return 'Password is required';
     if (value.length < min) return 'Password must be at least $min characters';
     return null;

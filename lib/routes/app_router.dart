@@ -12,6 +12,8 @@ import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
 import '../features/billing/screens/packages_screen.dart';
 import '../features/billing/screens/plans_screen.dart';
+import '../features/blog/screens/blog_detail_screen.dart';
+import '../features/blog/screens/blog_list_screen.dart';
 import '../features/bookings/screens/my_bookings_screen.dart';
 import '../features/chat/screens/chat_screen.dart';
 import '../features/chat/screens/conversations_screen.dart';
@@ -30,6 +32,7 @@ import '../features/profile/screens/change_password_screen.dart';
 import '../features/profile/screens/edit_profile_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
 import '../features/properties/models/property_model.dart';
+import '../features/properties/screens/map_search_screen.dart';
 import '../features/properties/screens/property_detail_screen.dart';
 import '../features/properties/screens/property_list_screen.dart';
 import '../features/rent_management/screens/agreements_screen.dart';
@@ -40,6 +43,8 @@ import '../features/rent_management/screens/tenancies_screen.dart';
 import '../features/rent_management/screens/units_screen.dart';
 import '../features/saved/screens/saved_screen.dart';
 import '../features/saved_searches/screens/saved_searches_screen.dart';
+import '../features/support/screens/cms_page_screen.dart';
+import '../features/support/screens/help_contact_screen.dart';
 import '../features/technicians/screens/become_technician_screen.dart';
 import '../features/technicians/screens/my_service_bookings_screen.dart';
 import '../features/technicians/screens/technician_detail_screen.dart';
@@ -276,6 +281,44 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.usageLimits,
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const UsageLimitsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.privacyPolicy,
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const CmsPageScreen(
+          slug: AppRoutes.privacyPolicySlug,
+          title: 'Privacy Policy',
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.termsConditions,
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const CmsPageScreen(
+          slug: AppRoutes.termsConditionsSlug,
+          title: 'Terms & Conditions',
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.helpContact,
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const HelpContactScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.mapSearch,
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const MapSearchScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.blog,
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const BlogListScreen(),
+      ),
+      GoRoute(
+        path: '/blog/:slug',
+        name: AppRoutes.blogDetailName,
+        parentNavigatorKey: _rootKey,
+        builder: (_, state) =>
+            BlogDetailScreen(slug: state.pathParameters['slug'] ?? ''),
       ),
       GoRoute(
         path: AppRoutes.blockedUsers,

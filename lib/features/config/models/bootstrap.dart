@@ -63,13 +63,21 @@ class LanguageOption {
 
 /// Basic site branding/contact info.
 class SiteInfo {
-  const SiteInfo({required this.name, this.tagline, this.logo, this.phone, this.email});
+  const SiteInfo({
+    required this.name,
+    this.tagline,
+    this.logo,
+    this.phone,
+    this.email,
+    this.address,
+  });
 
   final String name;
   final String? tagline;
   final String? logo;
   final String? phone;
   final String? email;
+  final String? address;
 
   factory SiteInfo.fromJson(Map<String, dynamic> json) => SiteInfo(
         name: '${json['name'] ?? 'Rentdo'}',
@@ -77,6 +85,41 @@ class SiteInfo {
         logo: json['logo'] as String?,
         phone: json['phone'] as String?,
         email: json['email'] as String?,
+        address: json['address'] as String?,
+      );
+}
+
+/// Server-driven feature switches (`feature_toggles` in the bootstrap payload).
+/// The app hides the corresponding UI when a feature is off, so admins can
+/// disable a module without a client release.
+class FeatureFlags {
+  const FeatureFlags({
+    this.hotelBooking = true,
+    this.technicianMarketplace = true,
+    this.reviews = true,
+    this.chat = true,
+    this.savedSearchAlerts = true,
+    this.referral = false,
+  });
+
+  final bool hotelBooking;
+  final bool technicianMarketplace;
+  final bool reviews;
+  final bool chat;
+  final bool savedSearchAlerts;
+  final bool referral;
+
+  /// Safe defaults used until the bootstrap resolves (everything on except
+  /// referral) so the UI never hides core features while loading.
+  static const FeatureFlags defaults = FeatureFlags();
+
+  factory FeatureFlags.fromJson(Map<String, dynamic> json) => FeatureFlags(
+        hotelBooking: json['hotel_booking'] != false,
+        technicianMarketplace: json['technician_marketplace'] != false,
+        reviews: json['reviews'] != false,
+        chat: json['chat'] != false,
+        savedSearchAlerts: json['saved_search_alerts'] != false,
+        referral: json['referral'] == true,
       );
 }
 
@@ -88,6 +131,7 @@ class Bootstrap {
     required this.languages,
     required this.propertyTypes,
     required this.technicianCategories,
+    required this.features,
     required this.defaultCurrency,
     required this.defaultLanguage,
   });
@@ -97,6 +141,7 @@ class Bootstrap {
   final List<LanguageOption> languages;
   final List<LabeledOption> propertyTypes;
   final List<LabeledOption> technicianCategories;
+  final FeatureFlags features;
   final String defaultCurrency;
   final String defaultLanguage;
 
@@ -115,6 +160,8 @@ class Bootstrap {
       propertyTypes: mapList('property_types', LabeledOption.fromJson),
       technicianCategories:
           mapList('technician_categories', LabeledOption.fromJson),
+      features: FeatureFlags.fromJson(
+          (json['feature_toggles'] as Map<String, dynamic>?) ?? const {}),
       defaultCurrency: '${json['default_currency'] ?? 'USD'}',
       defaultLanguage: '${json['default_language'] ?? 'en'}',
     );

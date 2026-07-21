@@ -15,10 +15,10 @@ abstract final class AppColors {
   // ---------------------------------------------------------------------------
   // Interactive / action color — the logo indigo. Used for CTAs, active tabs,
   // links, focus rings and price.
-  static const Color primary = Color(0xFF4F52E8); // logo indigo
-  static const Color primaryDark = Color(0xFF3A3DC4); // pressed / gradient end
-  static const Color primaryLight = Color(0xFF8486F2);
-  static const Color primarySurface = Color(0xFFECEDFD); // tinted container
+  static const Color primary = Color(0xFF5352ED); // logo blue (sampled from logo)
+  static const Color primaryDark = Color(0xFF4242BE); // pressed / gradient end
+  static const Color primaryLight = Color(0xFF8F8FF3);
+  static const Color primarySurface = Color(0xFFEDEEFD); // tinted container
 
   // Brand navy — the logo "Rent" ink. Used for dark surfaces, hero/header
   // backgrounds, splash and the dark-theme base.

@@ -23,6 +23,28 @@ class PropertyService {
     return res.data ?? const {};
   }
 
+  /// Listings whose coordinates fall inside a map viewport
+  /// (`sw_lat`/`sw_lng`/`ne_lat`/`ne_lng`). [extra] carries the active filter
+  /// query so the map respects type/price/etc.
+  Future<Map<String, dynamic>> listInBounds({
+    required double swLat,
+    required double swLng,
+    required double neLat,
+    required double neLng,
+    Map<String, dynamic> extra = const {},
+    CancelToken? cancelToken,
+  }) {
+    return list({
+      ...extra,
+      'sw_lat': swLat,
+      'sw_lng': swLng,
+      'ne_lat': neLat,
+      'ne_lng': neLng,
+      'per_page': 100,
+      'page': 1,
+    }, cancelToken: cancelToken);
+  }
+
   Future<Map<String, dynamic>> detail(int id) async {
     final res = await _api.get<Map<String, dynamic>>(
       ApiEndpoints.listing(id),

@@ -28,6 +28,33 @@ class PropertyRepository {
     );
   }
 
+  /// Listings inside a map viewport, filtered by [filter] (paging/sort dropped —
+  /// the map shows up to 100 pins in view).
+  Future<List<PropertyModel>> fetchInBounds({
+    required double swLat,
+    required double swLng,
+    required double neLat,
+    required double neLng,
+    PropertyFilter? filter,
+    CancelToken? cancelToken,
+  }) async {
+    final extra = Map<String, dynamic>.of(filter?.toQuery() ?? const {})
+      ..remove('page')
+      ..remove('per_page');
+    final json = await _service.listInBounds(
+      swLat: swLat,
+      swLng: swLng,
+      neLat: neLat,
+      neLng: neLng,
+      extra: extra,
+      cancelToken: cancelToken,
+    );
+    return (json['data'] as List? ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map(PropertyModel.fromJson)
+        .toList(growable: false);
+  }
+
   Future<PropertyModel> fetchDetail(int id) async {
     final json = await _service.detail(id);
     final data = (json['data'] as Map<String, dynamic>?) ?? json;

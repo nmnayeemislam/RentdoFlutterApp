@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/services/location_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/geo.dart';
 import '../../../shared/widgets/animations.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/network_image_widget.dart';
@@ -75,6 +78,7 @@ class PropertyCard extends StatelessWidget {
                           style: AppTextStyles.bodySm,
                         ),
                       ),
+                      _DistanceLabel(property: property),
                     ],
                   ),
                   AppSpacing.vGapMd,
@@ -142,6 +146,33 @@ class _ImageHeader extends StatelessWidget {
           if (property.isFeatured)
             const Positioned(bottom: 10, left: 10, child: AppBadge.featured()),
         ],
+      ),
+    );
+  }
+}
+
+/// "· 2.3 km" shown next to the location once the user shares their position
+/// (via Home → "Use my current location"). Renders nothing otherwise.
+class _DistanceLabel extends ConsumerWidget {
+  const _DistanceLabel({required this.property});
+  final PropertyModel property;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final me = ref.watch(userLocationProvider);
+    final lat = property.latitude;
+    final lng = property.longitude;
+    if (me == null || lat == null || lng == null) return const SizedBox.shrink();
+
+    final km = Geo.distanceKm(me.lat, me.lng, lat, lng);
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(start: 6),
+      child: Text(
+        '· ${Geo.label(km)}',
+        style: AppTextStyles.bodySm.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
