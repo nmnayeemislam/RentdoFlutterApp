@@ -9,7 +9,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/primary_button.dart';
-import '../controllers/technician_controller.dart';
+import '../viewmodels/technician_viewmodel.dart';
 
 /// Bottom sheet to request a technician. Pops `true` on success.
 class BookTechnicianSheet extends ConsumerStatefulWidget {
@@ -92,7 +92,7 @@ class _BookTechnicianSheetState extends ConsumerState<BookTechnicianSheet> {
             isUrgent: _urgent,
           );
       if (!mounted) return;
-      ref.invalidate(technicianBookingsControllerProvider);
+      ref.invalidate(technicianBookingsViewModelProvider);
       Navigator.pop(context, true);
     } on ApiException catch (e) {
       if (!mounted) return;

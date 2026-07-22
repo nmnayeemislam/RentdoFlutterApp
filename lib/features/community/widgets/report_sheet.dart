@@ -7,7 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/primary_button.dart';
-import '../controllers/community_controller.dart';
+import '../viewmodels/community_viewmodel.dart';
 
 /// Bottom sheet to report a listing. Pops `true` on success.
 class ReportSheet extends ConsumerStatefulWidget {

@@ -9,8 +9,8 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/primary_button.dart';
-import '../../properties/controllers/property_providers.dart';
-import '../controllers/bookings_controller.dart';
+import '../../properties/viewmodels/property_providers.dart';
+import '../viewmodels/bookings_viewmodel.dart';
 
 /// Bottom sheet to book a hotel/short-stay listing. Pops `true` on success.
 class BookNowSheet extends ConsumerStatefulWidget {
@@ -79,7 +79,7 @@ class _BookNowSheetState extends ConsumerState<BookNowSheet> {
             specialRequests: _requests.text.trim(),
           );
       if (!mounted) return;
-      ref.invalidate(bookingsControllerProvider);
+      ref.invalidate(bookingsViewModelProvider);
       Navigator.pop(context, true);
     } on ApiException catch (e) {
       if (!mounted) return;

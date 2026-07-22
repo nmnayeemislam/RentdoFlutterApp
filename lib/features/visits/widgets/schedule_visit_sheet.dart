@@ -9,7 +9,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/primary_button.dart';
-import '../controllers/visits_controller.dart';
+import '../viewmodels/visits_viewmodel.dart';
 
 /// Bottom sheet to schedule a property visit. Pops `true` on success.
 class ScheduleVisitSheet extends ConsumerStatefulWidget {
@@ -79,7 +79,7 @@ class _ScheduleVisitSheetState extends ConsumerState<ScheduleVisitSheet> {
     setState(() => _submitting = true);
     try {
       await ref
-          .read(visitsControllerProvider.notifier)
+          .read(visitsViewModelProvider.notifier)
           .schedule(widget.listingId, when, note: _note.text.trim());
       if (!mounted) return;
       Navigator.pop(context, true);

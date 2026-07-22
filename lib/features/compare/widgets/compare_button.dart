@@ -6,13 +6,13 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
-import '../../auth/controllers/auth_controller.dart';
+import '../../auth/viewmodels/auth_viewmodel.dart';
 import '../../properties/models/property_model.dart';
-import '../controllers/compare_controller.dart';
+import '../viewmodels/compare_viewmodel.dart';
 
 /// Toggles a listing in/out of the compare set. Used on the detail screen.
 /// Guests are prompted to sign in; for authed users it reflects live
-/// membership from [compareControllerProvider].
+/// membership from [compareViewModelProvider].
 class CompareButton extends ConsumerWidget {
   const CompareButton({super.key, required this.property});
 
@@ -21,7 +21,7 @@ class CompareButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isAuthed =
-        ref.watch(authControllerProvider.select((s) => s.isAuthenticated));
+        ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     if (!isAuthed) {
       return IconButton(
@@ -34,7 +34,7 @@ class CompareButton extends ConsumerWidget {
       );
     }
 
-    final isIn = ref.watch(compareControllerProvider
+    final isIn = ref.watch(compareViewModelProvider
         .select((s) => s.valueOrNull?.any((p) => p.id == property.id) ?? false));
 
     return IconButton(
@@ -46,7 +46,7 @@ class CompareButton extends ConsumerWidget {
       onPressed: () async {
         try {
           final added =
-              await ref.read(compareControllerProvider.notifier).toggle(property);
+              await ref.read(compareViewModelProvider.notifier).toggle(property);
           if (!context.mounted) return;
           context.showSnack(added ? 'Added to compare' : 'Removed from compare');
         } on ApiException catch (e) {

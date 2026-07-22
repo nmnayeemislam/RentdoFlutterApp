@@ -11,7 +11,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/primary_button.dart';
-import '../controllers/technician_controller.dart';
+import '../viewmodels/technician_viewmodel.dart';
 
 /// Bottom sheet for a technician to quote a booking. Pops `true` on success.
 class SubmitQuoteSheet extends ConsumerStatefulWidget {
@@ -72,7 +72,7 @@ class _SubmitQuoteSheetState extends ConsumerState<SubmitQuoteSheet> {
             validUntil: _validUntil,
           );
       if (!mounted) return;
-      ref.invalidate(technicianBookingsControllerProvider);
+      ref.invalidate(technicianBookingsViewModelProvider);
       Navigator.pop(context, true);
     } on ApiException catch (e) {
       if (!mounted) return;

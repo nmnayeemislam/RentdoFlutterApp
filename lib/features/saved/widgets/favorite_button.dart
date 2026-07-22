@@ -9,8 +9,8 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
-import '../../auth/controllers/auth_controller.dart';
-import '../controllers/favorites_controller.dart';
+import '../../auth/viewmodels/auth_viewmodel.dart';
+import '../viewmodels/favorites_viewmodel.dart';
 
 /// A heart toggle that adds/removes a listing from favorites with optimistic
 /// UI. Guests are prompted to sign in. Keeps its own state so it can live in a
@@ -43,7 +43,7 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
   Future<void> _toggle() async {
     if (_busy) return;
     final isAuthed =
-        ref.read(authControllerProvider.select((s) => s.isAuthenticated));
+        ref.read(authViewModelProvider.select((s) => s.isAuthenticated));
     if (!isAuthed) {
       context.showSnack('Log in to save properties.');
       unawaited(context.push(AppRoutes.login));
@@ -63,7 +63,7 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
         await repo.add(widget.listingId);
       } else {
         await repo.remove(widget.listingId);
-        ref.read(savedControllerProvider.notifier).removeLocally(widget.listingId);
+        ref.read(savedViewModelProvider.notifier).removeLocally(widget.listingId);
       }
     } on ApiException catch (e) {
       if (!mounted) return;

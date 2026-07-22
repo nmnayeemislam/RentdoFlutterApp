@@ -8,7 +8,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/primary_button.dart';
-import '../controllers/reviews_controller.dart';
+import '../viewmodels/reviews_viewmodel.dart';
 
 /// Bottom sheet to submit a rating + review for a listing. Pops `true` on success.
 class WriteReviewSheet extends ConsumerStatefulWidget {

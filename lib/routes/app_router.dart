@@ -2,56 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/account/screens/notification_preferences_screen.dart';
-import '../features/account/screens/privacy_data_screen.dart';
-import '../features/account/screens/usage_limits_screen.dart';
-import '../features/account/screens/verification_screen.dart';
-import '../features/auth/controllers/auth_controller.dart';
-import '../features/auth/screens/forgot_password_screen.dart';
-import '../features/auth/screens/login_screen.dart';
-import '../features/auth/screens/register_screen.dart';
-import '../features/billing/screens/packages_screen.dart';
-import '../features/billing/screens/plans_screen.dart';
-import '../features/blog/screens/blog_detail_screen.dart';
-import '../features/blog/screens/blog_list_screen.dart';
-import '../features/bookings/screens/my_bookings_screen.dart';
-import '../features/chat/screens/chat_screen.dart';
-import '../features/chat/screens/conversations_screen.dart';
-import '../features/community/screens/blocked_users_screen.dart';
-import '../features/compare/screens/compare_screen.dart';
-import '../features/config/screens/language_currency_screen.dart';
-import '../features/home/screens/home_screen.dart';
-import '../features/maintenance/screens/maintenance_screen.dart';
-import '../features/notifications/screens/notifications_screen.dart';
-import '../features/onboarding/screens/onboarding_screen.dart';
-import '../features/onboarding/screens/splash_screen.dart';
-import '../features/owner/screens/create_listing_screen.dart';
-import '../features/owner/screens/my_listings_screen.dart';
-import '../features/owner/screens/owner_leads_screen.dart';
-import '../features/profile/screens/change_password_screen.dart';
-import '../features/profile/screens/edit_profile_screen.dart';
-import '../features/profile/screens/profile_screen.dart';
+import '../features/account/views/notification_preferences_screen.dart';
+import '../features/account/views/privacy_data_screen.dart';
+import '../features/account/views/usage_limits_screen.dart';
+import '../features/account/views/verification_screen.dart';
+import '../features/auth/viewmodels/auth_viewmodel.dart';
+import '../features/auth/views/forgot_password_screen.dart';
+import '../features/auth/views/login_screen.dart';
+import '../features/auth/views/register_screen.dart';
+import '../features/billing/views/packages_screen.dart';
+import '../features/billing/views/plans_screen.dart';
+import '../features/blog/views/blog_detail_screen.dart';
+import '../features/blog/views/blog_list_screen.dart';
+import '../features/bookings/views/my_bookings_screen.dart';
+import '../features/chat/views/chat_screen.dart';
+import '../features/chat/views/conversations_screen.dart';
+import '../features/community/views/blocked_users_screen.dart';
+import '../features/compare/views/compare_screen.dart';
+import '../features/config/views/language_currency_screen.dart';
+import '../features/home/views/home_screen.dart';
+import '../features/maintenance/views/maintenance_screen.dart';
+import '../features/notifications/views/notifications_screen.dart';
+import '../features/onboarding/views/onboarding_screen.dart';
+import '../features/onboarding/views/splash_screen.dart';
+import '../features/owner/views/create_listing_screen.dart';
+import '../features/owner/views/my_listings_screen.dart';
+import '../features/owner/views/owner_leads_screen.dart';
+import '../features/profile/views/change_password_screen.dart';
+import '../features/profile/views/edit_profile_screen.dart';
+import '../features/profile/views/profile_screen.dart';
 import '../features/properties/models/property_model.dart';
-import '../features/properties/screens/map_search_screen.dart';
-import '../features/properties/screens/property_detail_screen.dart';
-import '../features/properties/screens/property_list_screen.dart';
-import '../features/rent_management/screens/agreements_screen.dart';
-import '../features/rent_management/screens/ledger_screen.dart';
-import '../features/rent_management/screens/rent_dashboard_screen.dart';
-import '../features/rent_management/screens/rent_payments_screen.dart';
-import '../features/rent_management/screens/tenancies_screen.dart';
-import '../features/rent_management/screens/units_screen.dart';
-import '../features/saved/screens/saved_screen.dart';
-import '../features/saved_searches/screens/saved_searches_screen.dart';
-import '../features/support/screens/cms_page_screen.dart';
-import '../features/support/screens/help_contact_screen.dart';
-import '../features/technicians/screens/become_technician_screen.dart';
-import '../features/technicians/screens/my_service_bookings_screen.dart';
-import '../features/technicians/screens/technician_detail_screen.dart';
-import '../features/technicians/screens/technician_profile_screen.dart';
-import '../features/technicians/screens/technicians_screen.dart';
-import '../features/visits/screens/my_visits_screen.dart';
-import '../features/wallet/screens/wallet_screen.dart';
+import '../features/properties/views/map_search_screen.dart';
+import '../features/properties/views/property_detail_screen.dart';
+import '../features/properties/views/property_list_screen.dart';
+import '../features/rent_management/views/agreements_screen.dart';
+import '../features/rent_management/views/ledger_screen.dart';
+import '../features/rent_management/views/rent_dashboard_screen.dart';
+import '../features/rent_management/views/rent_payments_screen.dart';
+import '../features/rent_management/views/tenancies_screen.dart';
+import '../features/rent_management/views/units_screen.dart';
+import '../features/saved/views/saved_screen.dart';
+import '../features/saved_searches/views/saved_searches_screen.dart';
+import '../features/support/views/cms_page_screen.dart';
+import '../features/support/views/help_contact_screen.dart';
+import '../features/technicians/views/become_technician_screen.dart';
+import '../features/technicians/views/my_service_bookings_screen.dart';
+import '../features/technicians/views/technician_detail_screen.dart';
+import '../features/technicians/views/technician_profile_screen.dart';
+import '../features/technicians/views/technicians_screen.dart';
+import '../features/visits/views/my_visits_screen.dart';
+import '../features/wallet/views/wallet_screen.dart';
 import '../shared/widgets/app_shell.dart';
 import 'app_routes.dart';
 
@@ -60,7 +60,7 @@ import 'app_routes.dart';
 class _AuthRefresh extends ChangeNotifier {
   _AuthRefresh(Ref ref) {
     ref.listen(
-      authControllerProvider.select((s) => s.status),
+      authViewModelProvider.select((s) => s.status),
       (_, _) => notifyListeners(),
     );
   }
@@ -79,7 +79,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: AppRoutes.splash,
     refreshListenable: refresh,
     redirect: (context, state) {
-      final auth = ref.read(authControllerProvider);
+      final auth = ref.read(authViewModelProvider);
       final loc = state.matchedLocation;
 
       // Wait on splash while session is being restored.

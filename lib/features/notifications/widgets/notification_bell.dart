@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../routes/app_routes.dart';
-import '../controllers/notifications_controller.dart';
+import '../viewmodels/notifications_viewmodel.dart';
 
 /// Notification bell with an unread dot; navigates to the notifications
 /// screen. A bordered white tile that sits on the light home header.

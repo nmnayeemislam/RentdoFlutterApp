@@ -7,7 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/primary_button.dart';
-import '../controllers/chat_controller.dart';
+import '../viewmodels/chat_viewmodel.dart';
 
 /// Bottom sheet to message a listing owner. Pops the new conversation id
 /// (`int`) on success.
@@ -51,7 +51,7 @@ class _StartConversationSheetState
     try {
       final id = await ref.read(chatServiceProvider).start(widget.listingId, text);
       if (!mounted) return;
-      ref.invalidate(conversationsControllerProvider);
+      ref.invalidate(conversationsViewModelProvider);
       Navigator.pop(context, id);
     } on ApiException catch (e) {
       if (!mounted) return;
