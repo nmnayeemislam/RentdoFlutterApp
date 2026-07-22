@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_shadows.dart';
 import '../../routes/app_routes.dart';
+import '../extensions/context_extensions.dart';
 
 /// Persistent bottom-navigation scaffold wrapping the main tabbed sections.
 ///
@@ -17,29 +17,33 @@ class AppShell extends StatelessWidget {
 
   final Widget child;
 
-  static const _tabs = <_TabItem>[
-    _TabItem(AppRoutes.home, Icons.home_outlined, Icons.home_rounded,
-        AppStrings.home),
-    _TabItem(AppRoutes.properties, Icons.search_outlined, Icons.search_rounded,
-        AppStrings.search),
-    _TabItem(AppRoutes.saved, Icons.favorite_border_rounded,
-        Icons.favorite_rounded, AppStrings.saved),
-    _TabItem(AppRoutes.conversations, Icons.chat_bubble_outline_rounded,
-        Icons.chat_bubble_rounded, 'Messages', push: true),
-    _TabItem(AppRoutes.profile, Icons.person_outline_rounded,
-        Icons.person_rounded, AppStrings.profile),
-  ];
+  static List<_TabItem> _tabsFor(BuildContext context) {
+    final l10n = context.l10n;
+    return [
+      _TabItem(AppRoutes.home, Icons.home_outlined, Icons.home_rounded,
+          l10n.home),
+      _TabItem(AppRoutes.properties, Icons.search_outlined,
+          Icons.search_rounded, l10n.search),
+      _TabItem(AppRoutes.saved, Icons.favorite_border_rounded,
+          Icons.favorite_rounded, l10n.saved),
+      _TabItem(AppRoutes.conversations, Icons.chat_bubble_outline_rounded,
+          Icons.chat_bubble_rounded, l10n.messages, push: true),
+      _TabItem(AppRoutes.profile, Icons.person_outline_rounded,
+          Icons.person_rounded, l10n.profile),
+    ];
+  }
 
-  int _indexFor(BuildContext context) {
+  int _indexFor(BuildContext context, List<_TabItem> tabs) {
     final loc = GoRouterState.of(context).matchedLocation;
-    final i = _tabs.indexWhere((t) => !t.push && loc.startsWith(t.path));
+    final i = tabs.indexWhere((t) => !t.push && loc.startsWith(t.path));
     return i < 0 ? 0 : i;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final current = _indexFor(context);
+    final tabs = _tabsFor(context);
+    final current = _indexFor(context, tabs);
     final bool isDark = theme.brightness == Brightness.dark;
 
     void onTap(_TabItem tab) {
@@ -55,9 +59,9 @@ class AppShell extends StatelessWidget {
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 12),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+            padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 8),
             decoration: BoxDecoration(
               color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
               borderRadius: AppRadius.brXl,
@@ -67,11 +71,11 @@ class AppShell extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                for (var i = 0; i < _tabs.length; i++)
+                for (var i = 0; i < tabs.length; i++)
                   _NavButton(
-                    item: _tabs[i],
+                    item: tabs[i],
                     selected: i == current,
-                    onTap: () => onTap(_tabs[i]),
+                    onTap: () => onTap(tabs[i]),
                   ),
               ],
             ),

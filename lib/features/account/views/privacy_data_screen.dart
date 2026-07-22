@@ -35,7 +35,7 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
       final url = await ref.read(accountServiceProvider).requestExport();
       if (!mounted) return;
       setState(() => _exportUrl = url);
-      context.showSnack('Export requested');
+      context.showSnack(context.l10n.accountExportRequested);
     } on ApiException catch (e) {
       if (!mounted) return;
       context.showSnack(e.message, error: true);
@@ -48,19 +48,17 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete account'),
-        content: const Text(
-          'This schedules your account for deletion. Continue?',
-        ),
+        title: Text(context.l10n.accountDeleteAccountTitle),
+        content: Text(context.l10n.accountDeleteAccountConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -73,8 +71,8 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
       if (!mounted) return;
       context.showSnack(
         date == null
-            ? 'Account scheduled for deletion'
-            : 'Account scheduled for deletion on $date',
+            ? context.l10n.accountDeletionScheduled
+            : context.l10n.accountDeletionScheduledOn(date),
       );
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -92,21 +90,19 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
     final exportUrl = _exportUrl;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Privacy & Data')),
+      appBar: AppBar(title: Text(context.l10n.accountPrivacyDataTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
                 _Section(
-                  title: 'Export my data',
+                  title: context.l10n.accountExportMyData,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Request a copy of your account data, listings, '
-                        'messages and bookings. We prepare a download link '
-                        'for you.',
+                      Text(
+                        context.l10n.accountExportDataDesc,
                         style: AppTextStyles.bodyMd,
                       ),
                       if (exportUrl != null) ...[
@@ -126,7 +122,7 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
                       ],
                       AppSpacing.vGapLg,
                       PrimaryButton(
-                        label: 'Request export',
+                        label: context.l10n.accountRequestExport,
                         icon: Icons.download_rounded,
                         isLoading: _exporting,
                         onPressed: () => unawaited(_requestExport()),
@@ -136,15 +132,13 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
                 ),
                 AppSpacing.vGapLg,
                 _Section(
-                  title: 'Delete account',
+                  title: context.l10n.accountDeleteAccountTitle,
                   danger: true,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Deleting your account is permanent. Your listings, '
-                        'messages, bookings and saved searches will be removed '
-                        'and cannot be restored.',
+                      Text(
+                        context.l10n.accountDeleteAccountDesc,
                         style: AppTextStyles.bodyMd,
                       ),
                       AppSpacing.vGapLg,
@@ -170,7 +164,7 @@ class _PrivacyDataScreenState extends ConsumerState<PrivacyDataScreen> {
                                     ),
                                   ),
                                 )
-                              : const Text('Delete my account'),
+                              : Text(context.l10n.accountDeleteMyAccount),
                         ),
                       ),
                     ],
@@ -232,12 +226,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.privacy_tip_outlined,
-      title: 'Sign in to manage your data',
-      subtitle: 'Log in to export your data or delete your account.',
+      title: context.l10n.accountSignInToManageData,
+      subtitle: context.l10n.accountLogInToExportOrDelete,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

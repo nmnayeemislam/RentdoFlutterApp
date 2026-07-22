@@ -62,7 +62,7 @@ class _TechnicianProfileScreenState
           );
       if (!mounted) return;
       setState(() => _submitting = false);
-      context.showSnack('Profile updated');
+      context.showSnack(context.l10n.profileUpdated);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
@@ -76,7 +76,7 @@ class _TechnicianProfileScreenState
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Technician Profile')),
+      appBar: AppBar(title: Text(context.l10n.technicianProfileTitle)),
       body: !isAuthed ? const _GuestPrompt() : _buildForm(),
     );
   }
@@ -87,37 +87,38 @@ class _TechnicianProfileScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Profile details', style: AppTextStyles.headingMd),
+          Text(context.l10n.technicianProfileDetails,
+              style: AppTextStyles.headingMd),
           AppSpacing.vGapSm,
-          const Text(
-            'Keep your details current so customers know what you offer.',
+          Text(
+            context.l10n.technicianKeepCurrentDesc,
             style: AppTextStyles.bodySm,
           ),
           AppSpacing.vGapXl,
           AppTextField(
-            label: 'Bio',
-            hint: 'A short intro about your experience',
+            label: context.l10n.bio,
+            hint: context.l10n.technicianBioHint,
             controller: _bio,
             maxLines: 3,
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: 'Skills',
-            hint: 'Comma separated, e.g. Plumbing, Wiring',
+            label: context.l10n.skills,
+            hint: context.l10n.technicianSkillsHint,
             controller: _skills,
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: 'Experience (years)',
-            hint: 'e.g. 5',
+            label: context.l10n.technicianExperienceYears,
+            hint: context.l10n.technicianExperienceHint,
             controller: _experience,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: 'Hourly rate',
-            hint: 'Your rate per hour',
+            label: context.l10n.technicianHourlyRate,
+            hint: context.l10n.technicianRateHint,
             controller: _hourlyRate,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -127,19 +128,19 @@ class _TechnicianProfileScreenState
             contentPadding: EdgeInsets.zero,
             value: _isAvailable,
             activeThumbColor: AppColors.primary,
-            title: const Text(
-              'Available for work',
+            title: Text(
+              context.l10n.technicianAvailableForWork,
               style: AppTextStyles.titleSm,
             ),
-            subtitle: const Text(
-              'Turn this off to pause new requests.',
+            subtitle: Text(
+              context.l10n.technicianPauseDesc,
               style: AppTextStyles.bodySm,
             ),
             onChanged: (v) => setState(() => _isAvailable = v),
           ),
           AppSpacing.vGapXl,
           PrimaryButton(
-            label: 'Save changes',
+            label: context.l10n.accountSaveChanges,
             isLoading: _submitting,
             onPressed: _save,
           ),
@@ -156,12 +157,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.badge_outlined,
-      title: 'Sign in to manage your profile',
-      subtitle: 'Log in to update your technician details.',
+      title: context.l10n.technicianSignInToManage,
+      subtitle: context.l10n.technicianLogInToUpdate,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

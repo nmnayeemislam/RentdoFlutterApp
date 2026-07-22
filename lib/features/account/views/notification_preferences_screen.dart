@@ -41,7 +41,7 @@ class _NotificationPreferencesScreenState
           .read(accountServiceProvider)
           .updateNotificationPreferences(prefs);
       if (!mounted) return;
-      context.showSnack('Preferences saved');
+      context.showSnack(context.l10n.accountPreferencesSaved);
     } on ApiException catch (e) {
       if (!mounted) return;
       context.showSnack(e.message, error: true);
@@ -57,7 +57,7 @@ class _NotificationPreferencesScreenState
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Notification Settings')),
+      appBar: AppBar(title: Text(context.l10n.accountNotificationSettingsTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ref.watch(notificationPreferencesProvider).when(
@@ -88,7 +88,7 @@ class _NotificationPreferencesScreenState
                       ],
                       AppSpacing.vGapSm,
                       PrimaryButton(
-                        label: 'Save changes',
+                        label: context.l10n.accountSaveChanges,
                         isLoading: _saving,
                         onPressed: () => unawaited(_save()),
                       ),
@@ -155,12 +155,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.notifications_none_rounded,
-      title: 'Sign in to manage notifications',
-      subtitle: 'Log in to choose how and when we contact you.',
+      title: context.l10n.accountSignInToManageNotifications,
+      subtitle: context.l10n.accountLogInToChooseContact,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

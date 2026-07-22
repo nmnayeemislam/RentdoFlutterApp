@@ -2,26 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/constants/app_strings.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'features/config/providers/config_providers.dart';
+import 'l10n/app_localizations.dart';
 import 'routes/app_router.dart';
 
 /// Root application widget. Wires the router, themes and theme mode.
 class RentdoApp extends ConsumerWidget {
   const RentdoApp({super.key});
 
-  /// Locales the UI can render (drives Material/Cupertino translations and,
-  /// for RTL scripts like Arabic/Hebrew/Urdu, mirrors the whole layout).
-  /// The selected code comes from [localeControllerProvider] and can be any
-  /// backend language; [_resolveLocale] maps it onto the closest entry here.
-  static const List<Locale> supportedLocales = [
-    Locale('en'), Locale('ar'), Locale('bn'), Locale('hi'), Locale('ur'),
-    Locale('fa'), Locale('he'), Locale('es'), Locale('fr'), Locale('de'),
-    Locale('pt'), Locale('ru'), Locale('tr'), Locale('id'), Locale('ms'),
-    Locale('zh'), Locale('ja'), Locale('vi'), Locale('th'),
-  ];
+  /// Locales the UI can render. App copy is translated via [AppLocalizations]
+  /// (see `lib/l10n/*.arb`); the selected code comes from
+  /// [localeControllerProvider] and [_resolveLocale] maps it onto the closest
+  /// entry here, falling back to English for anything not yet translated.
+  static const List<Locale> supportedLocales = AppLocalizations.supportedLocales;
 
   static Locale _resolveLocale(Locale? locale, Iterable<Locale> supported) {
     if (locale != null) {
@@ -44,7 +39,7 @@ class RentdoApp extends ConsumerWidget {
     ref.watch(bootstrapProvider);
 
     return MaterialApp.router(
-      title: AppStrings.appName,
+      onGenerateTitle: (context) => AppLocalizations.of(context).appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
@@ -52,6 +47,7 @@ class RentdoApp extends ConsumerWidget {
       locale: Locale(localeCode),
       supportedLocales: supportedLocales,
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

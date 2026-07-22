@@ -137,12 +137,15 @@ class _DetailBody extends StatelessWidget {
                     const Spacer(),
                     Text(
                       property.priceDisplay ??
-                          Formatters.price(property.price,
-                              period: property.type.pricePeriod.isEmpty
-                                  ? null
-                                  : property.type.pricePeriod),
-                      style: AppTextStyles.headingMd
-                          .copyWith(color: AppColors.primary),
+                          Formatters.price(
+                            property.price,
+                            period: property.type.pricePeriod.isEmpty
+                                ? null
+                                : property.type.pricePeriod,
+                          ),
+                      style: AppTextStyles.headingMd.copyWith(
+                        color: AppColors.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -151,14 +154,18 @@ class _DetailBody extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(Icons.location_on_outlined,
-                        size: 18, color: AppColors.textTertiary),
+                    const Icon(
+                      Icons.location_on_outlined,
+                      size: 18,
+                      color: AppColors.textTertiary,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        [property.address, property.zoneName]
-                            .where((e) => e != null && e.isNotEmpty)
-                            .join(', '),
+                        [
+                          property.address,
+                          property.zoneName,
+                        ].where((e) => e != null && e.isNotEmpty).join(', '),
                         style: AppTextStyles.bodyMd,
                       ),
                     ),
@@ -174,37 +181,52 @@ class _DetailBody extends StatelessWidget {
                 ],
                 if (property.description != null) ...[
                   AppSpacing.vGapXxl,
-                  const Text('Description', style: AppTextStyles.headingMd),
+                  Text(
+                    context.l10n.propertyDescription,
+                    style: AppTextStyles.headingMd,
+                  ),
                   AppSpacing.vGapMd,
-                  Text(property.description!,
-                      style: AppTextStyles.bodyLg),
+                  Text(property.description!, style: AppTextStyles.bodyLg),
                 ],
                 AppSpacing.vGapXxl,
-                const Text('Property details', style: AppTextStyles.headingMd),
+                Text(
+                  context.l10n.propertyDetails,
+                  style: AppTextStyles.headingMd,
+                ),
                 AppSpacing.vGapMd,
                 _SpecTable(property: property),
                 if (property.type == ListingType.hotel ||
                     property.type == ListingType.vacation) ...[
                   AppSpacing.vGapXxl,
-                  const Text('Availability', style: AppTextStyles.headingMd),
+                  Text(
+                    context.l10n.propertyAvailability,
+                    style: AppTextStyles.headingMd,
+                  ),
                   AppSpacing.vGapMd,
                   _AvailabilityStrip(listingId: property.id),
                 ],
                 if (property.amenities.isNotEmpty) ...[
                   AppSpacing.vGapXxl,
-                  const Text('Amenities', style: AppTextStyles.headingMd),
+                  Text(
+                    context.l10n.propertyAmenities,
+                    style: AppTextStyles.headingMd,
+                  ),
                   AppSpacing.vGapMd,
                   Wrap(
                     spacing: 10,
                     runSpacing: 10,
                     children: [
-                      for (final a in property.amenities) _AmenityChip(label: a),
+                      for (final a in property.amenities)
+                        _AmenityChip(label: a),
                     ],
                   ),
                 ],
                 if (property.address != null || property.zoneName != null) ...[
                   AppSpacing.vGapXxl,
-                  const Text('Location', style: AppTextStyles.headingMd),
+                  Text(
+                    context.l10n.compareAttrLocation,
+                    style: AppTextStyles.headingMd,
+                  ),
                   AppSpacing.vGapMd,
                   _LocationCard(property: property),
                 ],
@@ -236,9 +258,14 @@ class _GalleryState extends State<_Gallery> {
   final PageController _controller = PageController();
   int _index = 0;
 
-  List<String> get _images => widget.property.gallery.isNotEmpty
-      ? widget.property.gallery
-      : [if (widget.property.imageUrl != null) widget.property.imageUrl!];
+  List<String> get _images {
+    final urls = <String>{
+      if (widget.property.imageUrl != null) widget.property.imageUrl!,
+      ...widget.property.gallery,
+      ...widget.property.images.map((e) => e.url),
+    };
+    return urls.where((url) => url.trim().isNotEmpty).toList(growable: false);
+  }
 
   @override
   void dispose() {
@@ -325,7 +352,9 @@ class _Dots extends StatelessWidget {
             height: 6,
             width: i == index ? 18 : 6,
             decoration: BoxDecoration(
-              color: i == index ? Colors.white : Colors.white.withValues(alpha: 0.5),
+              color: i == index
+                  ? Colors.white
+                  : Colors.white.withValues(alpha: 0.5),
               borderRadius: AppRadius.brPill,
             ),
           ),
@@ -349,10 +378,16 @@ class _CounterPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.photo_library_outlined, color: Colors.white, size: 13),
+          const Icon(
+            Icons.photo_library_outlined,
+            color: Colors.white,
+            size: 13,
+          ),
           const SizedBox(width: 5),
-          Text(text,
-              style: AppTextStyles.caption.copyWith(color: Colors.white)),
+          Text(
+            text,
+            style: AppTextStyles.caption.copyWith(color: Colors.white),
+          ),
         ],
       ),
     );
@@ -370,8 +405,9 @@ class _GalleryViewer extends StatefulWidget {
 }
 
 class _GalleryViewerState extends State<_GalleryViewer> {
-  late final PageController _controller =
-      PageController(initialPage: widget.initialIndex);
+  late final PageController _controller = PageController(
+    initialPage: widget.initialIndex,
+  );
   late int _index = widget.initialIndex;
 
   @override
@@ -420,7 +456,8 @@ class _GalleryViewerState extends State<_GalleryViewer> {
               right: 0,
               child: Center(
                 child: _CounterPill(
-                    text: '${_index + 1}/${widget.images.length}'),
+                  text: '${_index + 1}/${widget.images.length}',
+                ),
               ),
             ),
         ],
@@ -457,29 +494,38 @@ class _CalculatorButton extends StatelessWidget {
                 color: AppColors.primary.withValues(alpha: 0.15),
                 borderRadius: AppRadius.brSm,
               ),
-              child: const Icon(Icons.calculate_outlined,
-                  color: AppColors.primary),
+              child: const Icon(
+                Icons.calculate_outlined,
+                color: AppColors.primary,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(isSale ? 'Mortgage calculator' : 'Rent calculator',
-                      style: AppTextStyles.titleSm),
+                  Text(
+                    isSale
+                        ? context.l10n.propertyMortgageCalculator
+                        : context.l10n.propertyRentCalculator,
+                    style: AppTextStyles.titleSm,
+                  ),
                   const SizedBox(height: 2),
                   Text(
                     isSale
-                        ? 'Estimate your monthly repayment'
-                        : 'Estimate your move-in cost',
-                    style: AppTextStyles.bodySm
-                        .copyWith(color: AppColors.textSecondary),
+                        ? context.l10n.propertyEstimateRepayment
+                        : context.l10n.propertyEstimateMoveInCost,
+                    style: AppTextStyles.bodySm.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                color: AppColors.textTertiary),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
           ],
         ),
       ),
@@ -495,12 +541,23 @@ class _FeatureCards extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <(IconData, String, String)>[
       if (property.beds != null)
-        (Icons.king_bed_outlined, '${property.beds}', 'Bedrooms'),
+        (
+          Icons.king_bed_outlined,
+          '${property.beds}',
+          context.l10n.compareAttrBedrooms,
+        ),
       if (property.baths != null)
-        (Icons.bathtub_outlined, '${property.baths}', 'Bathrooms'),
+        (
+          Icons.bathtub_outlined,
+          '${property.baths}',
+          context.l10n.compareAttrBathrooms,
+        ),
       if (property.sizeSqft != null)
-        (Icons.square_foot_rounded, Formatters.compact(property.sizeSqft),
-            'Sq ft'),
+        (
+          Icons.square_foot_rounded,
+          Formatters.compact(property.sizeSqft),
+          context.l10n.propertySqFt,
+        ),
     ];
     if (items.isEmpty) return PropertyFeatureRow(property: property);
 
@@ -541,21 +598,28 @@ class _SpecTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = property;
+    final l10n = context.l10n;
     final rows = <(String, String)>[
-      ('Type', p.type.label),
-      if (p.beds != null) ('Bedrooms', '${p.beds}'),
-      if (p.baths != null) ('Bathrooms', '${p.baths}'),
-      if (p.sizeSqft != null) ('Area', '${Formatters.compact(p.sizeSqft)} sqft'),
+      (l10n.compareAttrType, p.type.label),
+      if (p.beds != null) (l10n.compareAttrBedrooms, '${p.beds}'),
+      if (p.baths != null) (l10n.compareAttrBathrooms, '${p.baths}'),
+      if (p.sizeSqft != null)
+        (l10n.propertyArea, '${Formatters.compact(p.sizeSqft)} sqft'),
       if (p.floor != null)
-        ('Floor',
-            '${p.floor}${p.totalFloors != null ? ' of ${p.totalFloors}' : ''}'),
-      ('Furnished', p.furnished ? 'Yes' : 'No'),
-      ('Parking', p.parking ? 'Yes' : 'No'),
-      if (p.allowedFor != null) ('Allowed for', _cap(p.allowedFor!)),
+        (
+          l10n.propertyFloor,
+          '${p.floor}${p.totalFloors != null ? ' ${l10n.ofWord} ${p.totalFloors}' : ''}',
+        ),
+      (l10n.compareAttrFurnished, p.furnished ? l10n.yes : l10n.no),
+      (l10n.compareAttrParking, p.parking ? l10n.yes : l10n.no),
+      if (p.allowedFor != null) (l10n.ownerAllowedFor, _cap(p.allowedFor!)),
       if (p.serviceCharge != null && p.serviceCharge! > 0)
-        ('Service charge', Formatters.money(p.serviceCharge, currency: p.currency)),
+        (
+          l10n.propertyServiceCharge,
+          Formatters.money(p.serviceCharge, currency: p.currency),
+        ),
       if (p.advanceMonths != null && p.advanceMonths! > 0)
-        ('Advance', '${p.advanceMonths} month(s)'),
+        (l10n.propertyAdvance, l10n.propertyMonthsCount(p.advanceMonths!)),
     ];
 
     return Container(
@@ -571,15 +635,19 @@ class _SpecTable extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               child: Row(
                 children: [
-                  Text(rows[i].$1,
-                      style: AppTextStyles.bodyMd
-                          .copyWith(color: AppColors.textSecondary)),
+                  Text(
+                    rows[i].$1,
+                    style: AppTextStyles.bodyMd.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                   const Spacer(),
                   Text(rows[i].$2, style: AppTextStyles.titleSm),
                 ],
               ),
             ),
-            if (i != rows.length - 1) const Divider(height: 1, indent: 14, endIndent: 14),
+            if (i != rows.length - 1)
+              const Divider(height: 1, indent: 14, endIndent: 14),
           ],
         ],
       ),
@@ -593,15 +661,22 @@ class _LocationCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final address = [property.address, property.zoneName]
-        .where((e) => e != null && e.isNotEmpty)
-        .join(', ');
+    final address = [
+      property.address,
+      property.zoneName,
+    ].where((e) => e != null && e.isNotEmpty).join(', ');
     final hasCoords = property.latitude != null && property.longitude != null;
 
     final me = ref.watch(userLocationProvider);
     final String? distance = (me != null && hasCoords)
-        ? Geo.label(Geo.distanceKm(
-            me.lat, me.lng, property.latitude!, property.longitude!))
+        ? Geo.label(
+            Geo.distanceKm(
+              me.lat,
+              me.lng,
+              property.latitude!,
+              property.longitude!,
+            ),
+          )
         : null;
 
     return Column(
@@ -631,28 +706,41 @@ class _LocationCard extends ConsumerWidget {
                   color: AppColors.primarySurface,
                   borderRadius: AppRadius.brMd,
                 ),
-                child: const Icon(Icons.place_outlined, color: AppColors.primary),
+                child: const Icon(
+                  Icons.place_outlined,
+                  color: AppColors.primary,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(address.isEmpty ? 'Location' : address,
-                        style: AppTextStyles.titleSm),
+                    Text(
+                      address.isEmpty
+                          ? context.l10n.compareAttrLocation
+                          : address,
+                      style: AppTextStyles.titleSm,
+                    ),
                     if (distance != null) ...[
                       const SizedBox(height: 2),
-                      Text('$distance away',
-                          style: AppTextStyles.bodySm
-                              .copyWith(color: AppColors.primary)),
+                      Text(
+                        context.l10n.propertyAway(distance),
+                        style: AppTextStyles.bodySm.copyWith(
+                          color: AppColors.primary,
+                        ),
+                      ),
                     ],
                   ],
                 ),
               ),
               if (hasCoords)
-                Text('Map',
-                    style: AppTextStyles.titleSm
-                        .copyWith(color: AppColors.primary)),
+                Text(
+                  context.l10n.map,
+                  style: AppTextStyles.titleSm.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
             ],
           ),
         ),
@@ -675,14 +763,19 @@ class _AvailabilityStrip extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator(strokeWidth: 2.4)),
       ),
       error: (e, _) => Text(
-        e is ApiException ? e.message : 'Availability unavailable.',
+        e is ApiException
+            ? e.message
+            : context.l10n.propertyAvailabilityUnavailable,
         style: AppTextStyles.bodySm,
       ),
       data: (list) {
         if (list.isEmpty) {
-          return Text('No availability published yet.',
-              style: AppTextStyles.bodyMd
-                  .copyWith(color: AppColors.textSecondary));
+          return Text(
+            context.l10n.propertyNoAvailabilityYet,
+            style: AppTextStyles.bodyMd.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          );
         }
         return SizedBox(
           height: 74,
@@ -708,8 +801,10 @@ class _AvailabilityStrip extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('${day.date.day}/${day.date.month}',
-                        style: AppTextStyles.caption),
+                    Text(
+                      '${day.date.day}/${day.date.month}',
+                      style: AppTextStyles.caption,
+                    ),
                     const SizedBox(height: 2),
                     Icon(
                       free ? Icons.check_rounded : Icons.close_rounded,
@@ -717,8 +812,10 @@ class _AvailabilityStrip extends ConsumerWidget {
                       color: free ? AppColors.primary : AppColors.textTertiary,
                     ),
                     if (day.price != null)
-                      Text(Formatters.compact(day.price),
-                          style: AppTextStyles.caption),
+                      Text(
+                        Formatters.compact(day.price),
+                        style: AppTextStyles.caption,
+                      ),
                   ],
                 ),
               );
@@ -740,14 +837,19 @@ class _SuggestedTechnicians extends ConsumerWidget {
     if (!ref.watch(featureFlagsProvider).technicianMarketplace) {
       return const SizedBox.shrink();
     }
-    return ref.watch(listingTechniciansProvider(listingId)).maybeWhen(
+    return ref
+        .watch(listingTechniciansProvider(listingId))
+        .maybeWhen(
           data: (items) {
             if (items.isEmpty) return const SizedBox.shrink();
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AppSpacing.vGapXxl,
-                const Text('Services nearby', style: AppTextStyles.headingMd),
+                Text(
+                  context.l10n.propertyServicesNearby,
+                  style: AppTextStyles.headingMd,
+                ),
                 AppSpacing.vGapMd,
                 SizedBox(
                   height: 96,
@@ -774,23 +876,33 @@ class _SuggestedTechnicians extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(tech.name ?? 'Technician',
+                              Text(
+                                tech.name ??
+                                    context.l10n.propertyTechnicianFallback,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.titleSm,
+                              ),
+                              if (tech.categoryName != null)
+                                Text(
+                                  tech.categoryName!,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.titleSm),
-                              if (tech.categoryName != null)
-                                Text(tech.categoryName!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTextStyles.bodySm),
+                                  style: AppTextStyles.bodySm,
+                                ),
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Icon(Icons.star_rounded,
-                                      size: 14, color: AppColors.rating),
+                                  const Icon(
+                                    Icons.star_rounded,
+                                    size: 14,
+                                    color: AppColors.rating,
+                                  ),
                                   const SizedBox(width: 2),
-                                  Text(tech.rating.toStringAsFixed(1),
-                                      style: AppTextStyles.caption),
+                                  Text(
+                                    tech.rating.toStringAsFixed(1),
+                                    style: AppTextStyles.caption,
+                                  ),
                                 ],
                               ),
                             ],
@@ -814,8 +926,9 @@ class _SimilarSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final similar = ref.watch(similarPropertiesProvider(
-        (excludeId: property.id, type: property.type)));
+    final similar = ref.watch(
+      similarPropertiesProvider((excludeId: property.id, type: property.type)),
+    );
     return similar.maybeWhen(
       data: (items) {
         if (items.isEmpty) return const SizedBox.shrink();
@@ -823,7 +936,10 @@ class _SimilarSection extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AppSpacing.vGapXxl,
-            const Text('Similar properties', style: AppTextStyles.headingMd),
+            Text(
+              context.l10n.propertySimilarProperties,
+              style: AppTextStyles.headingMd,
+            ),
             AppSpacing.vGapMd,
             SizedBox(
               height: 320,
@@ -868,11 +984,16 @@ class _AmenityChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.check_circle_outline_rounded,
-              size: 16, color: AppColors.primary),
+          const Icon(
+            Icons.check_circle_outline_rounded,
+            size: 16,
+            color: AppColors.primary,
+          ),
           const SizedBox(width: 6),
-          Text(label,
-              style: AppTextStyles.bodySm.copyWith(color: AppColors.primaryDark)),
+          Text(
+            label,
+            style: AppTextStyles.bodySm.copyWith(color: AppColors.primaryDark),
+          ),
         ],
       ),
     );
@@ -884,10 +1005,11 @@ class _AgentCard extends ConsumerWidget {
   final PropertyModel property;
 
   Future<void> _startChat(BuildContext context, WidgetRef ref) async {
-    final isAuthed =
-        ref.read(authViewModelProvider.select((s) => s.isAuthenticated));
+    final isAuthed = ref.read(
+      authViewModelProvider.select((s) => s.isAuthenticated),
+    );
     if (!isAuthed) {
-      context.showSnack('Log in to message the owner.');
+      context.showSnack(context.l10n.propertyLogInToMessageOwner);
       unawaited(context.push(AppRoutes.login));
       return;
     }
@@ -923,11 +1045,16 @@ class _AgentCard extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Listed by', style: AppTextStyles.caption),
+                Text(
+                  context.l10n.propertyListedBy,
+                  style: AppTextStyles.caption,
+                ),
                 Text(property.ownerName!, style: AppTextStyles.titleMd),
                 if (property.postedAt != null)
-                  Text(Formatters.relative(property.postedAt),
-                      style: AppTextStyles.bodySm),
+                  Text(
+                    Formatters.relative(property.postedAt),
+                    style: AppTextStyles.bodySm,
+                  ),
               ],
             ),
           ),
@@ -947,10 +1074,11 @@ class _ContactBar extends ConsumerWidget {
   final PropertyModel property;
 
   bool _requireAuth(BuildContext context, WidgetRef ref) {
-    final isAuthed =
-        ref.read(authViewModelProvider.select((s) => s.isAuthenticated));
+    final isAuthed = ref.read(
+      authViewModelProvider.select((s) => s.isAuthenticated),
+    );
     if (!isAuthed) {
-      context.showSnack('Log in to continue.');
+      context.showSnack(context.l10n.logInToContinue);
       unawaited(context.push(AppRoutes.login));
     }
     return isAuthed;
@@ -959,22 +1087,23 @@ class _ContactBar extends ConsumerWidget {
   Future<void> _revealContact(BuildContext context, WidgetRef ref) async {
     if (!_requireAuth(context, ref)) return;
     try {
-      final phone =
-          await ref.read(propertyRepositoryProvider).revealContact(property.id);
+      final phone = await ref
+          .read(propertyRepositoryProvider)
+          .revealContact(property.id);
       if (!context.mounted) return;
       if (phone == null || phone.isEmpty) {
-        context.showSnack('Contact not available for this listing.');
+        context.showSnack(context.l10n.propertyContactNotAvailable);
         return;
       }
       await showDialog<void>(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Contact owner'),
+          title: Text(context.l10n.propertyContactOwner),
           content: SelectableText(phone, style: AppTextStyles.headingMd),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
+              child: Text(context.l10n.close),
             ),
           ],
         ),
@@ -989,7 +1118,7 @@ class _ContactBar extends ConsumerWidget {
     if (!_requireAuth(context, ref)) return;
     final ok = await ScheduleVisitSheet.show(context, property.id);
     if (ok == true && context.mounted) {
-      context.showSnack('Visit requested');
+      context.showSnack(context.l10n.propertyVisitRequested);
     }
   }
 
@@ -997,13 +1126,14 @@ class _ContactBar extends ConsumerWidget {
     if (!_requireAuth(context, ref)) return;
     final ok = await BookNowSheet.show(context, property.id);
     if (ok == true && context.mounted) {
-      context.showSnack('Booking requested');
+      context.showSnack(context.l10n.propertyBookingRequested);
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bookable = property.type == ListingType.hotel ||
+    final bookable =
+        property.type == ListingType.hotel ||
         property.type == ListingType.vacation;
 
     final period = property.type.pricePeriod;
@@ -1026,15 +1156,23 @@ class _ContactBar extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(period.isEmpty ? 'Price' : 'Price / $period',
-                      style: AppTextStyles.caption
-                          .copyWith(color: AppColors.textTertiary)),
+                  Text(
+                    period.isEmpty
+                        ? context.l10n.propertyPriceLabel
+                        : context.l10n.propertyPricePerPeriod(period),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(priceText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.headingMd
-                          .copyWith(color: AppColors.primary)),
+                  Text(
+                    priceText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.headingMd.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(width: 12),
@@ -1047,12 +1185,12 @@ class _ContactBar extends ConsumerWidget {
               Expanded(
                 child: bookable
                     ? PrimaryButton(
-                        label: 'Book now',
+                        label: context.l10n.propertyBookNow,
                         icon: Icons.hotel_rounded,
                         onPressed: () => _book(context, ref),
                       )
                     : PrimaryButton(
-                        label: 'Schedule visit',
+                        label: context.l10n.propertyScheduleVisit,
                         icon: Icons.calendar_today_rounded,
                         onPressed: () => _scheduleVisit(context, ref),
                       ),
@@ -1094,15 +1232,18 @@ class _ReviewsSection extends ConsumerWidget {
   final int listingId;
 
   Future<void> _write(BuildContext context, WidgetRef ref) async {
-    final isAuthed =
-        ref.read(authViewModelProvider.select((s) => s.isAuthenticated));
+    final isAuthed = ref.read(
+      authViewModelProvider.select((s) => s.isAuthenticated),
+    );
     if (!isAuthed) {
-      context.showSnack('Log in to write a review.');
+      context.showSnack(context.l10n.propertyLogInToWriteReview);
       unawaited(context.push(AppRoutes.login));
       return;
     }
     final ok = await WriteReviewSheet.show(context, listingId);
-    if (ok == true && context.mounted) context.showSnack('Review submitted');
+    if (ok == true && context.mounted) {
+      context.showSnack(context.l10n.propertyReviewSubmitted);
+    }
   }
 
   @override
@@ -1117,12 +1258,12 @@ class _ReviewsSection extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Text('Reviews', style: AppTextStyles.headingMd),
+            Text(context.l10n.reviews, style: AppTextStyles.headingMd),
             const Spacer(),
             TextButton.icon(
               onPressed: () => _write(context, ref),
               icon: const Icon(Icons.rate_review_outlined, size: 18),
-              label: const Text('Write'),
+              label: Text(context.l10n.write),
             ),
           ],
         ),
@@ -1132,13 +1273,18 @@ class _ReviewsSection extends ConsumerWidget {
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: CircularProgressIndicator(strokeWidth: 2.4)),
           ),
-          error: (e, _) => const Text('Could not load reviews.',
-              style: AppTextStyles.bodySm),
+          error: (e, _) => Text(
+            context.l10n.propertyCouldNotLoadReviews,
+            style: AppTextStyles.bodySm,
+          ),
           data: (items) {
             if (items.isEmpty) {
-              return Text('No reviews yet. Be the first to review.',
-                  style: AppTextStyles.bodyMd
-                      .copyWith(color: AppColors.textSecondary));
+              return Text(
+                context.l10n.propertyNoReviewsYet,
+                style: AppTextStyles.bodyMd.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              );
             }
             return Column(
               children: [for (final r in items) _ReviewTile(review: r)],
@@ -1161,12 +1307,19 @@ class _ReviewTile extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Padding(
-              padding: EdgeInsets.all(AppSpacing.lg),
-              child: Text('Report this review',
-                  style: AppTextStyles.headingMd),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text(
+                context.l10n.propertyReportThisReview,
+                style: AppTextStyles.headingMd,
+              ),
             ),
-            for (final r in const ['spam', 'inappropriate_content', 'harassment', 'other'])
+            for (final r in const [
+              'spam',
+              'inappropriate_content',
+              'harassment',
+              'other',
+            ])
               ListTile(
                 title: Text(r.replaceAll('_', ' ')),
                 onTap: () => Navigator.pop(context, r),
@@ -1178,7 +1331,9 @@ class _ReviewTile extends ConsumerWidget {
     if (reason == null) return;
     try {
       await ref.read(reviewServiceProvider).report(review.id, reason);
-      if (context.mounted) context.showSnack('Review reported');
+      if (context.mounted) {
+        context.showSnack(context.l10n.propertyReviewReported);
+      }
     } on ApiException catch (e) {
       if (context.mounted) context.showSnack(e.message, error: true);
     }
@@ -1193,14 +1348,19 @@ class _ReviewTile extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Text(review.reviewerName ?? 'Guest',
-                  style: AppTextStyles.titleSm),
+              Text(
+                review.reviewerName ?? context.l10n.propertyGuestFallback,
+                style: AppTextStyles.titleSm,
+              ),
               InkResponse(
                 onTap: () => unawaited(_report(context, ref)),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6),
-                  child: Icon(Icons.flag_outlined,
-                      size: 14, color: AppColors.textTertiary),
+                  child: Icon(
+                    Icons.flag_outlined,
+                    size: 14,
+                    color: AppColors.textTertiary,
+                  ),
                 ),
               ),
               const Spacer(),
@@ -1220,8 +1380,10 @@ class _ReviewTile extends ConsumerWidget {
           ],
           if (review.createdAt != null) ...[
             const SizedBox(height: 2),
-            Text(Formatters.relative(review.createdAt),
-                style: AppTextStyles.caption),
+            Text(
+              Formatters.relative(review.createdAt),
+              style: AppTextStyles.caption,
+            ),
           ],
         ],
       ),
@@ -1239,7 +1401,8 @@ class _ShareButton extends ConsumerWidget {
     var url = '${AppConfig.baseUrl}/properties/${property.id}';
     try {
       final data = await ref.read(propertyServiceProvider).share(property.id);
-      final remote = (data['url'] ?? data['share_url'] ?? data['link']) as String?;
+      final remote =
+          (data['url'] ?? data['share_url'] ?? data['link']) as String?;
       if (remote != null && remote.isNotEmpty) url = remote;
     } on ApiException {
       // Fall back to the locally-built link.
@@ -1254,7 +1417,7 @@ class _ShareButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
       icon: const Icon(Icons.share_outlined, color: AppColors.ink, size: 20),
-      tooltip: 'Share',
+      tooltip: context.l10n.share,
       onPressed: () => unawaited(_share(context, ref)),
     );
   }
@@ -1265,10 +1428,11 @@ class _MoreMenu extends ConsumerWidget {
   final PropertyModel property;
 
   bool _requireAuth(BuildContext context, WidgetRef ref) {
-    final isAuthed =
-        ref.read(authViewModelProvider.select((s) => s.isAuthenticated));
+    final isAuthed = ref.read(
+      authViewModelProvider.select((s) => s.isAuthenticated),
+    );
     if (!isAuthed) {
-      context.showSnack('Log in to continue.');
+      context.showSnack(context.l10n.logInToContinue);
       unawaited(context.push(AppRoutes.login));
     }
     return isAuthed;
@@ -1277,7 +1441,9 @@ class _MoreMenu extends ConsumerWidget {
   Future<void> _report(BuildContext context, WidgetRef ref) async {
     if (!_requireAuth(context, ref)) return;
     final ok = await ReportSheet.show(context, property.id);
-    if (ok == true && context.mounted) context.showSnack('Report submitted');
+    if (ok == true && context.mounted) {
+      context.showSnack(context.l10n.propertyReportSubmitted);
+    }
   }
 
   Future<void> _block(BuildContext context, WidgetRef ref) async {
@@ -1286,7 +1452,7 @@ class _MoreMenu extends ConsumerWidget {
     try {
       await ref.read(communityServiceProvider).blockUser(ownerId);
       if (!context.mounted) return;
-      context.showSnack('Owner blocked');
+      context.showSnack(context.l10n.propertyOwnerBlocked);
     } on ApiException catch (e) {
       if (!context.mounted) return;
       context.showSnack(e.message, error: true);
@@ -1301,10 +1467,16 @@ class _MoreMenu extends ConsumerWidget {
         if (v == 'report') unawaited(_report(context, ref));
         if (v == 'block') unawaited(_block(context, ref));
       },
-      itemBuilder: (_) => [
-        const PopupMenuItem(value: 'report', child: Text('Report listing')),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'report',
+          child: Text(context.l10n.propertyReportListing),
+        ),
         if (property.ownerId != null)
-          const PopupMenuItem(value: 'block', child: Text('Block owner')),
+          PopupMenuItem(
+            value: 'block',
+            child: Text(context.l10n.propertyBlockOwner),
+          ),
       ],
     );
   }

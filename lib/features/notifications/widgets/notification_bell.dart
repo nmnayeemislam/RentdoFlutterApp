@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../routes/app_routes.dart';
+import '../../../shared/extensions/context_extensions.dart';
 import '../viewmodels/notifications_viewmodel.dart';
 
 /// Notification bell with an unread dot; navigates to the notifications
@@ -19,7 +20,9 @@ class NotificationBell extends ConsumerWidget {
 
     return Semantics(
       button: true,
-      label: unread > 0 ? 'Notifications, $unread unread' : 'Notifications',
+      label: unread > 0
+          ? context.l10n.notificationsUnreadLabel(unread)
+          : context.l10n.notifications,
       child: GestureDetector(
         onTap: () => context.push(AppRoutes.notifications),
         child: Stack(

@@ -26,7 +26,7 @@ class SavedSearchesScreen extends ConsumerWidget {
     final searches = ref.watch(savedSearchViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Saved Searches')),
+      appBar: AppBar(title: Text(context.l10n.savedSearchesTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
           : searches.when(
@@ -39,11 +39,10 @@ class SavedSearchesScreen extends ConsumerWidget {
               ),
               data: (items) {
                 if (items.isEmpty) {
-                  return const EmptyState(
+                  return EmptyState(
                     icon: Icons.bookmark_border_rounded,
-                    title: 'No saved searches',
-                    subtitle:
-                        'Save a search to get notified about new matches.',
+                    title: context.l10n.savedSearchesNone,
+                    subtitle: context.l10n.savedSearchesEmptyDesc,
                   );
                 }
                 return RefreshIndicator(
@@ -113,7 +112,8 @@ class _SearchTile extends ConsumerWidget {
                         color: AppColors.textTertiary,
                       ),
                       const SizedBox(width: 4),
-                      const Text('Match alerts', style: AppTextStyles.caption),
+                      Text(context.l10n.savedSearchesMatchAlerts,
+                          style: AppTextStyles.caption),
                       Switch.adaptive(
                         value: search.alertOn,
                         activeThumbColor: AppColors.primary,
@@ -147,12 +147,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.bookmark_border_rounded,
-      title: 'Sign in for saved searches',
-      subtitle: 'Log in to save searches and get match alerts.',
+      title: context.l10n.savedSearchesSignInTitle,
+      subtitle: context.l10n.savedSearchesLogInDesc,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

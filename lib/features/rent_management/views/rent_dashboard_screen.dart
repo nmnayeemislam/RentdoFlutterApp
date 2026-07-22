@@ -24,8 +24,9 @@ class RentDashboardScreen extends ConsumerWidget {
     final isAuthed =
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
+    final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: const Text('Rent Management')),
+      appBar: AppBar(title: Text(l10n.rentManagementTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ListView(
@@ -35,31 +36,31 @@ class RentDashboardScreen extends ConsumerWidget {
                   summary: ref.watch(ledgerSummaryProvider),
                 ),
                 AppSpacing.vGapXl,
-                const _MenuGroup(
+                _MenuGroup(
                   items: [
                     (
                       Icons.meeting_room_outlined,
-                      'Units',
+                      l10n.rentUnits,
                       AppRoutes.rentUnits,
                     ),
                     (
                       Icons.people_outline,
-                      'Tenancies',
+                      l10n.rentTenancies,
                       AppRoutes.tenancies,
                     ),
                     (
                       Icons.payments_outlined,
-                      'Rent Payments',
+                      l10n.rentPayments,
                       AppRoutes.rentPayments,
                     ),
                     (
                       Icons.receipt_long_outlined,
-                      'Ledger',
+                      l10n.rentLedger,
                       AppRoutes.ledger,
                     ),
                     (
                       Icons.description_outlined,
-                      'Agreements',
+                      l10n.rentAgreements,
                       AppRoutes.agreements,
                     ),
                   ],
@@ -94,16 +95,16 @@ class _SummaryCard extends StatelessWidget {
           ),
         ),
         error: (e, _) => Text(
-          'Could not load summary',
+          context.l10n.rentCouldNotLoadSummary,
           style: AppTextStyles.bodyMd.copyWith(color: Colors.white),
         ),
         data: (data) => Row(
           children: [
-            _SummaryTile(label: 'Income', value: data.income),
+            _SummaryTile(label: context.l10n.rentIncome, value: data.income),
             const _Divider(),
-            _SummaryTile(label: 'Expenses', value: data.expense),
+            _SummaryTile(label: context.l10n.rentExpenses, value: data.expense),
             const _Divider(),
-            _SummaryTile(label: 'Net', value: data.net),
+            _SummaryTile(label: context.l10n.rentNet, value: data.net),
           ],
         ),
       ),
@@ -193,12 +194,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.receipt_long_outlined,
-      title: 'Sign in to manage rent',
-      subtitle: 'Log in to track units, tenancies and payments.',
+      title: context.l10n.rentSignInToManage,
+      subtitle: context.l10n.rentLogInToTrack,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

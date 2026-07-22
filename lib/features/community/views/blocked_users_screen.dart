@@ -24,7 +24,9 @@ class BlockedUsersScreen extends ConsumerWidget {
     try {
       await ref.read(communityServiceProvider).unblockUser(userId);
       ref.invalidate(blockedUsersProvider);
-      if (context.mounted) context.showSnack('User unblocked');
+      if (context.mounted) {
+        context.showSnack(context.l10n.communityUserUnblocked);
+      }
     } on ApiException catch (e) {
       if (context.mounted) context.showSnack(e.message, error: true);
     }
@@ -36,16 +38,16 @@ class BlockedUsersScreen extends ConsumerWidget {
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Blocked Users')),
+      appBar: AppBar(title: Text(context.l10n.communityBlockedUsersTitle)),
       body: !isAuthed
           ? EmptyState(
               icon: Icons.block_rounded,
-              title: 'Sign in to manage blocks',
-              subtitle: 'Log in to see who you have blocked.',
+              title: context.l10n.communitySignInToManageBlocks,
+              subtitle: context.l10n.communityLogInToSeeBlocked,
               action: SizedBox(
                 width: 200,
                 child: PrimaryButton(
-                  label: 'Log in',
+                  label: context.l10n.login,
                   onPressed: () => context.push(AppRoutes.login),
                 ),
               ),
@@ -58,10 +60,10 @@ class BlockedUsersScreen extends ConsumerWidget {
                 ),
                 data: (items) {
                   if (items.isEmpty) {
-                    return const EmptyState(
+                    return EmptyState(
                       icon: Icons.block_rounded,
-                      title: 'No blocked users',
-                      subtitle: 'People you block will appear here.',
+                      title: context.l10n.communityNoBlockedUsers,
+                      subtitle: context.l10n.communityBlockedUsersEmptyDesc,
                     );
                   }
                   return RefreshIndicator(
@@ -91,14 +93,15 @@ class BlockedUsersScreen extends ConsumerWidget {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  user.name ?? 'User #${user.id}',
+                                  user.name ??
+                                      context.l10n.communityUserFallback(user.id),
                                   style: AppTextStyles.titleSm,
                                 ),
                               ),
                               TextButton(
                                 onPressed: () =>
                                     unawaited(_unblock(context, ref, user.id)),
-                                child: const Text('Unblock'),
+                                child: Text(context.l10n.communityUnblock),
                               ),
                             ],
                           ),

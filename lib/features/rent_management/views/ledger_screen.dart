@@ -22,11 +22,11 @@ class LedgerScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ledger'),
+        title: Text(context.l10n.rentLedger),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'Add entry',
+            tooltip: context.l10n.rentAddEntry,
             onPressed: () => _AddEntrySheet.show(context),
           ),
         ],
@@ -44,12 +44,12 @@ class LedgerScreen extends ConsumerWidget {
                   _SummaryCard(summary: ref.watch(ledgerSummaryProvider)),
                   AppSpacing.vGapLg,
                   if (entries.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(top: AppSpacing.xxl),
+                    Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.xxl),
                       child: EmptyState(
                         icon: Icons.receipt_long_outlined,
-                        title: 'No ledger entries yet',
-                        subtitle: 'Add income or expenses to track your net.',
+                        title: context.l10n.rentNoLedgerEntriesYet,
+                        subtitle: context.l10n.rentLedgerEmptyDesc,
                       ),
                     )
                   else
@@ -90,16 +90,16 @@ class _SummaryCard extends StatelessWidget {
           ),
         ),
         error: (e, _) => Text(
-          'Could not load summary',
+          context.l10n.rentCouldNotLoadSummary,
           style: AppTextStyles.bodyMd.copyWith(color: Colors.white),
         ),
         data: (data) => Row(
           children: [
-            _SummaryTile(label: 'Income', value: data.income),
+            _SummaryTile(label: context.l10n.rentIncome, value: data.income),
             const _VDivider(),
-            _SummaryTile(label: 'Expenses', value: data.expense),
+            _SummaryTile(label: context.l10n.rentExpenses, value: data.expense),
             const _VDivider(),
-            _SummaryTile(label: 'Net', value: data.net),
+            _SummaryTile(label: context.l10n.rentNet, value: data.net),
           ],
         ),
       ),
@@ -154,7 +154,9 @@ class _EntryCard extends StatelessWidget {
     final title =
         (entry.category != null && entry.category!.isNotEmpty)
             ? entry.category!
-            : (entry.isIncome ? 'Income' : 'Expense');
+            : (entry.isIncome
+                ? context.l10n.rentIncomeLabel
+                : context.l10n.rentExpenseLabel);
     final color = entry.isIncome ? AppColors.success : AppColors.error;
     final sign = entry.isIncome ? '+' : '-';
 
@@ -257,11 +259,11 @@ class _AddEntrySheetState extends ConsumerState<_AddEntrySheet> {
     final category = _category.text.trim();
     final amount = num.tryParse(_amount.text.trim());
     if (category.isEmpty) {
-      context.showSnack('Enter a category', error: true);
+      context.showSnack(context.l10n.rentEnterCategory, error: true);
       return;
     }
     if (amount == null) {
-      context.showSnack('Enter an amount', error: true);
+      context.showSnack(context.l10n.rentEnterAmount, error: true);
       return;
     }
     final description = _description.text.trim();
@@ -281,7 +283,7 @@ class _AddEntrySheetState extends ConsumerState<_AddEntrySheet> {
       ref.invalidate(ledgerSummaryProvider);
       if (!mounted) return;
       Navigator.pop(context);
-      context.showSnack('Entry added');
+      context.showSnack(context.l10n.rentEntryAdded);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
@@ -303,54 +305,56 @@ class _AddEntrySheetState extends ConsumerState<_AddEntrySheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Add ledger entry', style: AppTextStyles.headingMd),
+            Text(context.l10n.rentAddLedgerEntry, style: AppTextStyles.headingMd),
             AppSpacing.vGapLg,
-            const Text('Type', style: AppTextStyles.label),
+            Text(context.l10n.type, style: AppTextStyles.label),
             AppSpacing.vGapSm,
             SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'income', label: Text('Income')),
-                ButtonSegment(value: 'expense', label: Text('Expense')),
+              segments: [
+                ButtonSegment(
+                    value: 'income', label: Text(context.l10n.rentIncomeLabel)),
+                ButtonSegment(
+                    value: 'expense', label: Text(context.l10n.rentExpenseLabel)),
               ],
               selected: {_type},
               onSelectionChanged: (s) => setState(() => _type = s.first),
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Category',
-              hint: 'e.g. Rent, Maintenance',
+              label: context.l10n.rentCategory,
+              hint: context.l10n.rentCategoryHint,
               controller: _category,
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Amount',
-              hint: 'Amount',
+              label: context.l10n.amount,
+              hint: context.l10n.amount,
               controller: _amount,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
             ),
             AppSpacing.vGapMd,
-            const Text('Date', style: AppTextStyles.label),
+            Text(context.l10n.date, style: AppTextStyles.label),
             AppSpacing.vGapSm,
             _DateTile(label: Formatters.date(_date), onTap: _pickDate),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Description',
-              hint: 'Optional',
+              label: context.l10n.description,
+              hint: context.l10n.optional,
               controller: _description,
               maxLines: 2,
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Listing ID',
-              hint: "Optional — your property's listing ID",
+              label: context.l10n.maintenanceListingId,
+              hint: context.l10n.rentListingIdOptionalHint,
               controller: _listingId,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             AppSpacing.vGapXl,
             PrimaryButton(
-              label: 'Add entry',
+              label: context.l10n.rentAddEntry,
               isLoading: _submitting,
               onPressed: _submit,
             ),

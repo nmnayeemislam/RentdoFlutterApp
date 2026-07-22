@@ -25,7 +25,7 @@ class ConversationsScreen extends ConsumerWidget {
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Messages')),
+      appBar: AppBar(title: Text(context.l10n.messages)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ref.watch(conversationsViewModelProvider).when(
@@ -38,10 +38,10 @@ class ConversationsScreen extends ConsumerWidget {
                 ),
                 data: (items) {
                   if (items.isEmpty) {
-                    return const EmptyState(
+                    return EmptyState(
                       icon: Icons.chat_bubble_outline,
-                      title: 'No messages yet',
-                      subtitle: 'Start a conversation from any listing.',
+                      title: context.l10n.chatNoMessagesYet,
+                      subtitle: context.l10n.chatStartConversationDesc,
                     );
                   }
                   return RefreshIndicator(
@@ -82,10 +82,11 @@ class _ConversationTile extends StatelessWidget {
     final name = (conversation.otherPartyName != null &&
             conversation.otherPartyName!.isNotEmpty)
         ? conversation.otherPartyName!
-        : 'Owner';
+        : context.l10n.chatOwnerFallback;
     final avatar = conversation.otherPartyAvatar;
     final body = conversation.lastMessageBody ?? '';
-    final preview = conversation.lastMessageIsMine ? 'You: $body' : body;
+    final preview =
+        conversation.lastMessageIsMine ? context.l10n.chatYouPrefix(body) : body;
     final hasUnread = conversation.unreadCount > 0;
 
     return InkWell(
@@ -225,12 +226,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.chat_bubble_outline,
-      title: 'Sign in to see your messages',
-      subtitle: 'Log in to chat with property owners.',
+      title: context.l10n.chatSignInToSeeMessages,
+      subtitle: context.l10n.chatLogInToChatWithOwners,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

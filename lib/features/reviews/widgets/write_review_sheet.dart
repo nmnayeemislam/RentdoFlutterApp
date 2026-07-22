@@ -41,7 +41,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
 
   Future<void> _submit() async {
     if (_rating == 0) {
-      context.showSnack('Tap a star to rate', error: true);
+      context.showSnack(context.l10n.reviewTapStarToRate, error: true);
       return;
     }
     setState(() => _submitting = true);
@@ -72,7 +72,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Write a review', style: AppTextStyles.headingMd),
+          Text(context.l10n.reviewWriteTitle, style: AppTextStyles.headingMd),
           AppSpacing.vGapLg,
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -92,14 +92,14 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: 'Your review (optional)',
-            hint: 'Share details of your experience',
+            label: context.l10n.reviewYourReviewOptional,
+            hint: context.l10n.reviewShareDetailsHint,
             controller: _body,
             maxLines: 4,
           ),
           AppSpacing.vGapXl,
           PrimaryButton(
-            label: 'Submit review',
+            label: context.l10n.reviewSubmitReview,
             isLoading: _submitting,
             onPressed: _submit,
           ),

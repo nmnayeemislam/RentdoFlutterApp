@@ -78,21 +78,28 @@ class AuthViewModel extends Notifier<AuthState> {
 
   /// Restores session on app start.
   Future<void> bootstrap() async {
+    final minimumSplash = Future<void>.delayed(const Duration(seconds: 3));
+
     if (!await _repo.hasSession()) {
+      await minimumSplash;
       state = state.copyWith(status: AuthStatus.unauthenticated);
       return;
     }
     try {
       final user = await _repo.currentUser();
+      await minimumSplash;
       state = state.copyWith(status: AuthStatus.authenticated, user: user);
     } on ApiException {
+      await minimumSplash;
       state = state.copyWith(status: AuthStatus.unauthenticated);
     }
   }
 
   // ── Login ──────────────────────────────────────────────────────────────
   Future<AuthActionResult> loginWithEmail(String email, String password) =>
-      _run(() => _repo.login(LoginRequest.email(email: email, password: password)));
+      _run(
+        () => _repo.login(LoginRequest.email(email: email, password: password)),
+      );
 
   Future<AuthActionResult> startPhoneLogin(String phone) =>
       _run(() => _repo.login(LoginRequest.phone(phone: phone)));
@@ -105,9 +112,11 @@ class AuthViewModel extends Notifier<AuthState> {
     String phone, {
     String? name,
     String? email,
-  }) =>
-      _run(() =>
-          _repo.registerStart(RegisterStartRequest(phone: phone, name: name, email: email)));
+  }) => _run(
+    () => _repo.registerStart(
+      RegisterStartRequest(phone: phone, name: name, email: email),
+    ),
+  );
 
   Future<AuthActionResult> verifyRegister({
     required String phone,
@@ -115,14 +124,17 @@ class AuthViewModel extends Notifier<AuthState> {
     required String name,
     String? email,
     String? password,
-  }) =>
-      _run(() => _repo.registerVerify(RegisterVerifyRequest(
-            phone: phone,
-            otp: otp,
-            name: name,
-            email: email,
-            password: password,
-          )));
+  }) => _run(
+    () => _repo.registerVerify(
+      RegisterVerifyRequest(
+        phone: phone,
+        otp: otp,
+        name: name,
+        email: email,
+        password: password,
+      ),
+    ),
+  );
 
   // ── Password reset ───────────────────────────────────────────────────────
   Future<bool> forgot(ForgotPasswordRequest request) async {
@@ -196,5 +208,6 @@ class AuthViewModel extends Notifier<AuthState> {
   }
 }
 
-final authViewModelProvider =
-    NotifierProvider<AuthViewModel, AuthState>(AuthViewModel.new);
+final authViewModelProvider = NotifierProvider<AuthViewModel, AuthState>(
+  AuthViewModel.new,
+);

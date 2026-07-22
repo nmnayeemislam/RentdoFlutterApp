@@ -28,15 +28,15 @@ class MyListingsScreen extends ConsumerWidget {
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
     if (!isAuthed) {
       return Scaffold(
-        appBar: AppBar(title: const Text('My Listings')),
+        appBar: AppBar(title: Text(context.l10n.ownerMyListingsTitle)),
         body: EmptyState(
           icon: Icons.home_work_outlined,
-          title: 'Sign in to manage listings',
-          subtitle: 'Log in to see and manage the properties you posted.',
+          title: context.l10n.ownerSignInToManageListings,
+          subtitle: context.l10n.ownerLogInToManageListings,
           action: SizedBox(
             width: 200,
             child: PrimaryButton(
-              label: 'Log in',
+              label: context.l10n.login,
               onPressed: () => context.push(AppRoutes.login),
             ),
           ),
@@ -46,13 +46,13 @@ class MyListingsScreen extends ConsumerWidget {
 
     final listings = ref.watch(myListingsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('My Listings')),
+      appBar: AppBar(title: Text(context.l10n.ownerMyListingsTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(AppRoutes.createListing),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Post'),
+        label: Text(context.l10n.post),
       ),
       body: listings.when(
         loading: () => const LoadingWidget(),
@@ -62,10 +62,10 @@ class MyListingsScreen extends ConsumerWidget {
         ),
         data: (items) {
           if (items.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.home_work_outlined,
-              title: 'No listings yet',
-              subtitle: 'Properties you post will appear here.',
+              title: context.l10n.ownerNoListingsYet,
+              subtitle: context.l10n.ownerListingsEmptyDesc,
             );
           }
           return RefreshIndicator(
@@ -99,7 +99,9 @@ class _OwnerListingTile extends ConsumerWidget {
   Future<void> _setStatus(BuildContext context, WidgetRef ref, String status) async {
     try {
       await ref.read(listingStatusUpdater)(property.id, status);
-      if (context.mounted) context.showSnack('Listing marked $status');
+      if (context.mounted) {
+        context.showSnack(context.l10n.ownerListingMarked(status));
+      }
     } on ApiException catch (e) {
       if (context.mounted) context.showSnack(e.message, error: true);
     }
@@ -108,7 +110,9 @@ class _OwnerListingTile extends ConsumerWidget {
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
     try {
       await ref.read(listingDeleter)(property.id);
-      if (context.mounted) context.showSnack('Listing deleted');
+      if (context.mounted) {
+        context.showSnack(context.l10n.ownerListingDeleted);
+      }
     } on ApiException catch (e) {
       if (context.mounted) context.showSnack(e.message, error: true);
     }
@@ -180,12 +184,15 @@ class _OwnerListingTile extends ConsumerWidget {
                   unawaited(_setStatus(context, ref, v));
                 }
               },
-              itemBuilder: (_) => const [
-                PopupMenuItem(value: 'edit', child: Text('Edit')),
-                PopupMenuItem(value: 'rented', child: Text('Mark as rented')),
-                PopupMenuItem(value: 'sold', child: Text('Mark as sold')),
-                PopupMenuItem(value: 'archived', child: Text('Archive')),
-                PopupMenuItem(value: 'delete', child: Text('Delete')),
+              itemBuilder: (_) => [
+                PopupMenuItem(value: 'edit', child: Text(context.l10n.edit)),
+                PopupMenuItem(
+                    value: 'rented', child: Text(context.l10n.ownerMarkAsRented)),
+                PopupMenuItem(
+                    value: 'sold', child: Text(context.l10n.ownerMarkAsSold)),
+                PopupMenuItem(
+                    value: 'archived', child: Text(context.l10n.archive)),
+                PopupMenuItem(value: 'delete', child: Text(context.l10n.delete)),
               ],
             ),
           ],

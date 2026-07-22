@@ -26,9 +26,9 @@ class CompareButton extends ConsumerWidget {
     if (!isAuthed) {
       return IconButton(
         icon: const Icon(Icons.compare_arrows_rounded, color: AppColors.ink),
-        tooltip: 'Compare',
+        tooltip: context.l10n.compareTitle,
         onPressed: () {
-          context.showSnack('Log in to compare properties.');
+          context.showSnack(context.l10n.compareLogInToCompare);
           context.push(AppRoutes.login);
         },
       );
@@ -42,13 +42,17 @@ class CompareButton extends ConsumerWidget {
         Icons.compare_arrows_rounded,
         color: isIn ? AppColors.primary : AppColors.ink,
       ),
-      tooltip: isIn ? 'Remove from compare' : 'Add to compare',
+      tooltip: isIn
+          ? context.l10n.compareRemoveFromCompare
+          : context.l10n.compareAddToCompare,
       onPressed: () async {
         try {
           final added =
               await ref.read(compareViewModelProvider.notifier).toggle(property);
           if (!context.mounted) return;
-          context.showSnack(added ? 'Added to compare' : 'Removed from compare');
+          context.showSnack(added
+              ? context.l10n.compareAddedToCompare
+              : context.l10n.compareRemovedFromCompare);
         } on ApiException catch (e) {
           if (!context.mounted) return;
           context.showSnack(e.message, error: true);

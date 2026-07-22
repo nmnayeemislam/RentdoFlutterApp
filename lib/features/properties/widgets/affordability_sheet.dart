@@ -75,20 +75,24 @@ class _AffordabilitySheetState extends State<AffordabilitySheet> {
                     AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.xl),
                 children: [
                   Text(
-                    _isSale ? 'Mortgage calculator' : 'Rent calculator',
+                    _isSale
+                        ? context.l10n.propertyMortgageCalculator
+                        : context.l10n.propertyRentCalculator,
                     style: AppTextStyles.headingLg,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _isSale
-                        ? 'Estimate your monthly repayment.'
-                        : 'Estimate your move-in cost and income guideline.',
+                        ? context.l10n.affordEstimateRepayment
+                        : context.l10n.affordEstimateMoveIn,
                     style: AppTextStyles.bodyMd
                         .copyWith(color: AppColors.textSecondary),
                   ),
                   AppSpacing.vGapXl,
                   _AmountField(
-                    label: _isSale ? 'Property price' : 'Monthly rent',
+                    label: _isSale
+                        ? context.l10n.affordPropertyPrice
+                        : context.l10n.affordMonthlyRent,
                     controller: _amount,
                     currency: _currency,
                     onChanged: () => setState(() {}),
@@ -111,7 +115,7 @@ class _AffordabilitySheetState extends State<AffordabilitySheet> {
   // --------------------------------------------------------------------------
   List<Widget> _saleInputs() => [
         _SliderRow(
-          label: 'Down payment',
+          label: context.l10n.affordDownPayment,
           valueLabel: '${_downPct.round()}%',
           value: _downPct,
           min: 0,
@@ -120,7 +124,7 @@ class _AffordabilitySheetState extends State<AffordabilitySheet> {
           onChanged: (v) => setState(() => _downPct = v),
         ),
         _SliderRow(
-          label: 'Interest rate',
+          label: context.l10n.affordInterestRate,
           valueLabel: '${_rate.toStringAsFixed(2)}%',
           value: _rate,
           min: 1,
@@ -129,8 +133,8 @@ class _AffordabilitySheetState extends State<AffordabilitySheet> {
           onChanged: (v) => setState(() => _rate = v),
         ),
         _SliderRow(
-          label: 'Loan tenure',
-          valueLabel: '${_years.round()} yr',
+          label: context.l10n.affordLoanTenure,
+          valueLabel: '${_years.round()} ${context.l10n.affordYr}',
           value: _years,
           min: 1,
           max: 30,
@@ -155,14 +159,16 @@ class _AffordabilitySheetState extends State<AffordabilitySheet> {
     final totalInterest = totalPayable - principal;
 
     return _ResultPanel(
-      headline: 'Monthly payment',
+      headline: context.l10n.affordMonthlyPayment,
       headlineValue: Formatters.money(emi.round(), currency: _currency),
       rows: [
-        ('Down payment', Formatters.money(downAmount.round(), currency: _currency)),
-        ('Loan amount', Formatters.money(principal.round(), currency: _currency)),
-        ('Total interest',
+        (context.l10n.affordDownPayment,
+            Formatters.money(downAmount.round(), currency: _currency)),
+        (context.l10n.affordLoanAmount,
+            Formatters.money(principal.round(), currency: _currency)),
+        (context.l10n.affordTotalInterest,
             Formatters.money(totalInterest.round(), currency: _currency)),
-        ('Total payable',
+        (context.l10n.affordTotalPayable,
             Formatters.money(totalPayable.round(), currency: _currency)),
       ],
     );
@@ -173,10 +179,10 @@ class _AffordabilitySheetState extends State<AffordabilitySheet> {
   // --------------------------------------------------------------------------
   List<Widget> _rentInputs() => [
         _SliderRow(
-          label: 'Advance / deposit',
+          label: context.l10n.affordAdvanceDeposit,
           valueLabel: _advanceMonths.round() == 1
-              ? '1 month'
-              : '${_advanceMonths.round()} months',
+              ? context.l10n.affordMonthSingular
+              : context.l10n.affordMonthsPlural(_advanceMonths.round()),
           value: _advanceMonths,
           min: 0,
           max: 12,
@@ -194,17 +200,17 @@ class _AffordabilitySheetState extends State<AffordabilitySheet> {
     final recommendedIncome = rent / 0.30;
 
     return _ResultPanel(
-      headline: 'Move-in cost',
+      headline: context.l10n.affordMoveInCost,
       headlineValue: Formatters.money(moveIn.round(), currency: _currency),
       rows: [
-        ('Deposit (${_advanceMonths.round()} mo)',
+        (context.l10n.affordDepositMo(_advanceMonths.round()),
             Formatters.money(deposit.round(), currency: _currency)),
-        ('First month rent',
+        (context.l10n.affordFirstMonthRent,
             Formatters.money(rent.round(), currency: _currency)),
         if (serviceCharge > 0)
-          ('Service charge',
+          (context.l10n.propertyServiceCharge,
               Formatters.money(serviceCharge.round(), currency: _currency)),
-        ('Suggested income /mo',
+        (context.l10n.affordSuggestedIncome,
             Formatters.money(recommendedIncome.round(), currency: _currency)),
       ],
     );
@@ -359,7 +365,7 @@ class _ResultPanel extends StatelessWidget {
             ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Estimates only. Actual figures may vary.',
+            context.l10n.affordEstimatesDisclaimer,
             style: AppTextStyles.caption
                 .copyWith(color: Colors.white.withValues(alpha: 0.6)),
           ),

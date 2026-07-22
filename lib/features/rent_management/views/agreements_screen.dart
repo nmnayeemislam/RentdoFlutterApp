@@ -24,15 +24,15 @@ class AgreementsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agreements'),
+        title: Text(context.l10n.rentAgreements),
         actions: [
           TextButton(
             onPressed: () => unawaited(_TemplatesSheet.show(context)),
-            child: const Text('Templates'),
+            child: Text(context.l10n.rentTemplates),
           ),
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'Generate agreement',
+            tooltip: context.l10n.rentGenerateAgreement,
             onPressed: () => unawaited(_GenerateAgreementSheet.show(context)),
           ),
         ],
@@ -45,10 +45,10 @@ class AgreementsScreen extends ConsumerWidget {
             ),
             data: (agreements) {
               if (agreements.isEmpty) {
-                return const EmptyState(
+                return EmptyState(
                   icon: Icons.description_outlined,
-                  title: 'No agreements yet',
-                  subtitle: 'Generate one from a tenancy and template.',
+                  title: context.l10n.rentNoAgreementsYet,
+                  subtitle: context.l10n.rentAgreementsEmptyDesc,
                 );
               }
               return ListView.separated(
@@ -89,7 +89,7 @@ class _AgreementCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Agreement #${agreement.id}',
+                  context.l10n.rentAgreementFallback(agreement.id),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.titleMd,
@@ -214,11 +214,11 @@ class _TemplatesSheetState extends ConsumerState<_TemplatesSheet> {
     final name = _name.text.trim();
     final body = _body.text.trim();
     if (name.isEmpty) {
-      context.showSnack('Enter a template name', error: true);
+      context.showSnack(context.l10n.rentEnterTemplateName, error: true);
       return;
     }
     if (body.isEmpty) {
-      context.showSnack('Enter the template body', error: true);
+      context.showSnack(context.l10n.rentEnterTemplateBody, error: true);
       return;
     }
     setState(() => _submitting = true);
@@ -236,7 +236,7 @@ class _TemplatesSheetState extends ConsumerState<_TemplatesSheet> {
         _isDefault = false;
         _submitting = false;
       });
-      context.showSnack('Template created');
+      context.showSnack(context.l10n.rentTemplateCreated);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
@@ -249,7 +249,7 @@ class _TemplatesSheetState extends ConsumerState<_TemplatesSheet> {
       await ref.read(rentManagementServiceProvider).deleteAgreementTemplate(id);
       ref.invalidate(agreementTemplatesProvider);
       if (!mounted) return;
-      context.showSnack('Template deleted');
+      context.showSnack(context.l10n.rentTemplateDeleted);
     } on ApiException catch (e) {
       if (!mounted) return;
       context.showSnack(e.message, error: true);
@@ -272,7 +272,8 @@ class _TemplatesSheetState extends ConsumerState<_TemplatesSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Agreement templates', style: AppTextStyles.headingMd),
+            Text(context.l10n.rentAgreementTemplates,
+                style: AppTextStyles.headingMd),
             AppSpacing.vGapLg,
             templates.when(
               loading: () => const LoadingWidget(),
@@ -282,8 +283,8 @@ class _TemplatesSheetState extends ConsumerState<_TemplatesSheet> {
               ),
               data: (items) {
                 if (items.isEmpty) {
-                  return const Text(
-                    'No templates yet. Create your first one below.',
+                  return Text(
+                    context.l10n.rentNoTemplatesYet,
                     style: AppTextStyles.bodySm,
                   );
                 }
@@ -320,7 +321,7 @@ class _TemplatesSheetState extends ConsumerState<_TemplatesSheet> {
                               Icons.delete_outline,
                               color: AppColors.error,
                             ),
-                            tooltip: 'Delete template',
+                            tooltip: context.l10n.rentDeleteTemplate,
                             onPressed: () => unawaited(_delete(template.id)),
                           ),
                         ],
@@ -331,17 +332,17 @@ class _TemplatesSheetState extends ConsumerState<_TemplatesSheet> {
               },
             ),
             AppSpacing.vGapXl,
-            const Text('New template', style: AppTextStyles.titleMd),
+            Text(context.l10n.rentNewTemplate, style: AppTextStyles.titleMd),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Name',
-              hint: 'e.g. Standard 12-month lease',
+              label: context.l10n.name,
+              hint: context.l10n.rentTemplateNameHint,
               controller: _name,
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Body',
-              hint: 'The agreement text',
+              label: context.l10n.rentBody,
+              hint: context.l10n.rentTemplateBodyHint,
               controller: _body,
               maxLines: 5,
             ),
@@ -350,12 +351,12 @@ class _TemplatesSheetState extends ConsumerState<_TemplatesSheet> {
               contentPadding: EdgeInsets.zero,
               value: _isDefault,
               activeThumbColor: AppColors.primary,
-              title: const Text('Is default', style: AppTextStyles.titleSm),
+              title: Text(context.l10n.rentIsDefault, style: AppTextStyles.titleSm),
               onChanged: (v) => setState(() => _isDefault = v),
             ),
             AppSpacing.vGapMd,
             PrimaryButton(
-              label: 'Create template',
+              label: context.l10n.rentCreateTemplate,
               isLoading: _submitting,
               onPressed: _create,
             ),
@@ -381,7 +382,7 @@ class _DefaultChip extends StatelessWidget {
         borderRadius: AppRadius.brPill,
       ),
       child: Text(
-        'Default',
+        context.l10n.rentDefault,
         style: AppTextStyles.caption.copyWith(
           color: AppColors.success,
           fontWeight: FontWeight.w600,
@@ -418,11 +419,11 @@ class _GenerateAgreementSheetState
     final tenancyId = _tenancyId;
     final templateId = _templateId;
     if (tenancyId == null) {
-      context.showSnack('Choose a tenancy', error: true);
+      context.showSnack(context.l10n.rentChooseTenancy, error: true);
       return;
     }
     if (templateId == null) {
-      context.showSnack('Choose a template', error: true);
+      context.showSnack(context.l10n.rentChooseTemplate, error: true);
       return;
     }
     setState(() => _submitting = true);
@@ -434,7 +435,7 @@ class _GenerateAgreementSheetState
       ref.invalidate(agreementsProvider);
       if (!mounted) return;
       Navigator.pop(context);
-      context.showSnack('Agreement generated');
+      context.showSnack(context.l10n.rentAgreementGenerated);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
@@ -459,7 +460,8 @@ class _GenerateAgreementSheetState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Generate agreement', style: AppTextStyles.headingMd),
+            Text(context.l10n.rentGenerateAgreement,
+                style: AppTextStyles.headingMd),
             AppSpacing.vGapLg,
             tenancies.when(
               loading: () => const LoadingWidget(),
@@ -469,12 +471,14 @@ class _GenerateAgreementSheetState
               ),
               data: (items) => DropdownButtonFormField<int>(
                 initialValue: _tenancyId,
-                decoration: const InputDecoration(labelText: 'Tenancy'),
+                decoration:
+                    InputDecoration(labelText: context.l10n.rentTenancyLabel),
                 items: [
                   for (final t in items)
                     DropdownMenuItem(
                       value: t.id,
-                      child: Text(t.tenantName ?? 'Tenancy #${t.id}'),
+                      child: Text(t.tenantName ??
+                          context.l10n.rentTenancyFallback(t.id)),
                     ),
                 ],
                 onChanged: (v) => setState(() => _tenancyId = v),
@@ -489,7 +493,8 @@ class _GenerateAgreementSheetState
               ),
               data: (items) => DropdownButtonFormField<int>(
                 initialValue: _templateId,
-                decoration: const InputDecoration(labelText: 'Template'),
+                decoration:
+                    InputDecoration(labelText: context.l10n.rentTemplateLabel),
                 items: [
                   for (final t in items)
                     DropdownMenuItem(value: t.id, child: Text(t.name)),
@@ -499,7 +504,7 @@ class _GenerateAgreementSheetState
             ),
             AppSpacing.vGapXl,
             PrimaryButton(
-              label: 'Generate',
+              label: context.l10n.generate,
               isLoading: _submitting,
               onPressed: _submit,
             ),

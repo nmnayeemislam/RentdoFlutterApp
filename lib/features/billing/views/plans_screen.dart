@@ -29,7 +29,7 @@ class PlansScreen extends ConsumerWidget {
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Membership')),
+      appBar: AppBar(title: Text(context.l10n.billingMembershipTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ListView(
@@ -49,7 +49,9 @@ class _CurrentSubscription extends ConsumerWidget {
   Future<void> _cancel(BuildContext context, WidgetRef ref) async {
     try {
       await ref.read(billingActionsProvider.notifier).cancel();
-      if (context.mounted) context.showSnack('Subscription cancelled');
+      if (context.mounted) {
+        context.showSnack(context.l10n.billingSubscriptionCancelled);
+      }
     } on ApiException catch (e) {
       if (context.mounted) context.showSnack(e.message, error: true);
     }
@@ -79,7 +81,7 @@ class _CurrentSubscription extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      sub.planName ?? 'Your plan',
+                      sub.planName ?? context.l10n.billingYourPlan,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.titleMd,
@@ -92,14 +94,16 @@ class _CurrentSubscription extends ConsumerWidget {
               const SizedBox(height: AppSpacing.sm),
               _InfoRow(
                 icon: Icons.event_available_rounded,
-                label: '${sub.autoRenew ? 'Renews' : 'Ends'} '
+                label: '${sub.autoRenew ? context.l10n.billingRenews : context.l10n.billingEnds} '
                     '${Formatters.date(sub.endsAt)}',
               ),
               const SizedBox(height: AppSpacing.xs),
               _InfoRow(
                 icon: Icons.article_outlined,
-                label:
-                    'Posts used ${sub.postsUsed}/${sub.postsLimit ?? '∞'}',
+                label: context.l10n.billingPostsUsedOf(
+                  '${sub.postsUsed}',
+                  sub.postsLimit?.toString() ?? '∞',
+                ),
               ),
               Align(
                 alignment: Alignment.centerRight,
@@ -112,7 +116,7 @@ class _CurrentSubscription extends ConsumerWidget {
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.error,
                   ),
-                  child: const Text('Cancel plan'),
+                  child: Text(context.l10n.billingCancelPlan),
                 ),
               ),
             ],
@@ -144,10 +148,10 @@ class _PlanList extends ConsumerWidget {
       ),
       data: (items) {
         if (items.isEmpty) {
-          return const EmptyState(
+          return EmptyState(
             icon: Icons.workspace_premium_outlined,
-            title: 'No plans available',
-            subtitle: 'Check back later for membership options.',
+            title: context.l10n.billingNoPlansAvailable,
+            subtitle: context.l10n.billingCheckBackLaterPlans,
           );
         }
         return Column(
@@ -172,10 +176,12 @@ class _PlanCard extends ConsumerWidget {
   final PlanModel plan;
   final bool isCurrent;
 
-  String get _priceLine => plan.isFree
-      ? 'Free'
-      : '${Formatters.money(plan.price, currency: plan.currency)} '
-          '/ ${plan.durationDays} days';
+  String _priceLine(BuildContext context) => plan.isFree
+      ? context.l10n.billingFree
+      : context.l10n.billingPriceDuration(
+          Formatters.money(plan.price, currency: plan.currency),
+          plan.durationDays,
+        );
 
   String _capitalize(String value) => value.isEmpty
       ? value
@@ -190,22 +196,23 @@ class _PlanCard extends ConsumerWidget {
       final code = await showDialog<String>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('Have a coupon?'),
+          title: Text(context.l10n.billingHaveCoupon),
           content: TextField(
             controller: controller,
             autofocus: true,
             textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(hintText: 'Coupon code (optional)'),
+            decoration:
+                InputDecoration(hintText: context.l10n.billingCouponHint),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, ''),
-              child: const Text('Skip'),
+              child: Text(context.l10n.skip),
             ),
             TextButton(
               onPressed: () =>
                   Navigator.pop(dialogContext, controller.text.trim()),
-              child: const Text('Apply'),
+              child: Text(context.l10n.apply),
             ),
           ],
         ),
@@ -218,12 +225,16 @@ class _PlanCard extends ConsumerWidget {
           );
       if (!context.mounted) return null;
       if (!result.valid) {
-        context.showSnack(result.message ?? 'Invalid coupon', error: true);
+        context.showSnack(
+          result.message ?? context.l10n.billingInvalidCoupon,
+          error: true,
+        );
         return null;
       }
       context.showSnack(result.discount != null
-          ? 'Coupon applied — you save ${Formatters.money(result.discount, currency: plan.currency)}'
-          : 'Coupon applied');
+          ? context.l10n.billingCouponAppliedSavings(
+              Formatters.money(result.discount, currency: plan.currency))
+          : context.l10n.billingCouponApplied);
       return code;
     } on ApiException catch (e) {
       if (context.mounted) context.showSnack(e.message, error: true);
@@ -243,7 +254,9 @@ class _PlanCard extends ConsumerWidget {
       await ref
           .read(billingActionsProvider.notifier)
           .subscribe(plan.id, couponCode: coupon);
-      if (context.mounted) context.showSnack('Subscribed to ${plan.name}');
+      if (context.mounted) {
+        context.showSnack(context.l10n.billingSubscribedTo(plan.name));
+      }
     } on ApiException catch (e) {
       if (context.mounted) context.showSnack(e.message, error: true);
     }
@@ -289,7 +302,7 @@ class _PlanCard extends ConsumerWidget {
                     borderRadius: AppRadius.brPill,
                   ),
                   child: Text(
-                    'Popular',
+                    context.l10n.billingPopular,
                     style: AppTextStyles.caption.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -301,13 +314,13 @@ class _PlanCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            _priceLine,
+            _priceLine(context),
             style: AppTextStyles.price,
           ),
           if (plan.postLimitLabel != null) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(
-              '${plan.postLimitLabel} listings',
+              context.l10n.billingListingsCount(plan.postLimitLabel!),
               style: AppTextStyles.bodySm,
             ),
           ],
@@ -348,9 +361,9 @@ class _PlanCard extends ConsumerWidget {
                     borderRadius: AppRadius.brMd,
                   ),
                 ),
-                child: const Text(
-                  'Current plan',
-                  style: TextStyle(
+                child: Text(
+                  context.l10n.billingCurrentPlan,
+                  style: const TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w700,
                   ),
@@ -359,7 +372,9 @@ class _PlanCard extends ConsumerWidget {
             )
           else
             PrimaryButton(
-              label: plan.isFree ? 'Choose Free' : 'Subscribe',
+              label: plan.isFree
+                  ? context.l10n.billingChooseFree
+                  : context.l10n.billingSubscribe,
               isLoading: submitting,
               onPressed: submitting
                   ? null
@@ -441,12 +456,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.workspace_premium_outlined,
-      title: 'Sign in to view memberships',
-      subtitle: 'Log in to subscribe to a membership plan.',
+      title: context.l10n.billingSignInToViewMemberships,
+      subtitle: context.l10n.billingLogInToSubscribe,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

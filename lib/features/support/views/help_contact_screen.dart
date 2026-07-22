@@ -43,7 +43,9 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
 
   Future<void> _launch(Uri uri) async {
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (mounted) context.showSnack('Could not open ${uri.scheme}', error: true);
+      if (mounted) {
+        context.showSnack(context.l10n.supportCouldNotOpen(uri.scheme), error: true);
+      }
     }
   }
 
@@ -63,11 +65,10 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
       _email.clear();
       _subject.clear();
       _message.clear();
-      context.showSnack("Thanks for reaching out. We'll get back to you shortly.");
+      context.showSnack(context.l10n.supportThanksMessage);
     } catch (_) {
       if (mounted) {
-        context.showSnack('Could not send your message. Please try again.',
-            error: true);
+        context.showSnack(context.l10n.supportCouldNotSend, error: true);
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -80,15 +81,15 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
     final faqs = ref.watch(faqsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Help & Contact')),
+      appBar: AppBar(title: Text(context.l10n.helpContactTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            const Text('Get in touch', style: AppTextStyles.headingMd),
+            Text(context.l10n.supportGetInTouch, style: AppTextStyles.headingMd),
             const SizedBox(height: 4),
             Text(
-              'We usually respond within one business day.',
+              context.l10n.supportRespondDesc,
               style:
                   AppTextStyles.bodySm.copyWith(color: AppColors.textSecondary),
             ),
@@ -98,28 +99,28 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
             if (site?.email != null && site!.email!.isNotEmpty)
               _ContactTile(
                 icon: Icons.email_outlined,
-                title: 'Email us',
+                title: context.l10n.supportEmailUs,
                 subtitle: site.email!,
                 onTap: () => _launch(Uri(scheme: 'mailto', path: site.email)),
               ),
             if (site?.phone != null && site!.phone!.isNotEmpty)
               _ContactTile(
                 icon: Icons.call_outlined,
-                title: 'Call us',
+                title: context.l10n.supportCallUs,
                 subtitle: site.phone!,
                 onTap: () => _launch(Uri(scheme: 'tel', path: site.phone)),
               ),
             if (site?.address != null && site!.address!.isNotEmpty)
               _ContactTile(
                 icon: Icons.location_on_outlined,
-                title: 'Visit us',
+                title: context.l10n.supportVisitUs,
                 subtitle: site.address!,
               ),
 
             AppSpacing.vGapXl,
 
             // ── Contact form ─────────────────────────────────────────────────
-            const Text('Send us a message', style: AppTextStyles.titleMd),
+            Text(context.l10n.supportSendMessage, style: AppTextStyles.titleMd),
             AppSpacing.vGapMd,
             Form(
               key: _formKey,
@@ -128,7 +129,8 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
                   TextFormField(
                     controller: _name,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'Your name'),
+                    decoration:
+                        InputDecoration(labelText: context.l10n.supportYourName),
                     validator: (v) => Validators.required(v, field: 'Name'),
                   ),
                   AppSpacing.vGapMd,
@@ -136,14 +138,15 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
                     controller: _email,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'Email'),
+                    decoration: InputDecoration(labelText: context.l10n.email),
                     validator: Validators.email,
                   ),
                   AppSpacing.vGapMd,
                   TextFormField(
                     controller: _subject,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'Subject'),
+                    decoration:
+                        InputDecoration(labelText: context.l10n.supportSubject),
                     validator: (v) => Validators.required(v, field: 'Subject'),
                   ),
                   AppSpacing.vGapMd,
@@ -151,15 +154,15 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
                     controller: _message,
                     minLines: 4,
                     maxLines: 8,
-                    decoration: const InputDecoration(
-                      labelText: 'Message',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.supportMessage,
                       alignLabelWithHint: true,
                     ),
                     validator: (v) => Validators.required(v, field: 'Message'),
                   ),
                   AppSpacing.vGapLg,
                   PrimaryButton(
-                    label: 'Send message',
+                    label: context.l10n.supportSendMessageBtn,
                     icon: Icons.send_rounded,
                     isLoading: _submitting,
                     onPressed: _submit,
@@ -183,11 +186,11 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
             AppSpacing.vGapSm,
             TextButton(
               onPressed: () => context.push(AppRoutes.privacyPolicy),
-              child: const Text('Privacy Policy'),
+              child: Text(context.l10n.profilePrivacyPolicy),
             ),
             TextButton(
               onPressed: () => context.push(AppRoutes.termsConditions),
-              child: const Text('Terms & Conditions'),
+              child: Text(context.l10n.profileTermsConditions),
             ),
           ],
         ),
@@ -251,7 +254,7 @@ class _FaqBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Frequently asked questions', style: AppTextStyles.titleMd),
+        Text(context.l10n.supportFaqTitle, style: AppTextStyles.titleMd),
         AppSpacing.vGapMd,
         Container(
           decoration: BoxDecoration(

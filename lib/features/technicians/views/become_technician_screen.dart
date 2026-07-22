@@ -52,7 +52,7 @@ class _BecomeTechnicianScreenState
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final categoryId = _categoryId;
     if (categoryId == null) {
-      context.showSnack('Choose a category', error: true);
+      context.showSnack(context.l10n.technicianChooseCategory, error: true);
       return;
     }
     final bio = _bio.text.trim();
@@ -66,7 +66,7 @@ class _BecomeTechnicianScreenState
             hourlyRate: num.tryParse(_hourlyRate.text.trim()),
           );
       if (!mounted) return;
-      context.showSnack("Application submitted — we'll review it shortly");
+      context.showSnack(context.l10n.technicianApplicationSubmitted);
       context.pop();
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -81,7 +81,7 @@ class _BecomeTechnicianScreenState
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Become a Technician')),
+      appBar: AppBar(title: Text(context.l10n.technicianBecomeTitle)),
       body: !isAuthed ? const _GuestPrompt() : _buildForm(),
     );
   }
@@ -96,13 +96,13 @@ class _BecomeTechnicianScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Tell us about your work',
+            Text(
+              context.l10n.technicianTellUsTitle,
               style: AppTextStyles.headingMd,
             ),
             AppSpacing.vGapSm,
-            const Text(
-              'We review every application before your profile goes live.',
+            Text(
+              context.l10n.technicianReviewDesc,
               style: AppTextStyles.bodySm,
             ),
             AppSpacing.vGapXl,
@@ -114,47 +114,48 @@ class _BecomeTechnicianScreenState
               ),
               data: (items) => DropdownButtonFormField<int>(
                 initialValue: _categoryId,
-                decoration: const InputDecoration(labelText: 'Category'),
+                decoration: InputDecoration(labelText: context.l10n.category),
                 items: [
                   for (final c in items)
                     DropdownMenuItem(value: c.id, child: Text(c.name)),
                 ],
-                validator: (v) => v == null ? 'Choose a category' : null,
+                validator: (v) =>
+                    v == null ? context.l10n.technicianChooseCategory : null,
                 onChanged: (v) => setState(() => _categoryId = v),
               ),
             ),
             AppSpacing.vGapLg,
             AppTextField(
-              label: 'Bio',
-              hint: 'A short intro about your experience',
+              label: context.l10n.bio,
+              hint: context.l10n.technicianBioHint,
               controller: _bio,
               maxLines: 3,
             ),
             AppSpacing.vGapLg,
             AppTextField(
-              label: 'Skills',
-              hint: 'Comma separated, e.g. Plumbing, Wiring',
+              label: context.l10n.skills,
+              hint: context.l10n.technicianSkillsHint,
               controller: _skills,
             ),
             AppSpacing.vGapLg,
             AppTextField(
-              label: 'Experience (years)',
-              hint: 'e.g. 5',
+              label: context.l10n.technicianExperienceYears,
+              hint: context.l10n.technicianExperienceHint,
               controller: _experience,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             AppSpacing.vGapLg,
             AppTextField(
-              label: 'Hourly rate',
-              hint: 'Your rate per hour',
+              label: context.l10n.technicianHourlyRate,
+              hint: context.l10n.technicianRateHint,
               controller: _hourlyRate,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             AppSpacing.vGapXxl,
             PrimaryButton(
-              label: 'Submit application',
+              label: context.l10n.technicianSubmitApplication,
               isLoading: _submitting,
               onPressed: _submit,
             ),
@@ -172,12 +173,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.handyman_outlined,
-      title: 'Sign in to apply',
-      subtitle: 'Log in to send us your technician application.',
+      title: context.l10n.technicianSignInToApply,
+      subtitle: context.l10n.technicianLogInToApply,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

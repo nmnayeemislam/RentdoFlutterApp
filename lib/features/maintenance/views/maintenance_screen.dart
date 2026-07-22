@@ -27,7 +27,7 @@ class MaintenanceScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Maintenance'),
+        title: Text(context.l10n.maintenanceTitle),
         actions: [
           if (isAuthed)
             IconButton(
@@ -39,12 +39,12 @@ class MaintenanceScreen extends ConsumerWidget {
       body: !isAuthed
           ? EmptyState(
               icon: Icons.build_outlined,
-              title: 'Sign in for maintenance',
-              subtitle: 'Log in to raise and track maintenance requests.',
+              title: context.l10n.maintenanceSignInTitle,
+              subtitle: context.l10n.maintenanceLogInDesc,
               action: SizedBox(
                 width: 200,
                 child: PrimaryButton(
-                  label: 'Log in',
+                  label: context.l10n.login,
                   onPressed: () => context.push(AppRoutes.login),
                 ),
               ),
@@ -58,10 +58,10 @@ class MaintenanceScreen extends ConsumerWidget {
                 ),
                 data: (items) {
                   if (items.isEmpty) {
-                    return const EmptyState(
+                    return EmptyState(
                       icon: Icons.build_outlined,
-                      title: 'No maintenance requests',
-                      subtitle: 'Tap + to raise an issue for a property.',
+                      title: context.l10n.maintenanceNoRequests,
+                      subtitle: context.l10n.maintenanceTapPlusDesc,
                     );
                   }
                   return RefreshIndicator(
@@ -144,7 +144,8 @@ class _RequestCard extends StatelessWidget {
           Row(
             children: [
               if (request.priority != null)
-                Text('Priority: ${request.priority}',
+                Text(
+                    context.l10n.maintenancePriorityLabel(request.priority!),
                     style: AppTextStyles.caption),
               const Spacer(),
               Text(Formatters.relative(request.createdAt),
@@ -188,11 +189,11 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
   Future<void> _submit() async {
     final listingId = int.tryParse(_listingId.text.trim());
     if (listingId == null || listingId <= 0) {
-      context.showSnack('Enter a valid listing ID', error: true);
+      context.showSnack(context.l10n.maintenanceEnterValidListingId, error: true);
       return;
     }
     if (_title.text.trim().isEmpty || _description.text.trim().isEmpty) {
-      context.showSnack('Add a title and description', error: true);
+      context.showSnack(context.l10n.maintenanceAddTitleDesc, error: true);
       return;
     }
     setState(() => _submitting = true);
@@ -205,7 +206,7 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
           );
       if (!mounted) return;
       Navigator.pop(context);
-      context.showSnack('Request submitted');
+      context.showSnack(context.l10n.maintenanceRequestSubmitted);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
@@ -226,43 +227,51 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Raise an issue', style: AppTextStyles.headingMd),
+          Text(context.l10n.maintenanceRaiseIssue,
+              style: AppTextStyles.headingMd),
           AppSpacing.vGapLg,
           AppTextField(
-            label: 'Listing ID',
-            hint: 'The property this relates to',
+            label: context.l10n.maintenanceListingId,
+            hint: context.l10n.maintenanceListingIdHint,
             controller: _listingId,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: 'Title',
-            hint: 'e.g. Leaking tap',
+            label: context.l10n.maintenanceTitleLabel,
+            hint: context.l10n.maintenanceTitleHint,
             controller: _title,
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: 'Description',
-            hint: 'Describe the problem',
+            label: context.l10n.description,
+            hint: context.l10n.maintenanceDescribeHint,
             controller: _description,
             maxLines: 3,
           ),
           AppSpacing.vGapLg,
           DropdownButtonFormField<String>(
             initialValue: _priority,
-            decoration: const InputDecoration(labelText: 'Priority'),
-            items: const [
-              DropdownMenuItem(value: 'low', child: Text('Low')),
-              DropdownMenuItem(value: 'normal', child: Text('Normal')),
-              DropdownMenuItem(value: 'high', child: Text('High')),
-              DropdownMenuItem(value: 'urgent', child: Text('Urgent')),
+            decoration: InputDecoration(labelText: context.l10n.priority),
+            items: [
+              DropdownMenuItem(
+                  value: 'low', child: Text(context.l10n.maintenancePriorityLow)),
+              DropdownMenuItem(
+                  value: 'normal',
+                  child: Text(context.l10n.maintenancePriorityNormal)),
+              DropdownMenuItem(
+                  value: 'high',
+                  child: Text(context.l10n.maintenancePriorityHigh)),
+              DropdownMenuItem(
+                  value: 'urgent',
+                  child: Text(context.l10n.maintenancePriorityUrgent)),
             ],
             onChanged: (v) => setState(() => _priority = v ?? 'normal'),
           ),
           AppSpacing.vGapXl,
           PrimaryButton(
-            label: 'Submit request',
+            label: context.l10n.submitRequest,
             isLoading: _submitting,
             onPressed: _submit,
           ),

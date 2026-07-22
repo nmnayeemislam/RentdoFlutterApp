@@ -25,7 +25,7 @@ class UsageLimitsScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Usage & Limits')),
+      appBar: AppBar(title: Text(context.l10n.accountUsageLimitsTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ref.watch(usageLimitsProvider).when(
@@ -41,12 +41,12 @@ class UsageLimitsScreen extends ConsumerWidget {
                     children: [
                       _PostsCard(limits: limits),
                       AppSpacing.vGapXl,
-                      const Text('Plan features',
+                      Text(context.l10n.accountPlanFeatures,
                           style: AppTextStyles.headingMd),
                       AppSpacing.vGapMd,
                       if (gates.isEmpty)
-                        const Text(
-                          'No plan features to show.',
+                        Text(
+                          context.l10n.accountNoPlanFeatures,
                           style: AppTextStyles.bodyMd,
                         )
                       else
@@ -110,7 +110,7 @@ class _PostsCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Posts used',
+                  context.l10n.accountPostsUsed,
                   style: AppTextStyles.titleMd.copyWith(color: Colors.white),
                 ),
               ),
@@ -133,9 +133,9 @@ class _PostsCard extends StatelessWidget {
           AppSpacing.vGapSm,
           Text(
             isUnlimited
-                ? 'Unlimited'
+                ? context.l10n.accountUnlimited
                 : '${limits.postsRemaining ?? (limit - limits.postsUsed)} '
-                    'remaining',
+                    '${context.l10n.accountRemainingSuffix}',
             style: AppTextStyles.bodySm.copyWith(color: Colors.white),
           ),
         ],
@@ -183,12 +183,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.speed_rounded,
-      title: 'Sign in to see your limits',
-      subtitle: 'Log in to track your posting usage and plan features.',
+      title: context.l10n.accountSignInToSeeLimits,
+      subtitle: context.l10n.accountLogInToTrackUsage,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

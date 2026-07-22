@@ -69,17 +69,17 @@ class _BookTechnicianSheetState extends ConsumerState<BookTechnicianSheet> {
     final description = _description.text.trim();
     final address = _address.text.trim();
     if (description.isEmpty || address.isEmpty) {
-      context.showSnack('Describe the job and enter an address', error: true);
+      context.showSnack(context.l10n.technicianDescribeJobAddress, error: true);
       return;
     }
     if (_date == null || _time == null) {
-      context.showSnack('Pick a date and time', error: true);
+      context.showSnack(context.l10n.technicianPickDateAndTime, error: true);
       return;
     }
     final when = DateTime(
         _date!.year, _date!.month, _date!.day, _time!.hour, _time!.minute);
     if (!when.isAfter(DateTime.now())) {
-      context.showSnack('Choose a future time', error: true);
+      context.showSnack(context.l10n.technicianChooseFutureTime, error: true);
       return;
     }
     setState(() => _submitting = true);
@@ -104,7 +104,7 @@ class _BookTechnicianSheetState extends ConsumerState<BookTechnicianSheet> {
   @override
   Widget build(BuildContext context) {
     final dtLabel = _date == null || _time == null
-        ? 'Select date & time'
+        ? context.l10n.technicianSelectDateTime
         : '${_date!.day}/${_date!.month}/${_date!.year}  ·  ${_time!.format(context)}';
 
     return Padding(
@@ -119,18 +119,18 @@ class _BookTechnicianSheetState extends ConsumerState<BookTechnicianSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Request a technician', style: AppTextStyles.headingMd),
+            Text(context.l10n.technicianRequestTitle, style: AppTextStyles.headingMd),
             AppSpacing.vGapLg,
             AppTextField(
-              label: 'What do you need done?',
-              hint: 'Describe the job',
+              label: context.l10n.technicianWhatNeedDone,
+              hint: context.l10n.technicianDescribeJobHint,
               controller: _description,
               maxLines: 3,
             ),
             AppSpacing.vGapLg,
             AppTextField(
-              label: 'Service address',
-              hint: 'Where should they come?',
+              label: context.l10n.technicianServiceAddress,
+              hint: context.l10n.technicianWhereComeHint,
               controller: _address,
               maxLines: 2,
             ),
@@ -162,13 +162,13 @@ class _BookTechnicianSheetState extends ConsumerState<BookTechnicianSheet> {
               contentPadding: EdgeInsets.zero,
               value: _urgent,
               activeThumbColor: AppColors.primary,
-              title: const Text('Mark as urgent',
+              title: Text(context.l10n.technicianMarkUrgent,
                   style: AppTextStyles.titleSm),
               onChanged: (v) => setState(() => _urgent = v),
             ),
             AppSpacing.vGapMd,
             PrimaryButton(
-              label: 'Send request',
+              label: context.l10n.technicianSendRequest,
               isLoading: _submitting,
               onPressed: _submit,
             ),

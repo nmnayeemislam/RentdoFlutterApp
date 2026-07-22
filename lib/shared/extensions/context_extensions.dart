@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Ergonomic accessors for theme, media query and simple feedback.
 extension BuildContextX on BuildContext {
   ThemeData get theme => Theme.of(this);
   ColorScheme get colors => Theme.of(this).colorScheme;
   TextTheme get texts => Theme.of(this).textTheme;
+
+  /// Translated strings for the active locale (see `lib/l10n/*.arb`).
+  AppLocalizations get l10n => AppLocalizations.of(this);
 
   Size get screenSize => MediaQuery.sizeOf(this);
   double get width => MediaQuery.sizeOf(this).width;

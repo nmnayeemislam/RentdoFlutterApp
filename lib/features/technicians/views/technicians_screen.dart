@@ -29,7 +29,7 @@ class _TechniciansScreenState extends ConsumerState<TechniciansScreen> {
     final technicians = ref.watch(techniciansProvider(_categoryId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Find a Technician')),
+      appBar: AppBar(title: Text(context.l10n.technicianFindTitle)),
       body: Column(
         children: [
           _CategoryBar(
@@ -47,9 +47,9 @@ class _TechniciansScreenState extends ConsumerState<TechniciansScreen> {
               ),
               data: (items) {
                 if (items.isEmpty) {
-                  return const EmptyState(
+                  return EmptyState(
                     icon: Icons.handyman_outlined,
-                    title: 'No technicians found',
+                    title: context.l10n.technicianNoneFound,
                   );
                 }
                 return ListView.separated(
@@ -78,7 +78,7 @@ class _CategoryBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = ref.watch(technicianCategoriesProvider);
-    final chips = <(int, String)>[(0, 'All')];
+    final chips = <(int, String)>[(0, context.l10n.all)];
     categories.whenData((items) {
       for (final c in items) {
         chips.add((c.id, c.name));
@@ -131,7 +131,7 @@ class _TechnicianCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final name = (technician.name != null && technician.name!.isNotEmpty)
         ? technician.name!
-        : 'Technician #${technician.id}';
+        : context.l10n.technicianFallback(technician.id);
     final rate = technician.hourlyRate;
 
     return GestureDetector(
@@ -198,7 +198,7 @@ class _TechnicianCard extends StatelessWidget {
                       if (rate != null) ...[
                         const SizedBox(width: AppSpacing.md),
                         Text(
-                          '${Formatters.money(rate)}/hr',
+                          '${Formatters.money(rate)}${context.l10n.technicianPerHour}',
                           style: AppTextStyles.titleSm.copyWith(
                             color: AppColors.primary,
                           ),
@@ -259,7 +259,7 @@ class _AvailabilityLabel extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Text(
-          isAvailable ? 'Available' : 'Busy',
+          isAvailable ? context.l10n.technicianAvailable : context.l10n.technicianBusy,
           style: AppTextStyles.caption.copyWith(
             color: color,
             fontWeight: FontWeight.w600,

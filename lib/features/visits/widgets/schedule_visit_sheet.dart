@@ -62,7 +62,7 @@ class _ScheduleVisitSheetState extends ConsumerState<ScheduleVisitSheet> {
 
   Future<void> _submit() async {
     if (_date == null || _time == null) {
-      context.showSnack('Pick a date and time', error: true);
+      context.showSnack(context.l10n.technicianPickDateAndTime, error: true);
       return;
     }
     final when = DateTime(
@@ -73,7 +73,7 @@ class _ScheduleVisitSheetState extends ConsumerState<ScheduleVisitSheet> {
       _time!.minute,
     );
     if (!when.isAfter(DateTime.now())) {
-      context.showSnack('Choose a future time', error: true);
+      context.showSnack(context.l10n.technicianChooseFutureTime, error: true);
       return;
     }
     setState(() => _submitting = true);
@@ -93,9 +93,10 @@ class _ScheduleVisitSheetState extends ConsumerState<ScheduleVisitSheet> {
   @override
   Widget build(BuildContext context) {
     final dateLabel = _date == null
-        ? 'Select date'
+        ? context.l10n.selectDate
         : '${_date!.day}/${_date!.month}/${_date!.year}';
-    final timeLabel = _time == null ? 'Select time' : _time!.format(context);
+    final timeLabel =
+        _time == null ? context.l10n.selectTime : _time!.format(context);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -108,7 +109,7 @@ class _ScheduleVisitSheetState extends ConsumerState<ScheduleVisitSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Schedule a visit', style: AppTextStyles.headingMd),
+          Text(context.l10n.visitScheduleTitle, style: AppTextStyles.headingMd),
           AppSpacing.vGapLg,
           Row(
             children: [
@@ -131,14 +132,14 @@ class _ScheduleVisitSheetState extends ConsumerState<ScheduleVisitSheet> {
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: 'Note (optional)',
-            hint: 'Anything the owner should know',
+            label: context.l10n.visitNoteOptional,
+            hint: context.l10n.visitNoteHint,
             controller: _note,
             maxLines: 3,
           ),
           AppSpacing.vGapXl,
           PrimaryButton(
-            label: 'Request visit',
+            label: context.l10n.visitRequestVisit,
             isLoading: _submitting,
             onPressed: _submit,
           ),

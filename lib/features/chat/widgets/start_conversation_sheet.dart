@@ -31,8 +31,8 @@ class StartConversationSheet extends ConsumerStatefulWidget {
 
 class _StartConversationSheetState
     extends ConsumerState<StartConversationSheet> {
-  final _message = TextEditingController(
-      text: 'Hi, I\'m interested in this property. Is it still available?');
+  late final _message =
+      TextEditingController(text: context.l10n.chatDefaultMessage);
   bool _submitting = false;
 
   @override
@@ -44,7 +44,7 @@ class _StartConversationSheetState
   Future<void> _send() async {
     final text = _message.text.trim();
     if (text.isEmpty) {
-      context.showSnack('Write a message first', error: true);
+      context.showSnack(context.l10n.chatWriteMessageFirst, error: true);
       return;
     }
     setState(() => _submitting = true);
@@ -73,16 +73,16 @@ class _StartConversationSheetState
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Message the owner', style: AppTextStyles.headingMd),
+          Text(context.l10n.chatMessageOwnerTitle, style: AppTextStyles.headingMd),
           AppSpacing.vGapLg,
           AppTextField(
             controller: _message,
             maxLines: 4,
-            hint: 'Your message',
+            hint: context.l10n.chatYourMessageHint,
           ),
           AppSpacing.vGapXl,
           PrimaryButton(
-            label: 'Send message',
+            label: context.l10n.supportSendMessageBtn,
             isLoading: _submitting,
             onPressed: _send,
           ),

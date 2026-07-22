@@ -89,8 +89,8 @@ class HomeScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SectionHeader(
-                  title: 'Categories',
-                  actionLabel: 'View all',
+                  title: context.l10n.homeCategories,
+                  actionLabel: context.l10n.viewAll,
                   onAction: () => _goToList(ref, context),
                 ),
               ),
@@ -102,9 +102,9 @@ class HomeScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SectionHeader(
-                  title: 'Featured Properties',
-                  subtitle: 'Hand-picked listings for you',
-                  actionLabel: 'View all',
+                  title: context.l10n.homeFeaturedProperties,
+                  subtitle: context.l10n.homeHandPickedDesc,
+                  actionLabel: context.l10n.viewAll,
                   onAction: () => _goToList(ref, context),
                 ),
               ),
@@ -117,11 +117,11 @@ class HomeScreen extends ConsumerWidget {
               ),
               AppSpacing.vGapXxl,
               const _BlogSection(),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SectionHeader(
-                  title: 'Property by Location',
-                  subtitle: 'Explore homes in top cities',
+                  title: context.l10n.homePropertyByLocation,
+                  subtitle: context.l10n.homeExploreTopCities,
                 ),
               ),
               AppSpacing.vGapMd,
@@ -168,16 +168,16 @@ class _UseMyLocationTileState extends ConsumerState<_UseMyLocationTile> {
                 PropertyFilter(zoneId: zone.id, zoneName: zone.displayName),
               ),
         );
-        context.showSnack('Showing properties near ${zone.name}');
+        context.showSnack(context.l10n.homeShowingNear(zone.name));
       } else {
-        context.showSnack('Showing properties near you');
+        context.showSnack(context.l10n.homeShowingNearYou);
       }
       context.go(AppRoutes.properties);
     } on LocationException catch (e) {
       if (mounted) context.showSnack(e.message, error: true);
     } catch (_) {
       if (mounted) {
-        context.showSnack('Could not get your location.', error: true);
+        context.showSnack(context.l10n.homeCouldNotGetLocation, error: true);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -213,7 +213,9 @@ class _UseMyLocationTileState extends ConsumerState<_UseMyLocationTile> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  _busy ? 'Finding properties near you…' : 'Use my current location',
+                  _busy
+                      ? context.l10n.homeFindingNearYou
+                      : context.l10n.homeUseMyLocation,
                   style: AppTextStyles.titleSm
                       .copyWith(color: AppColors.primary),
                 ),
@@ -262,10 +264,10 @@ class _CtaBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Not sure where to start?',
+                Text(context.l10n.homeNotSureTitle,
                     style: AppTextStyles.titleSm),
                 const SizedBox(height: 2),
-                Text('Let us help you find the perfect place.',
+                Text(context.l10n.homeNotSureDesc,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.bodySm
@@ -283,7 +285,7 @@ class _CtaBanner extends StatelessWidget {
                 color: AppColors.primary,
                 borderRadius: AppRadius.brMd,
               ),
-              child: Text('Explore Now',
+              child: Text(context.l10n.homeExploreNow,
                   style: AppTextStyles.titleSm.copyWith(color: Colors.white)),
             ),
           ),
@@ -304,15 +306,17 @@ class _FeaturedRail extends ConsumerWidget {
       error: (e, _) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: _InlineRetry(
-          message: e is ApiException ? e.message : 'Couldn\'t load listings.',
+          message: e is ApiException
+              ? e.message
+              : context.l10n.homeCouldntLoadListings,
           onRetry: () => ref.invalidate(featuredPropertiesProvider),
         ),
       ),
       data: (items) {
         if (items.isEmpty) {
-          return const SizedBox(
+          return SizedBox(
             height: 220,
-            child: EmptyState(title: 'No featured listings yet'),
+            child: EmptyState(title: context.l10n.homeNoFeaturedListings),
           );
         }
         return SizedBox(
@@ -414,9 +418,9 @@ class _BlogSection extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: SectionHeader(
-            title: 'From the Blog',
-            subtitle: 'Tips & guides for renters and owners',
-            actionLabel: 'View all',
+            title: context.l10n.homeFromBlog,
+            subtitle: context.l10n.homeBlogTipsDesc,
+            actionLabel: context.l10n.viewAll,
             onAction: () => context.push(AppRoutes.blog),
           ),
         ),
@@ -494,7 +498,7 @@ class _BlogRailCard extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      '${post.readMinutes} min read',
+                      context.l10n.blogMinRead(post.readMinutes),
                       style: AppTextStyles.caption
                           .copyWith(color: AppColors.textTertiary),
                     ),
@@ -536,7 +540,7 @@ class _InlineRetry extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.bodySm),
           ),
-          TextButton(onPressed: onRetry, child: const Text('Retry')),
+          TextButton(onPressed: onRetry, child: Text(context.l10n.retry)),
         ],
       ),
     );

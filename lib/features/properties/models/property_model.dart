@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../core/constants/app_config.dart';
+
 /// Listing category / purpose. Mirrors the backend `property-types` keys.
 enum ListingType {
   rent,
@@ -44,46 +46,77 @@ enum ListingType {
   String get apiValue => name;
 
   String get label => switch (this) {
-        ListingType.rent => 'Rent',
-        ListingType.sale => 'For Sale',
-        ListingType.hotel => 'Hotel',
-        ListingType.mess => 'Mess',
-        ListingType.land => 'Land',
-        ListingType.commercial => 'Commercial',
-        ListingType.office => 'Office',
-        ListingType.room => 'Room',
-        ListingType.vacation => 'Vacation',
-        ListingType.parking => 'Parking',
-        ListingType.unknown => 'Property',
-      };
+    ListingType.rent => 'Rent',
+    ListingType.sale => 'For Sale',
+    ListingType.hotel => 'Hotel',
+    ListingType.mess => 'Mess',
+    ListingType.land => 'Land',
+    ListingType.commercial => 'Commercial',
+    ListingType.office => 'Office',
+    ListingType.room => 'Room',
+    ListingType.vacation => 'Vacation',
+    ListingType.parking => 'Parking',
+    ListingType.unknown => 'Property',
+  };
 
   /// Suffix appended after price, e.g. "night", "month", or "" for sale/land.
   String get pricePeriod => switch (this) {
-        ListingType.hotel || ListingType.vacation => 'night',
-        ListingType.rent ||
-        ListingType.room ||
-        ListingType.mess ||
-        ListingType.office ||
-        ListingType.commercial ||
-        ListingType.parking =>
-          'month',
-        _ => '',
-      };
+    ListingType.hotel || ListingType.vacation => 'night',
+    ListingType.rent ||
+    ListingType.room ||
+    ListingType.mess ||
+    ListingType.office ||
+    ListingType.commercial ||
+    ListingType.parking => 'month',
+    _ => '',
+  };
 }
 
 /// A listing photo, with the id needed to delete it.
 class ListingImage {
-  const ListingImage({required this.id, required this.url, this.isCover = false});
+  const ListingImage({
+    required this.id,
+    required this.url,
+    this.isCover = false,
+  });
 
   final int id;
   final String url;
   final bool isCover;
 
   factory ListingImage.fromJson(Map<String, dynamic> j) => ListingImage(
-        id: (j['id'] as num?)?.toInt() ?? 0,
-        url: '${j['url'] ?? ''}',
-        isCover: j['is_cover'] == true,
-      );
+    id: (j['id'] as num?)?.toInt() ?? 0,
+    url: _absoluteImageUrl(_imageValue(j)) ?? '',
+    isCover: j['is_cover'] == true,
+  );
+}
+
+String? _imageValue(Map<dynamic, dynamic> json) {
+  for (final key in const [
+    'url',
+    'original_url',
+    'full_url',
+    'image_url',
+    'cover_image',
+    'path',
+    'image',
+  ]) {
+    final value = json[key];
+    if (value != null && '$value'.trim().isNotEmpty) return '$value';
+  }
+  return null;
+}
+
+String? _absoluteImageUrl(dynamic value) {
+  final raw = '$value'.trim();
+  if (raw.isEmpty || raw == 'null') return null;
+  final uri = Uri.tryParse(raw);
+  if (uri != null && uri.hasScheme) return raw;
+  if (raw.startsWith('//')) return 'https:$raw';
+
+  final host = AppConfig.baseUrl.replaceFirst(RegExp(r'/$'), '');
+  final path = raw.startsWith('/') ? raw : '/$raw';
+  return '$host$path';
 }
 
 /// A property listing. Mirrors the API `ListingResource` (index) and
@@ -188,27 +221,30 @@ class PropertyModel extends Equatable {
     final owner = json['owner'] ?? json['agency'];
 
     // Images: detail returns `images:[{url,is_cover}]`; index returns `cover_image`.
+    // Backends may return absolute URLs, `/storage/...`, `storage/...`, or
+    // alternate media keys, so normalize before handing values to Image.network.
     final rawImages = json['images'];
     final gallery = rawImages is List
         ? rawImages
-            .map((e) => e is Map ? '${e['url'] ?? ''}' : '$e')
-            .where((s) => s.isNotEmpty)
-            .toList(growable: false)
+              .map((e) => e is Map ? _imageValue(e) : '$e')
+              .map(_absoluteImageUrl)
+              .whereType<String>()
+              .toList(growable: false)
         : const <String>[];
-    String? cover = json['cover_image'] as String?;
+    String? cover = _absoluteImageUrl(json['cover_image']);
     if (cover == null && rawImages is List) {
       final coverImg = rawImages.firstWhere(
         (e) => e is Map && e['is_cover'] == true,
         orElse: () => rawImages.isNotEmpty ? rawImages.first : null,
       );
-      if (coverImg is Map) cover = coverImg['url'] as String?;
+      if (coverImg is Map) cover = _absoluteImageUrl(_imageValue(coverImg));
     }
 
     final amenities = (json['amenities'] is List)
         ? (json['amenities'] as List)
-            .map((e) => e is Map ? '${e['label'] ?? e['key'] ?? ''}' : '$e')
-            .where((s) => s.isNotEmpty)
-            .toList(growable: false)
+              .map((e) => e is Map ? '${e['label'] ?? e['key'] ?? ''}' : '$e')
+              .where((s) => s.isNotEmpty)
+              .toList(growable: false)
         : const <String>[];
 
     return PropertyModel(
@@ -219,7 +255,8 @@ class PropertyModel extends Equatable {
       priceDisplay: json['price_display'] as String?,
       currency: json['currency'] as String?,
       displayCurrency: json['display_currency'] as String?,
-      location: json['address'] as String? ??
+      location:
+          json['address'] as String? ??
           (zone is Map ? zone['name'] as String? : null),
       zoneId: zone is Map ? (zone['id'] as num?)?.toInt() : null,
       zoneName: zone is Map ? zone['name'] as String? : null,
@@ -228,9 +265,10 @@ class PropertyModel extends Equatable {
       gallery: gallery,
       images: rawImages is List
           ? rawImages
-              .whereType<Map<String, dynamic>>()
-              .map(ListingImage.fromJson)
-              .toList(growable: false)
+                .whereType<Map<dynamic, dynamic>>()
+                .map((e) => ListingImage.fromJson(Map<String, dynamic>.from(e)))
+                .where((e) => e.url.isNotEmpty)
+                .toList(growable: false)
           : const [],
       beds: asInt(json['bedrooms']),
       baths: asInt(json['bathrooms']),
@@ -259,7 +297,8 @@ class PropertyModel extends Equatable {
       reviewsCount: asInt(json['reviews_count']) ?? 0,
       favoritesCount: asInt(json['favorites_count']) ?? 0,
       postedAt: DateTime.tryParse(
-          '${json['published_at'] ?? json['created_at'] ?? ''}'),
+        '${json['published_at'] ?? json['created_at'] ?? ''}',
+      ),
       latitude: (asNum(json['lat']))?.toDouble(),
       longitude: (asNum(json['lng']))?.toDouble(),
     );
@@ -312,22 +351,22 @@ class PropertyModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        type,
-        price,
-        priceDisplay,
-        location,
-        imageUrl,
-        beds,
-        baths,
-        sizeSqft,
-        furnished,
-        parking,
-        isVerified,
-        isFeatured,
-        isFavorite,
-        reviewsCount,
-        favoritesCount,
-      ];
+    id,
+    title,
+    type,
+    price,
+    priceDisplay,
+    location,
+    imageUrl,
+    beds,
+    baths,
+    sizeSqft,
+    furnished,
+    parking,
+    isVerified,
+    isFeatured,
+    isFavorite,
+    reviewsCount,
+    favoritesCount,
+  ];
 }

@@ -41,7 +41,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
       await ref.read(accountServiceProvider).submitVerification(picked.path);
       if (!mounted) return;
       ref.invalidate(verificationStatusProvider);
-      context.showSnack('Document submitted for review');
+      context.showSnack(context.l10n.accountDocumentSubmitted);
     } on ApiException catch (e) {
       if (!mounted) return;
       context.showSnack(e.message, error: true);
@@ -57,7 +57,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Owner Verification')),
+      appBar: AppBar(title: Text(context.l10n.accountOwnerVerificationTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ref.watch(verificationStatusProvider).when(
@@ -71,15 +71,14 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                   children: [
                     _StatusCard(status: status),
                     AppSpacing.vGapXl,
-                    const Text(
-                      'Upload a government ID or business document to get the '
-                      'verified badge.',
+                    Text(
+                      context.l10n.accountUploadIdDesc,
                       style: AppTextStyles.bodyMd,
                     ),
                     if (!status.isVerified) ...[
                       AppSpacing.vGapXl,
                       PrimaryButton(
-                        label: 'Upload document',
+                        label: context.l10n.accountUploadDocument,
                         icon: Icons.upload_file_rounded,
                         isLoading: _submitting,
                         onPressed: () => unawaited(_pickAndSubmit()),
@@ -111,8 +110,8 @@ class _StatusCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
-                child: Text('Verification status',
+              Expanded(
+                child: Text(context.l10n.accountVerificationStatus,
                     style: AppTextStyles.titleMd),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -134,7 +133,7 @@ class _StatusCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Reviewed ${Formatters.date(reviewedAt)}',
+                  context.l10n.accountReviewedOn(Formatters.date(reviewedAt)),
                   style: AppTextStyles.bodySm,
                 ),
               ],
@@ -198,12 +197,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.verified_user_outlined,
-      title: 'Sign in to get verified',
-      subtitle: 'Log in to submit your documents and earn the verified badge.',
+      title: context.l10n.accountSignInToGetVerified,
+      subtitle: context.l10n.accountLogInToSubmitDocs,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

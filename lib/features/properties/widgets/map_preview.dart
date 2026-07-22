@@ -6,6 +6,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/extensions/context_extensions.dart';
 
 /// Keyless Google Maps embed URL. The classic `output=embed` endpoint renders
 /// real Google Maps tiles inside a WebView without any API key.
@@ -64,7 +65,9 @@ class _MapPreviewState extends State<MapPreview> {
               // No gesture recognizers (the default) → the preview stays
               // display-only and doesn't steal the list's scroll gestures.
               WebViewWidget(controller: _controller),
-              const _MapPill(label: 'View map', icon: Icons.open_in_full_rounded),
+              _MapPill(
+                  label: context.l10n.mapViewMap,
+                  icon: Icons.open_in_full_rounded),
             ],
           ),
         ),
@@ -98,7 +101,7 @@ class _MapFullScreenState extends State<MapFullScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.label ?? 'Location')),
+      appBar: AppBar(title: Text(widget.label ?? context.l10n.mapLocationFallback)),
       body: WebViewWidget(
         controller: _controller,
         // Eager recognizer → the interactive full-screen map claims all

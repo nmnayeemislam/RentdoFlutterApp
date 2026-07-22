@@ -110,11 +110,11 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_type == null) {
-      context.showSnack('Choose a property type', error: true);
+      context.showSnack(context.l10n.ownerChoosePropertyType, error: true);
       return;
     }
     if (_zoneId == null) {
-      context.showSnack('Choose a location', error: true);
+      context.showSnack(context.l10n.ownerChooseLocation, error: true);
       return;
     }
     FocusScope.of(context).unfocus();
@@ -158,8 +158,9 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
       ref.invalidate(myListingsProvider);
       if (_isEdit) ref.invalidate(propertyDetailProvider(widget.existing!.id));
       context.pop();
-      context.showSnack(
-          _isEdit ? 'Listing updated' : 'Listing submitted for review');
+      context.showSnack(_isEdit
+          ? context.l10n.ownerListingUpdated
+          : context.l10n.ownerListingSubmittedForReview);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
@@ -172,7 +173,10 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
     final types = ref.watch(propertyTypeOptionsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEdit ? 'Edit Property' : 'Post a Property')),
+      appBar: AppBar(
+          title: Text(_isEdit
+              ? context.l10n.ownerEditPropertyTitle
+              : context.l10n.ownerPostPropertyTitle)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -193,7 +197,8 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
                 if (types.isNotEmpty)
                   DropdownButtonFormField<String>(
                     initialValue: _type,
-                    decoration: const InputDecoration(labelText: 'Property type'),
+                    decoration: InputDecoration(
+                        labelText: context.l10n.ownerPropertyTypeLabel),
                     items: [
                       for (final t in types)
                         DropdownMenuItem(value: t.key, child: Text(t.label)),
@@ -202,24 +207,24 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
                   ),
                 AppSpacing.vGapLg,
                 AppTextField(
-                  label: 'Title',
-                  hint: 'e.g. Bright 2-bed near the park',
+                  label: context.l10n.title,
+                  hint: context.l10n.ownerTitleHint,
                   controller: _title,
                   validator: (v) => (v == null || v.trim().length < 5)
-                      ? 'At least 5 characters'
+                      ? context.l10n.ownerAtLeast5Chars
                       : null,
                 ),
                 AppSpacing.vGapLg,
                 _LocationField(name: _zoneName, onTap: _pickZone),
                 AppSpacing.vGapLg,
                 AppTextField(
-                  label: 'Price',
-                  hint: 'Amount',
+                  label: context.l10n.price,
+                  hint: context.l10n.ownerAmountHint,
                   controller: _price,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   validator: (v) => (int.tryParse(v?.trim() ?? '') == null)
-                      ? 'Enter a price'
+                      ? context.l10n.ownerEnterPrice
                       : null,
                 ),
                 AppSpacing.vGapLg,
@@ -227,7 +232,7 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
                   children: [
                     Expanded(
                       child: AppTextField(
-                        label: 'Bedrooms',
+                        label: context.l10n.compareAttrBedrooms,
                         controller: _bedrooms,
                         keyboardType: TextInputType.number,
                         inputFormatters: [
@@ -238,7 +243,7 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: AppTextField(
-                        label: 'Bathrooms',
+                        label: context.l10n.compareAttrBathrooms,
                         controller: _bathrooms,
                         keyboardType: TextInputType.number,
                         inputFormatters: [
@@ -250,7 +255,7 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
                 ),
                 AppSpacing.vGapLg,
                 AppTextField(
-                  label: 'Area (sq ft)',
+                  label: context.l10n.ownerAreaSqftLabel,
                   controller: _area,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -258,18 +263,23 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
                 AppSpacing.vGapLg,
                 DropdownButtonFormField<String>(
                   initialValue: _allowedFor,
-                  decoration: const InputDecoration(labelText: 'Allowed for'),
-                  items: const [
-                    DropdownMenuItem(value: 'family', child: Text('Family')),
-                    DropdownMenuItem(value: 'bachelor', child: Text('Bachelor')),
-                    DropdownMenuItem(value: 'both', child: Text('Both')),
+                  decoration:
+                      InputDecoration(labelText: context.l10n.ownerAllowedFor),
+                  items: [
+                    DropdownMenuItem(
+                        value: 'family', child: Text(context.l10n.ownerFamily)),
+                    DropdownMenuItem(
+                        value: 'bachelor',
+                        child: Text(context.l10n.ownerBachelor)),
+                    DropdownMenuItem(
+                        value: 'both', child: Text(context.l10n.ownerBoth)),
                   ],
                   onChanged: (v) => setState(() => _allowedFor = v),
                 ),
                 AppSpacing.vGapLg,
                 AppTextField(
-                  label: 'Address',
-                  hint: 'Street / area',
+                  label: context.l10n.address,
+                  hint: context.l10n.ownerAddressHint,
                   controller: _address,
                   maxLines: 2,
                 ),
@@ -277,19 +287,23 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
                   contentPadding: EdgeInsets.zero,
                   value: _furnished,
                   activeThumbColor: AppColors.primary,
-                  title: const Text('Furnished', style: AppTextStyles.titleSm),
+                  title: Text(context.l10n.compareAttrFurnished,
+                      style: AppTextStyles.titleSm),
                   onChanged: (v) => setState(() => _furnished = v),
                 ),
                 SwitchListTile.adaptive(
                   contentPadding: EdgeInsets.zero,
                   value: _parking,
                   activeThumbColor: AppColors.primary,
-                  title: const Text('Parking', style: AppTextStyles.titleSm),
+                  title: Text(context.l10n.compareAttrParking,
+                      style: AppTextStyles.titleSm),
                   onChanged: (v) => setState(() => _parking = v),
                 ),
                 AppSpacing.vGapXl,
                 PrimaryButton(
-                  label: _isEdit ? 'Save changes' : 'Submit listing',
+                  label: _isEdit
+                      ? context.l10n.accountSaveChanges
+                      : context.l10n.ownerSubmitListing,
                   isLoading: _submitting,
                   onPressed: _submit,
                 ),
@@ -325,7 +339,7 @@ class _EditPhotosState extends ConsumerState<_EditPhotos> {
             picked.map((x) => x.path).toList(),
           );
       ref.invalidate(propertyDetailProvider(widget.listingId));
-      if (mounted) context.showSnack('Photos added');
+      if (mounted) context.showSnack(context.l10n.ownerPhotosAdded);
     } on ApiException catch (e) {
       if (mounted) context.showSnack(e.message, error: true);
     } finally {
@@ -340,7 +354,7 @@ class _EditPhotosState extends ConsumerState<_EditPhotos> {
           .read(propertyServiceProvider)
           .deleteMedia(widget.listingId, mediaId);
       ref.invalidate(propertyDetailProvider(widget.listingId));
-      if (mounted) context.showSnack('Photo removed');
+      if (mounted) context.showSnack(context.l10n.ownerPhotoRemoved);
     } on ApiException catch (e) {
       if (mounted) context.showSnack(e.message, error: true);
     } finally {
@@ -379,7 +393,7 @@ class _EditPhotosState extends ConsumerState<_EditPhotos> {
                       : const Icon(Icons.add_a_photo_outlined,
                           color: AppColors.primary),
                   const SizedBox(height: 4),
-                  const Text('Add', style: AppTextStyles.caption),
+                  Text(context.l10n.add, style: AppTextStyles.caption),
                 ],
               ),
             ),
@@ -438,12 +452,13 @@ class _PhotoStrip extends StatelessWidget {
                 borderRadius: AppRadius.brMd,
                 border: Border.all(color: context.colors.outline),
               ),
-              child: const Column(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.add_a_photo_outlined, color: AppColors.primary),
-                  SizedBox(height: 4),
-                  Text('Add', style: AppTextStyles.caption),
+                  const Icon(Icons.add_a_photo_outlined,
+                      color: AppColors.primary),
+                  const SizedBox(height: 4),
+                  Text(context.l10n.add, style: AppTextStyles.caption),
                 ],
               ),
             ),
@@ -503,7 +518,7 @@ class _LocationField extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                name ?? 'Choose location',
+                name ?? context.l10n.ownerChooseLocationPlaceholder,
                 style: AppTextStyles.bodyMd.copyWith(
                   color: name == null
                       ? AppColors.textTertiary

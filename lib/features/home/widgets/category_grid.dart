@@ -25,6 +25,7 @@ class CategoryRail extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, i) {
           final item = CategoryItem.all[i];
+          final label = _labelFor(context, item.type);
           return Pressable(
             onTap: () => onSelected(item.type),
             child: SizedBox(
@@ -45,7 +46,7 @@ class CategoryRail extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    item.label,
+                    label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.caption
@@ -58,5 +59,18 @@ class CategoryRail extends StatelessWidget {
         },
       ),
     );
+  }
+
+  String _labelFor(BuildContext context, ListingType type) {
+    final l10n = context.l10n;
+    return switch (type) {
+      ListingType.sale => l10n.categoryForSale,
+      ListingType.rent => l10n.categoryForRent,
+      ListingType.hotel => l10n.categoryShortStay,
+      ListingType.land => l10n.categoryLand,
+      ListingType.office => l10n.categoryOffice,
+      ListingType.room => l10n.categoryRooms,
+      _ => type.label,
+    };
   }
 }

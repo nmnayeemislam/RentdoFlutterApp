@@ -40,12 +40,12 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
         .changePassword(_current.text, _password.text);
     if (!mounted) return;
     if (ok) {
-      context.showSnack('Password changed');
+      context.showSnack(context.l10n.profilePasswordChanged);
       context.pop();
     } else {
       context.showSnack(
         ref.read(profileViewModelProvider).error?.message ??
-            'Could not change password',
+            context.l10n.profileCouldNotChangePassword,
         error: true,
       );
     }
@@ -57,7 +57,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
         ref.watch(profileViewModelProvider.select((s) => s.isSubmitting));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Change Password')),
+      appBar: AppBar(title: Text(context.l10n.profileChangePassword)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -70,7 +70,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     AppTextField(
-                      label: 'Current password',
+                      label: context.l10n.profileCurrentPassword,
                       controller: _current,
                       obscure: true,
                       prefixIcon: Icons.lock_outline_rounded,
@@ -80,7 +80,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                     ),
                     AppSpacing.vGapLg,
                     AppTextField(
-                      label: 'New password',
+                      label: context.l10n.newPassword,
                       controller: _password,
                       obscure: true,
                       prefixIcon: Icons.lock_reset_rounded,
@@ -89,7 +89,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                     ),
                     AppSpacing.vGapLg,
                     AppTextField(
-                      label: 'Confirm new password',
+                      label: context.l10n.profileConfirmNewPassword,
                       controller: _confirm,
                       obscure: true,
                       prefixIcon: Icons.lock_reset_rounded,
@@ -98,7 +98,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                     ),
                     AppSpacing.vGapXxl,
                     PrimaryButton(
-                      label: 'Update password',
+                      label: context.l10n.profileUpdatePassword,
                       isLoading: isSubmitting,
                       onPressed: _submit,
                     ),

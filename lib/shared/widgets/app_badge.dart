@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../extensions/context_extensions.dart';
 
 /// Small pill label used for "Featured", "Verified", "New", listing type, etc.
 class AppBadge extends StatelessWidget {
   const AppBadge({
     super.key,
-    required this.label,
+    required String this.label,
     this.color = AppColors.navy,
     this.background,
     this.icon,
@@ -16,7 +17,7 @@ class AppBadge extends StatelessWidget {
     this.filled = true,
   });
 
-  final String label;
+  final String? label;
   final Color color;
   final Color? background;
   final IconData? icon;
@@ -26,7 +27,7 @@ class AppBadge extends StatelessWidget {
   final bool filled;
 
   const AppBadge.verified({super.key})
-      : label = 'Verified',
+      : label = null,
         color = AppColors.navy,
         background = Colors.white,
         icon = Icons.verified_rounded,
@@ -34,7 +35,7 @@ class AppBadge extends StatelessWidget {
         filled = true;
 
   const AppBadge.featured({super.key})
-      : label = 'Featured',
+      : label = null,
         color = Colors.white,
         background = AppColors.navy,
         icon = Icons.star_rounded,
@@ -42,7 +43,7 @@ class AppBadge extends StatelessWidget {
         filled = true;
 
   const AppBadge.isNew({super.key})
-      : label = 'New',
+      : label = null,
         color = Colors.white,
         background = AppColors.info,
         icon = null,
@@ -57,6 +58,12 @@ class AppBadge extends StatelessWidget {
     // A filled badge with no explicit background uses [color] as its fill, so
     // the label must contrast — white — rather than matching the fill.
     final Color fg = filled && background == null ? Colors.white : color;
+    final resolvedLabel = label ??
+        (icon == Icons.verified_rounded
+            ? context.l10n.verified
+            : icon == Icons.star_rounded
+                ? context.l10n.featured
+                : context.l10n.newLabel);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -71,7 +78,7 @@ class AppBadge extends StatelessWidget {
             const SizedBox(width: 4),
           ],
           Text(
-            label,
+            resolvedLabel,
             style: AppTextStyles.caption
                 .copyWith(color: fg, fontWeight: FontWeight.w700),
           ),

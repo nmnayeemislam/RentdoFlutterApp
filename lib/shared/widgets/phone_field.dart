@@ -5,6 +5,7 @@ import '../../core/constants/countries.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../extensions/context_extensions.dart';
 
 /// Phone-number field with a country dial-code + flag picker.
 ///
@@ -209,16 +210,16 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                 autofocus: true,
                 onChanged: _onQuery,
                 textInputAction: TextInputAction.search,
-                decoration: const InputDecoration(
-                  hintText: 'Search country or code',
-                  prefixIcon: Icon(Icons.search_rounded),
+                decoration: InputDecoration(
+                  hintText: context.l10n.searchCountryHint,
+                  prefixIcon: const Icon(Icons.search_rounded),
                 ),
               ),
             ),
             Expanded(
               child: _results.isEmpty
                   ? Center(
-                      child: Text('No countries found',
+                      child: Text(context.l10n.noCountriesFound,
                           style: AppTextStyles.bodyMd.copyWith(
                               color: onSurface.withValues(alpha: 0.5))),
                     )

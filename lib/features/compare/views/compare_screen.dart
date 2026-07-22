@@ -14,16 +14,16 @@ import '../../auth/viewmodels/auth_viewmodel.dart';
 import '../../properties/models/property_model.dart';
 import '../viewmodels/compare_viewmodel.dart';
 
-const _attributes = <String>[
-  'Price',
-  'Type',
-  'Bedrooms',
-  'Bathrooms',
-  'Area (sqft)',
-  'Furnished',
-  'Parking',
-  'Location',
-];
+List<String> _attributes(BuildContext context) => [
+      context.l10n.compareAttrPrice,
+      context.l10n.compareAttrType,
+      context.l10n.compareAttrBedrooms,
+      context.l10n.compareAttrBathrooms,
+      context.l10n.compareAttrArea,
+      context.l10n.compareAttrFurnished,
+      context.l10n.compareAttrParking,
+      context.l10n.compareAttrLocation,
+    ];
 
 const double _rowHeight = 46;
 const double _headerHeight = 168;
@@ -41,13 +41,13 @@ class CompareScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Compare'),
+        title: Text(context.l10n.compareTitle),
         actions: [
           if ((compare.valueOrNull?.isNotEmpty ?? false))
             TextButton(
               onPressed: () =>
                   ref.read(compareViewModelProvider.notifier).clear(),
-              child: const Text('Clear'),
+              child: Text(context.l10n.clear),
             ),
         ],
       ),
@@ -104,7 +104,7 @@ class _LabelColumn extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: _headerHeight),
-          for (final label in _attributes)
+          for (final label in _attributes(context))
             Container(
               height: _rowHeight,
               alignment: Alignment.centerLeft,
@@ -124,14 +124,14 @@ class _ListingColumn extends StatelessWidget {
   final PropertyModel property;
   final VoidCallback onRemove;
 
-  String _value(int i) => switch (i) {
+  String _value(BuildContext context, int i) => switch (i) {
         0 => property.priceDisplay ?? '${property.price ?? '—'}',
         1 => property.type.label,
         2 => '${property.beds ?? '—'}',
         3 => '${property.baths ?? '—'}',
         4 => property.sizeSqft == null ? '—' : '${property.sizeSqft}',
-        5 => property.furnished ? 'Yes' : 'No',
-        6 => property.parking ? 'Yes' : 'No',
+        5 => property.furnished ? context.l10n.yes : context.l10n.no,
+        6 => property.parking ? context.l10n.yes : context.l10n.no,
         7 => property.location ?? property.zoneName ?? '—',
         _ => '—',
       };
@@ -188,7 +188,7 @@ class _ListingColumn extends StatelessWidget {
               ],
             ),
           ),
-          for (var i = 0; i < _attributes.length; i++)
+          for (var i = 0; i < _attributes(context).length; i++)
             Container(
               height: _rowHeight,
               width: _colWidth,
@@ -198,7 +198,7 @@ class _ListingColumn extends StatelessWidget {
                 color: i.isEven ? context.colors.surface : null,
               ),
               child: Text(
-                _value(i),
+                _value(context, i),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: i == 0
@@ -219,12 +219,12 @@ class _EmptyCompare extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.compare_arrows_rounded,
-      title: 'Nothing to compare',
-      subtitle: 'Add properties to compare them side by side.',
+      title: context.l10n.compareNothingToCompare,
+      subtitle: context.l10n.compareAddPropertiesDesc,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Browse properties',
+          label: context.l10n.browseProperties,
           onPressed: () => context.go(AppRoutes.properties),
         ),
       ),
@@ -239,12 +239,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.compare_arrows_rounded,
-      title: 'Sign in to compare',
-      subtitle: 'Log in to build and compare property shortlists.',
+      title: context.l10n.compareSignInToCompare,
+      subtitle: context.l10n.compareLogInToBuildShortlists,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

@@ -24,7 +24,7 @@ class BlogListScreen extends ConsumerWidget {
     final active = ref.watch(blogCategoryFilterProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Blog')),
+      appBar: AppBar(title: Text(context.l10n.blogTitle)),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
@@ -46,7 +46,7 @@ class BlogListScreen extends ConsumerWidget {
                               horizontal: AppSpacing.lg, vertical: 8),
                           children: [
                             _CategoryChip(
-                              label: 'All',
+                              label: context.l10n.all,
                               selected: active == null,
                               onTap: () => ref
                                   .read(blogCategoryFilterProvider.notifier)
@@ -69,11 +69,11 @@ class BlogListScreen extends ConsumerWidget {
                 child: feed.when(
                   loading: () => const LoadingWidget(),
                   error: (_, _) => AppErrorWidget(
-                    message: 'Couldn\'t load posts.',
+                    message: context.l10n.blogCouldntLoadPosts,
                     onRetry: () => ref.invalidate(blogFeedProvider),
                   ),
                   data: (posts) => posts.isEmpty
-                      ? const EmptyState(title: 'No posts yet')
+                      ? EmptyState(title: context.l10n.blogNoPostsYet)
                       : ListView.separated(
                           padding: const EdgeInsets.all(AppSpacing.lg),
                           itemCount: posts.length,
@@ -161,7 +161,7 @@ class _BlogCard extends StatelessWidget {
                         ),
                       const Spacer(),
                       Text(
-                        '${post.readMinutes} min read',
+                        context.l10n.blogMinRead(post.readMinutes),
                         style: AppTextStyles.caption
                             .copyWith(color: AppColors.textTertiary),
                       ),

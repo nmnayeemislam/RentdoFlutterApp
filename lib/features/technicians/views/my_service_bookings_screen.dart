@@ -28,7 +28,7 @@ class MyServiceBookingsScreen extends ConsumerWidget {
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Service Bookings')),
+      appBar: AppBar(title: Text(context.l10n.technicianServiceBookingsTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ref.watch(technicianBookingsViewModelProvider).when(
@@ -41,10 +41,10 @@ class MyServiceBookingsScreen extends ConsumerWidget {
                 ),
                 data: (items) {
                   if (items.isEmpty) {
-                    return const EmptyState(
+                    return EmptyState(
                       icon: Icons.build_outlined,
-                      title: 'No service bookings',
-                      subtitle: 'Book a technician to see requests here.',
+                      title: context.l10n.technicianNoServiceBookings,
+                      subtitle: context.l10n.technicianBookTechDesc,
                     );
                   }
                   return RefreshIndicator(
@@ -74,7 +74,7 @@ class _BookingCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final title = booking.technicianName ?? 'Technician';
+    final title = booking.technicianName ?? context.l10n.propertyTechnicianFallback;
     final scheduled = booking.scheduledAt;
 
     return Container(
@@ -104,8 +104,8 @@ class _BookingCard extends ConsumerWidget {
           ),
           if (booking.isUrgent) ...[
             const SizedBox(height: AppSpacing.sm),
-            const AppBadge(
-              label: 'Urgent',
+            AppBadge(
+              label: context.l10n.urgent,
               color: Colors.white,
               background: AppColors.error,
               icon: Icons.priority_high_rounded,
@@ -160,7 +160,7 @@ class _BookingCard extends ConsumerWidget {
           ],
           if (booking.quotes.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.md),
-            const Text('Quotes', style: AppTextStyles.titleSm),
+            Text(context.l10n.technicianQuotes, style: AppTextStyles.titleSm),
             const SizedBox(height: AppSpacing.sm),
             for (final quote in booking.quotes)
               _QuoteTile(bookingId: booking.id, quote: quote),
@@ -174,7 +174,7 @@ class _BookingCard extends ConsumerWidget {
                 onPressed: () =>
                     unawaited(SubmitQuoteSheet.show(context, booking.id)),
                 icon: const Icon(Icons.request_quote_outlined, size: 18),
-                label: const Text('Submit a quote'),
+                label: Text(context.l10n.technicianSubmitQuote),
               ),
             ),
           ],
@@ -236,7 +236,7 @@ class _QuoteTile extends ConsumerWidget {
               children: [
                 Expanded(
                   child: SecondaryButton(
-                    label: 'Reject',
+                    label: context.l10n.reject,
                     onPressed: () => unawaited(
                       ref
                           .read(technicianBookingsViewModelProvider.notifier)
@@ -247,7 +247,7 @@ class _QuoteTile extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: PrimaryButton(
-                    label: 'Accept',
+                    label: context.l10n.accept,
                     onPressed: () => unawaited(
                       ref
                           .read(technicianBookingsViewModelProvider.notifier)
@@ -318,12 +318,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.build_outlined,
-      title: 'Sign in to see your service bookings',
-      subtitle: 'Log in to book technicians and track requests.',
+      title: context.l10n.technicianSignInToSeeBookings,
+      subtitle: context.l10n.technicianLogInToBookTrack,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

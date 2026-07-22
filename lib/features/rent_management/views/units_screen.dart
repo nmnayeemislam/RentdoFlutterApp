@@ -22,11 +22,11 @@ class UnitsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Units'),
+        title: Text(context.l10n.rentUnits),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'Add unit',
+            tooltip: context.l10n.rentAddUnit,
             onPressed: () => _AddUnitSheet.show(context),
           ),
         ],
@@ -39,10 +39,10 @@ class UnitsScreen extends ConsumerWidget {
             ),
             data: (units) {
               if (units.isEmpty) {
-                return const EmptyState(
+                return EmptyState(
                   icon: Icons.meeting_room_outlined,
-                  title: 'No units yet',
-                  subtitle: 'Add a unit to start tracking rent.',
+                  title: context.l10n.rentNoUnitsYet,
+                  subtitle: context.l10n.rentAddUnitDesc,
                 );
               }
               return ListView.separated(
@@ -105,7 +105,8 @@ class _UnitCard extends ConsumerWidget {
                         color: AppColors.textTertiary,
                       ),
                       const SizedBox(width: 6),
-                      Text('Floor ${unit.floor}', style: AppTextStyles.bodySm),
+                      Text(context.l10n.rentFloorValue(unit.floor!),
+                          style: AppTextStyles.bodySm),
                     ],
                   ),
                 ],
@@ -120,7 +121,7 @@ class _UnitCard extends ConsumerWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '${Formatters.money(unit.rentAmount)}/mo',
+                        '${Formatters.money(unit.rentAmount)}${context.l10n.rentPerMonth}',
                         style: AppTextStyles.titleSm.copyWith(
                           color: AppColors.primary,
                         ),
@@ -133,14 +134,16 @@ class _UnitCard extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline, color: AppColors.error),
-            tooltip: 'Delete unit',
+            tooltip: context.l10n.rentDeleteUnit,
             onPressed: () async {
               try {
                 await ref
                     .read(rentManagementServiceProvider)
                     .deleteUnit(unit.id);
                 ref.invalidate(rentUnitsProvider);
-                if (context.mounted) context.showSnack('Unit deleted');
+                if (context.mounted) {
+                  context.showSnack(context.l10n.rentUnitDeleted);
+                }
               } on ApiException catch (e) {
                 if (context.mounted) {
                   context.showSnack(e.message, error: true);
@@ -222,11 +225,11 @@ class _AddUnitSheetState extends ConsumerState<_AddUnitSheet> {
     final listingId = int.tryParse(_listingId.text.trim());
     final name = _name.text.trim();
     if (listingId == null || listingId <= 0) {
-      context.showSnack('Enter a valid listing ID', error: true);
+      context.showSnack(context.l10n.maintenanceEnterValidListingId, error: true);
       return;
     }
     if (name.isEmpty) {
-      context.showSnack('Enter a unit name', error: true);
+      context.showSnack(context.l10n.rentEnterUnitName, error: true);
       return;
     }
     final floor = _floor.text.trim();
@@ -243,7 +246,7 @@ class _AddUnitSheetState extends ConsumerState<_AddUnitSheet> {
       ref.invalidate(rentUnitsProvider);
       if (!mounted) return;
       Navigator.pop(context);
-      context.showSnack('Unit added');
+      context.showSnack(context.l10n.rentUnitAdded);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
@@ -265,45 +268,45 @@ class _AddUnitSheetState extends ConsumerState<_AddUnitSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Add unit', style: AppTextStyles.headingMd),
+            Text(context.l10n.rentAddUnit, style: AppTextStyles.headingMd),
             AppSpacing.vGapLg,
             AppTextField(
-              label: 'Listing ID',
-              hint: "Your property's listing ID",
+              label: context.l10n.maintenanceListingId,
+              hint: context.l10n.rentListingIdHint,
               controller: _listingId,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Name',
-              hint: 'e.g. Apartment 2B',
+              label: context.l10n.name,
+              hint: context.l10n.rentUnitNameHint,
               controller: _name,
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Floor',
-              hint: 'e.g. 2',
+              label: context.l10n.propertyFloor,
+              hint: context.l10n.rentFloorHint,
               controller: _floor,
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Rent amount',
-              hint: 'Monthly rent',
+              label: context.l10n.rentRentAmount,
+              hint: context.l10n.rentMonthlyRentHint,
               controller: _rent,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Notes',
-              hint: 'Optional notes',
+              label: context.l10n.notes,
+              hint: context.l10n.rentOptionalNotesHint,
               controller: _notes,
               maxLines: 3,
             ),
             AppSpacing.vGapXl,
             PrimaryButton(
-              label: 'Add unit',
+              label: context.l10n.rentAddUnit,
               isLoading: _submitting,
               onPressed: _submit,
             ),

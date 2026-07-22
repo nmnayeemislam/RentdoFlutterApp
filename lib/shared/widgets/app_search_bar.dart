@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../extensions/context_extensions.dart';
 
 /// Rounded search input used on Home and the property list.
 ///
@@ -10,7 +11,7 @@ import '../../core/theme/app_text_styles.dart';
 class AppSearchBar extends StatelessWidget {
   const AppSearchBar({
     super.key,
-    this.hint = 'Search location, property...',
+    this.hint,
     this.controller,
     this.onChanged,
     this.onSubmitted,
@@ -20,7 +21,7 @@ class AppSearchBar extends StatelessWidget {
     this.filterActive = false,
   });
 
-  final String hint;
+  final String? hint;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
@@ -55,7 +56,7 @@ class AppSearchBar extends StatelessWidget {
               style: AppTextStyles.bodyMd
                   .copyWith(color: theme.colorScheme.onSurface),
               decoration: InputDecoration(
-                hintText: hint,
+                hintText: hint ?? context.l10n.searchLocationHint,
                 filled: false,
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,

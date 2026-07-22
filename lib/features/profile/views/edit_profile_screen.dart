@@ -31,11 +31,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   String? _currency;
   String? _visibility;
 
-  static const _visibilityOptions = <String, String>{
-    'everyone': 'Everyone',
-    'registered': 'Registered users',
-    'none': 'Nobody',
-  };
+  Map<String, String> _visibilityOptions(BuildContext context) => {
+        'everyone': context.l10n.profileVisibilityEveryone,
+        'registered': context.l10n.profileVisibilityRegistered,
+        'none': context.l10n.profileVisibilityNobody,
+      };
 
   @override
   void initState() {
@@ -76,7 +76,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
 
     if (changes.isEmpty) {
-      context.showSnack('Nothing to update');
+      context.showSnack(context.l10n.profileNothingToUpdate);
       return;
     }
 
@@ -84,11 +84,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         await ref.read(profileViewModelProvider.notifier).updateProfile(changes);
     if (!mounted) return;
     if (ok) {
-      context.showSnack('Profile updated');
+      context.showSnack(context.l10n.profileUpdated);
       context.pop();
     } else {
       context.showSnack(
-        ref.read(profileViewModelProvider).error?.message ?? 'Update failed',
+        ref.read(profileViewModelProvider).error?.message ??
+            context.l10n.profileUpdateFailed,
         error: true,
       );
     }
@@ -100,8 +101,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ref.watch(profileViewModelProvider.select((s) => s.isSubmitting));
     final currencies = ref.watch(currencyOptionsProvider);
 
+    final visibilityOptions = _visibilityOptions(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Profile')),
+      appBar: AppBar(title: Text(context.l10n.profileEditProfile)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -116,7 +119,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     const Center(child: _AvatarPicker()),
                     AppSpacing.vGapXl,
                     AppTextField(
-                      label: 'Full name',
+                      label: context.l10n.fullName,
                       controller: _name,
                       prefixIcon: Icons.person_outline_rounded,
                       textInputAction: TextInputAction.next,
@@ -124,7 +127,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     ),
                     AppSpacing.vGapLg,
                     AppTextField(
-                      label: 'Email',
+                      label: context.l10n.email,
                       hint: 'you@example.com',
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
@@ -136,8 +139,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     ),
                     AppSpacing.vGapLg,
                     AppTextField(
-                      label: 'Phone',
-                      hint: '+1 415 555 0100',
+                      label: context.l10n.phone,
+                      hint: context.l10n.profilePhoneHint,
                       controller: _phone,
                       keyboardType: TextInputType.phone,
                       prefixIcon: Icons.phone_outlined,
@@ -152,12 +155,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         initialValue: currencies.any((c) => c.code == _currency)
                             ? _currency
                             : null,
-                        decoration: const InputDecoration(labelText: 'Currency'),
+                        decoration:
+                            InputDecoration(labelText: context.l10n.currency),
                         items: [
                           for (final c in currencies)
                             DropdownMenuItem(
                               value: c.code,
-                              child: Text('${c.code} — ${c.name}'),
+                              child: Text(
+                                  context.l10n.profileCurrencyOption(c.code, c.name)),
                             ),
                         ],
                         onChanged: (v) => setState(() => _currency = v),
@@ -165,20 +170,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     ],
                     AppSpacing.vGapLg,
                     DropdownButtonFormField<String>(
-                      initialValue: _visibilityOptions.containsKey(_visibility)
+                      initialValue: visibilityOptions.containsKey(_visibility)
                           ? _visibility
                           : null,
-                      decoration:
-                          const InputDecoration(labelText: 'Who can see my phone'),
+                      decoration: InputDecoration(
+                          labelText: context.l10n.profileWhoCanSeePhone),
                       items: [
-                        for (final e in _visibilityOptions.entries)
+                        for (final e in visibilityOptions.entries)
                           DropdownMenuItem(value: e.key, child: Text(e.value)),
                       ],
                       onChanged: (v) => setState(() => _visibility = v),
                     ),
                     AppSpacing.vGapXxl,
                     PrimaryButton(
-                      label: 'Save changes',
+                      label: context.l10n.accountSaveChanges,
                       isLoading: isSubmitting,
                       onPressed: _save,
                     ),
@@ -217,9 +222,11 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
         await ref.read(profileViewModelProvider.notifier).uploadPhoto(picked.path);
     if (!mounted) return;
     setState(() => _uploading = false);
-    context.showSnack(ok
-        ? 'Photo updated'
-        : ref.read(profileViewModelProvider).error?.message ?? 'Upload failed',
+    context.showSnack(
+        ok
+            ? context.l10n.profilePhotoUpdated
+            : ref.read(profileViewModelProvider).error?.message ??
+                context.l10n.profileUploadFailed,
         error: !ok);
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../models/zone_model.dart';
 import '../providers/zone_providers.dart';
@@ -64,13 +65,13 @@ class _ZonePickerSheetState extends ConsumerState<ZonePickerSheet> {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                 child: Row(
                   children: [
-                    const Text('Choose location',
+                    Text(context.l10n.ownerChooseLocationPlaceholder,
                         style: AppTextStyles.headingMd),
                     const Spacer(),
                     TextButton(
                       onPressed: () =>
                           Navigator.pop(context, const ZoneModel(id: 0, name: '')),
-                      child: const Text('Clear'),
+                      child: Text(context.l10n.clear),
                     ),
                   ],
                 ),
@@ -80,9 +81,9 @@ class _ZonePickerSheetState extends ConsumerState<ZonePickerSheet> {
                 child: TextField(
                   controller: _controller,
                   onChanged: (v) => setState(() => _query = v),
-                  decoration: const InputDecoration(
-                    hintText: 'Search countries or cities',
-                    prefixIcon: Icon(Icons.search_rounded),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.zoneSearchHint,
+                    prefixIcon: const Icon(Icons.search_rounded),
                   ),
                 ),
               ),
@@ -95,8 +96,8 @@ class _ZonePickerSheetState extends ConsumerState<ZonePickerSheet> {
                     onRetry: () => ref.invalidate(zoneSearchProvider(_query)),
                   ),
                   data: (zones) => zones.isEmpty
-                      ? const EmptyState(
-                          title: 'No locations found',
+                      ? EmptyState(
+                          title: context.l10n.zoneNoLocationsFound,
                           icon: Icons.location_off_outlined,
                         )
                       : ListView.separated(

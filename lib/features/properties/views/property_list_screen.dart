@@ -41,8 +41,7 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
   }
 
   void _onScroll() {
-    if (_scroll.position.pixels >=
-        _scroll.position.maxScrollExtent - 400) {
+    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 400) {
       ref.read(propertyListViewModelProvider.notifier).loadMore();
     }
   }
@@ -66,15 +65,19 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
     // Read the notifier once; the pieces below watch only the slices they need
     // so scrolling / load-more doesn't rebuild the search bar or filter chips.
     final controller = ref.read(propertyListViewModelProvider.notifier);
+    final state = ref.watch(propertyListViewModelProvider);
+    final hideMapButton = state.error?.type == ApiErrorType.network;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(AppRoutes.mapSearch),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.map_outlined),
-        label: const Text('Map'),
-      ),
+      floatingActionButton: hideMapButton
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => context.push(AppRoutes.mapSearch),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.map_outlined),
+              label: Text(context.l10n.map),
+            ),
       body: SafeArea(
         child: Column(
           children: [
@@ -82,8 +85,11 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: Consumer(
                 builder: (context, ref, _) {
-                  final active = ref.watch(propertyListViewModelProvider
-                      .select((s) => s.filter.hasActiveFilters));
+                  final active = ref.watch(
+                    propertyListViewModelProvider.select(
+                      (s) => s.filter.hasActiveFilters,
+                    ),
+                  );
                   return AppSearchBar(
                     controller: _searchController,
                     onSubmitted: controller.setSearch,
@@ -95,8 +101,9 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
             ),
             Consumer(
               builder: (context, ref, _) {
-                final type = ref.watch(propertyListViewModelProvider
-                    .select((s) => s.filter.type));
+                final type = ref.watch(
+                  propertyListViewModelProvider.select((s) => s.filter.type),
+                );
                 return TypeFilterBar(
                   selected: type,
                   onSelected: controller.setType,
@@ -107,9 +114,11 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
             Consumer(
               builder: (context, ref, _) {
                 final total = ref.watch(
-                    propertyListViewModelProvider.select((s) => s.total));
+                  propertyListViewModelProvider.select((s) => s.total),
+                );
                 final filter = ref.watch(
-                    propertyListViewModelProvider.select((s) => s.filter));
+                  propertyListViewModelProvider.select((s) => s.filter),
+                );
                 return _ResultHeader(count: total, filter: filter);
               },
             ),
@@ -137,13 +146,13 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
     }
     if (state.isEmpty) {
       return EmptyState(
-        title: 'No properties found',
-        subtitle: 'Try adjusting your filters or search terms.',
+        title: context.l10n.propertiesNoneFound,
+        subtitle: context.l10n.propertiesTryAdjusting,
         action: TextButton(
           onPressed: () => controller.applyFilter(
             state.filter.copyWith(clearType: true, clearPrice: true),
           ),
-          child: const Text('Clear filters'),
+          child: Text(context.l10n.clearFilters),
         ),
       );
     }
@@ -199,7 +208,7 @@ class _LoadMoreError extends StatelessWidget {
         child: TextButton.icon(
           onPressed: onRetry,
           icon: const Icon(Icons.refresh_rounded, size: 18),
-          label: const Text('Retry'),
+          label: Text(context.l10n.retry),
         ),
       ),
     );
@@ -212,19 +221,20 @@ class _ResultHeader extends ConsumerWidget {
   final PropertyFilter filter;
 
   Future<void> _saveSearch(BuildContext context, WidgetRef ref) async {
-    final isAuthed =
-        ref.read(authViewModelProvider.select((s) => s.isAuthenticated));
+    final isAuthed = ref.read(
+      authViewModelProvider.select((s) => s.isAuthenticated),
+    );
     if (!isAuthed) {
-      context.showSnack('Log in to save searches.');
+      context.showSnack(context.l10n.propertiesLogInToSaveSearches);
       unawaited(context.push(AppRoutes.login));
       return;
     }
     try {
-      await ref.read(savedSearchViewModelProvider.notifier).create(
-            criteria: filter.toCriteria(),
-          );
+      await ref
+          .read(savedSearchViewModelProvider.notifier)
+          .create(criteria: filter.toCriteria());
       if (!context.mounted) return;
-      context.showSnack('Search saved');
+      context.showSnack(context.l10n.propertiesSearchSaved);
     } on ApiException catch (e) {
       if (!context.mounted) return;
       context.showSnack(e.message, error: true);
@@ -237,13 +247,16 @@ class _ResultHeader extends ConsumerWidget {
       padding: const EdgeInsets.only(left: 16, right: 4),
       child: Row(
         children: [
-          Text('$count properties', style: AppTextStyles.titleMd),
+          Text(
+            context.l10n.propertiesCount(count),
+            style: AppTextStyles.titleMd,
+          ),
           const Spacer(),
           if (filter.hasActiveFilters)
             TextButton.icon(
               onPressed: () => _saveSearch(context, ref),
               icon: const Icon(Icons.bookmark_add_outlined, size: 18),
-              label: const Text('Save search'),
+              label: Text(context.l10n.propertiesSaveSearch),
             ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/extensions/context_extensions.dart';
 import '../../notifications/widgets/notification_bell.dart';
 
 /// Light home header: avatar, greeting, and the notification bell.
@@ -41,15 +42,17 @@ class HomeHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                userName == null ? 'Welcome 👋' : 'Hi, $userName 👋',
+                userName == null
+                    ? context.l10n.homeWelcome
+                    : context.l10n.homeHiName(userName!),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.bodySm
                     .copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 2),
-              const Text(
-                'Find your next home',
+              Text(
+                context.l10n.homeFindNextHome,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 // Inherits on-surface (near-navy in light, legible in dark).

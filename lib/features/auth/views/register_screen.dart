@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/validators.dart';
@@ -62,7 +61,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         setState(() => _otpStep = true);
       case AuthActionResult.failed:
         context.showSnack(
-          _errorMessage ?? AppStrings.somethingWentWrong,
+          _errorMessage ?? context.l10n.somethingWentWrong,
           error: true,
         );
     }
@@ -86,7 +85,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       case AuthActionResult.otpSent:
       case AuthActionResult.failed:
         context.showSnack(
-          _errorMessage ?? AppStrings.somethingWentWrong,
+          _errorMessage ?? context.l10n.somethingWentWrong,
           error: true,
         );
     }
@@ -129,14 +128,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const AuthHeader(
-            title: AppStrings.createAccount,
-            subtitle: 'Join Rentdo to save favorites and contact agents.',
+          AuthHeader(
+            title: context.l10n.createAccount,
+            subtitle: context.l10n.authJoinRentdoDesc,
           ),
           AppSpacing.vGapXxl,
           AppTextField(
-            label: AppStrings.fullName,
-            hint: 'Jane Doe',
+            label: context.l10n.fullName,
+            hint: context.l10n.authFullNameHint,
             controller: _name,
             prefixIcon: Icons.person_outline_rounded,
             textInputAction: TextInputAction.next,
@@ -144,7 +143,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: AppStrings.email,
+            label: context.l10n.email,
             hint: 'you@example.com',
             controller: _email,
             keyboardType: TextInputType.emailAddress,
@@ -154,7 +153,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           AppSpacing.vGapLg,
           PhoneField(
-            label: AppStrings.phone,
+            label: context.l10n.phone,
             hint: '1711 223344',
             controller: _phone,
             textInputAction: TextInputAction.next,
@@ -162,7 +161,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: AppStrings.password,
+            label: context.l10n.password,
             hint: '••••••••',
             controller: _password,
             obscure: true,
@@ -172,7 +171,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           AppSpacing.vGapXl,
           PrimaryButton(
-            label: AppStrings.sendOtp,
+            label: context.l10n.sendOtp,
             isLoading: isSubmitting,
             onPressed: _sendOtp,
           ),
@@ -180,13 +179,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                AppStrings.alreadyHaveAccount,
+              Text(
+                context.l10n.alreadyHaveAccount,
                 style: AppTextStyles.bodyMd,
               ),
               TextButton(
                 onPressed: () => context.go(AppRoutes.login),
-                child: const Text(AppStrings.login),
+                child: Text(context.l10n.login),
               ),
             ],
           ),
@@ -201,28 +200,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const AuthHeader(
-            title: AppStrings.createAccount,
-            subtitle: 'Enter the code we sent to your phone.',
+          AuthHeader(
+            title: context.l10n.createAccount,
+            subtitle: context.l10n.authEnterCodeDesc,
           ),
           AppSpacing.vGapXl,
-          Text('Verifying ${_phone.text.trim()}', style: AppTextStyles.titleSm),
+          Text(context.l10n.authVerifyingPhone(_phone.text.trim()),
+              style: AppTextStyles.titleSm),
           AppSpacing.vGapLg,
           OtpField(controller: _otp),
           AppSpacing.vGapXl,
           PrimaryButton(
-            label: AppStrings.createAccountCta,
+            label: context.l10n.createAccountCta,
             isLoading: isSubmitting,
             onPressed: _verify,
           ),
           AppSpacing.vGapSm,
           TextButton(
             onPressed: isSubmitting ? null : _sendOtp,
-            child: const Text(AppStrings.resendOtp),
+            child: Text(context.l10n.resendOtp),
           ),
           TextButton(
             onPressed: isSubmitting ? null : _backToDetails,
-            child: const Text(AppStrings.changeDetails),
+            child: Text(context.l10n.changeDetails),
           ),
         ],
       ),

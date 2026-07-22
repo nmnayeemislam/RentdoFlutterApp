@@ -61,7 +61,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ref.watch(conversationMessagesProvider(widget.conversationId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Chat')),
+      appBar: AppBar(title: Text(context.l10n.chatTitle)),
       body: Column(
         children: [
           Expanded(
@@ -75,10 +75,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ),
               data: (items) {
                 if (items.isEmpty) {
-                  return const EmptyState(
+                  return EmptyState(
                     icon: Icons.forum_outlined,
-                    title: 'No messages yet',
-                    subtitle: 'Say hello to start the conversation.',
+                    title: context.l10n.chatNoMessagesYet,
+                    subtitle: context.l10n.chatSayHelloDesc,
                   );
                 }
                 WidgetsBinding.instance
@@ -219,13 +219,13 @@ class _InputBar extends StatelessWidget {
                   onSubmitted: (_) => onSend(),
                   style: AppTextStyles.bodyMd
                       .copyWith(color: context.colors.onSurface),
-                  decoration: const InputDecoration(
-                    hintText: 'Type a message…',
+                  decoration: InputDecoration(
+                    hintText: context.l10n.chatTypeMessageHint,
                     filled: false,
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),

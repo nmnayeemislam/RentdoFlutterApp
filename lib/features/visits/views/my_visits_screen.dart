@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -25,7 +26,7 @@ class MyVisitsScreen extends ConsumerWidget {
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Visits')),
+      appBar: AppBar(title: Text(context.l10n.visitsTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ref.watch(visitsViewModelProvider).when(
@@ -39,12 +40,12 @@ class MyVisitsScreen extends ConsumerWidget {
                   if (items.isEmpty) {
                     return EmptyState(
                       icon: Icons.event_busy_rounded,
-                      title: 'No visits scheduled',
-                      subtitle: 'Book a viewing from any listing.',
+                      title: context.l10n.visitsNoneScheduled,
+                      subtitle: context.l10n.visitsBookViewingDesc,
                       action: SizedBox(
                         width: 200,
                         child: PrimaryButton(
-                          label: 'Browse properties',
+                          label: context.l10n.browseProperties,
                           onPressed: () => context.go(AppRoutes.properties),
                         ),
                       ),
@@ -71,45 +72,17 @@ class _VisitCard extends ConsumerWidget {
   const _VisitCard({required this.visit});
   final VisitModel visit;
 
-  /// Builds a readable label like "Mon, 12 Aug · 3:00 PM" from [scheduledAt]
-  /// without pulling in extra packages.
-  String _formatSchedule(DateTime dt) {
-    const weekdays = [
-      'Mon',
-      'Tue',
-      'Wed',
-      'Thu',
-      'Fri',
-      'Sat',
-      'Sun',
-    ];
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    final weekday = weekdays[(dt.weekday - 1) % 7];
-    final month = months[(dt.month - 1) % 12];
-    final hour12 = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-    final minute = dt.minute.toString().padLeft(2, '0');
-    final period = dt.hour < 12 ? 'AM' : 'PM';
-    return '$weekday, ${dt.day} $month · $hour12:$minute $period';
+  /// Builds a readable label like "Mon, 12 Aug · 3:00 PM" from [scheduledAt].
+  String _formatSchedule(BuildContext context, DateTime dt) {
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat('EEE, d MMM · h:mm a', locale).format(dt);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final title = (visit.listingTitle != null && visit.listingTitle!.isNotEmpty)
         ? visit.listingTitle!
-        : 'Property #${visit.listingId ?? visit.id}';
+        : context.l10n.visitsPropertyFallback(visit.listingId ?? visit.id);
     final canCancel = visit.status == 'pending' || visit.status == 'confirmed';
 
     return Container(
@@ -148,7 +121,7 @@ class _VisitCard extends ConsumerWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  _formatSchedule(visit.scheduledAt),
+                  _formatSchedule(context, visit.scheduledAt),
                   style: AppTextStyles.bodySm,
                 ),
               ),
@@ -188,7 +161,7 @@ class _VisitCard extends ConsumerWidget {
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.error,
                 ),
-                child: const Text('Cancel'),
+                child: Text(context.l10n.cancel),
               ),
             ),
           ],
@@ -249,12 +222,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.calendar_today_rounded,
-      title: 'Sign in to see your visits',
-      subtitle: 'Log in to schedule and track property viewings.',
+      title: context.l10n.visitsSignInToSeeVisits,
+      subtitle: context.l10n.visitsLogInToSchedule,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

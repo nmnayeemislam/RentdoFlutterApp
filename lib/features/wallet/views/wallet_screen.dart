@@ -26,17 +26,18 @@ class WalletScreen extends ConsumerWidget {
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Wallet')),
+      appBar: AppBar(title: Text(context.l10n.profileWallet)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              children: const [
-                _BalanceCard(),
-                SizedBox(height: AppSpacing.xl),
-                Text('Transactions', style: AppTextStyles.headingMd),
-                SizedBox(height: AppSpacing.md),
-                _TransactionList(),
+              children: [
+                const _BalanceCard(),
+                const SizedBox(height: AppSpacing.xl),
+                Text(context.l10n.walletTransactions,
+                    style: AppTextStyles.headingMd),
+                const SizedBox(height: AppSpacing.md),
+                const _TransactionList(),
               ],
             ),
     );
@@ -64,7 +65,7 @@ class _BalanceCard extends ConsumerWidget {
           Row(
             children: [
               Text(
-                'RENTDO WALLET',
+                context.l10n.walletBrandLabel,
                 style: AppTextStyles.caption.copyWith(
                   color: Colors.white.withValues(alpha: 0.7),
                   letterSpacing: 1.2,
@@ -78,7 +79,7 @@ class _BalanceCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'Available balance',
+            context.l10n.walletAvailableBalance,
             style: AppTextStyles.bodySm
                 .copyWith(color: Colors.white.withValues(alpha: 0.7)),
           ),
@@ -96,7 +97,7 @@ class _BalanceCard extends ConsumerWidget {
               ),
             ),
             error: (e, _) => Text(
-              'Unable to load balance',
+              context.l10n.walletUnableToLoad,
               style: AppTextStyles.titleMd.copyWith(color: Colors.white),
             ),
             data: (b) => Text(
@@ -109,14 +110,14 @@ class _BalanceCard extends ConsumerWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () =>
-                  context.showSnack('Card top-up is coming soon'),
+                  context.showSnack(context.l10n.walletTopUpComingSoon),
               icon: const Icon(Icons.add_rounded, size: 20),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: AppColors.primary,
                 minimumSize: const Size.fromHeight(48),
               ),
-              label: const Text('Top up'),
+              label: Text(context.l10n.walletTopUp),
             ),
           ),
         ],
@@ -145,9 +146,10 @@ class _TransactionList extends ConsumerWidget {
       ),
       data: (items) {
         if (items.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-            child: Text('No transactions yet', style: AppTextStyles.bodySm),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            child: Text(context.l10n.walletNoTransactionsYet,
+                style: AppTextStyles.bodySm),
           );
         }
         return ListView.separated(
@@ -234,12 +236,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.account_balance_wallet_outlined,
-      title: 'Sign in to view your wallet',
-      subtitle: 'Log in to see your balance and transactions.',
+      title: context.l10n.walletSignInToView,
+      subtitle: context.l10n.walletLogInToSeeBalance,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

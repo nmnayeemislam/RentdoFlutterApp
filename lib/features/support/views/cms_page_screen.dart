@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -29,7 +30,7 @@ class CmsPageScreen extends ConsumerWidget {
         child: page.when(
           loading: () => const LoadingWidget(),
           error: (_, _) => AppErrorWidget(
-            message: 'Couldn\'t load this page.',
+            message: context.l10n.supportCouldntLoadPage,
             onRetry: () => ref.invalidate(cmsPageProvider(slug)),
           ),
           data: (cms) => ListView(
@@ -42,7 +43,8 @@ class CmsPageScreen extends ConsumerWidget {
               if (cms.updatedAt != null) ...[
                 const SizedBox(height: 4),
                 Text(
-                  'Last updated ${_formatDate(cms.updatedAt!)}',
+                  context.l10n
+                      .supportLastUpdated(_formatDate(context, cms.updatedAt!)),
                   style: AppTextStyles.caption
                       .copyWith(color: AppColors.textTertiary),
                 ),
@@ -65,11 +67,8 @@ class CmsPageScreen extends ConsumerWidget {
     );
   }
 
-  static String _formatDate(DateTime d) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${months[d.month - 1]} ${d.day}, ${d.year}';
+  static String _formatDate(BuildContext context, DateTime d) {
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat.yMMMd(locale).format(d);
   }
 }

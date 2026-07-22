@@ -22,11 +22,11 @@ class TenanciesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tenancies'),
+        title: Text(context.l10n.rentTenancies),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'Add tenancy',
+            tooltip: context.l10n.rentAddTenancy,
             onPressed: () => _AddTenancySheet.show(context),
           ),
         ],
@@ -39,10 +39,10 @@ class TenanciesScreen extends ConsumerWidget {
             ),
             data: (tenancies) {
               if (tenancies.isEmpty) {
-                return const EmptyState(
+                return EmptyState(
                   icon: Icons.people_outline,
-                  title: 'No tenancies yet',
-                  subtitle: 'Add a tenancy to track a tenant and their rent.',
+                  title: context.l10n.rentNoTenanciesYet,
+                  subtitle: context.l10n.rentAddTenancyDesc,
                 );
               }
               return ListView.separated(
@@ -64,19 +64,19 @@ class _TenancyCard extends StatelessWidget {
 
   final Tenancy tenancy;
 
-  String get _period {
+  String _period(BuildContext context) {
     final start = Formatters.date(tenancy.startDate);
     final end = Formatters.date(tenancy.endDate);
     if (start.isEmpty && end.isEmpty) return '';
-    return '${start.isEmpty ? '—' : start} – ${end.isEmpty ? 'ongoing' : end}';
+    return '${start.isEmpty ? '—' : start} – ${end.isEmpty ? context.l10n.rentOngoing : end}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final period = _period;
+    final period = _period(context);
     final name = (tenancy.tenantName != null && tenancy.tenantName!.isNotEmpty)
         ? tenancy.tenantName!
-        : 'Tenancy #${tenancy.id}';
+        : context.l10n.rentTenancyFallback(tenancy.id);
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -244,19 +244,19 @@ class _AddTenancySheetState extends ConsumerState<_AddTenancySheet> {
     final name = _name.text.trim();
     final rent = num.tryParse(_rent.text.trim());
     if (listingId == null || listingId <= 0) {
-      context.showSnack('Enter a valid listing ID', error: true);
+      context.showSnack(context.l10n.maintenanceEnterValidListingId, error: true);
       return;
     }
     if (name.isEmpty) {
-      context.showSnack('Enter a tenant name', error: true);
+      context.showSnack(context.l10n.rentEnterTenantName, error: true);
       return;
     }
     if (rent == null) {
-      context.showSnack('Enter a rent amount', error: true);
+      context.showSnack(context.l10n.rentEnterRentAmount, error: true);
       return;
     }
     if (_startDate == null) {
-      context.showSnack('Pick a start date', error: true);
+      context.showSnack(context.l10n.rentPickStartDate, error: true);
       return;
     }
     final phone = _phone.text.trim();
@@ -276,7 +276,7 @@ class _AddTenancySheetState extends ConsumerState<_AddTenancySheet> {
       ref.invalidate(tenanciesProvider);
       if (!mounted) return;
       Navigator.pop(context);
-      context.showSnack('Tenancy added');
+      context.showSnack(context.l10n.rentTenancyAdded);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
@@ -287,7 +287,7 @@ class _AddTenancySheetState extends ConsumerState<_AddTenancySheet> {
   @override
   Widget build(BuildContext context) {
     final dateLabel = _startDate == null
-        ? 'Select start date'
+        ? context.l10n.rentSelectStartDate
         : Formatters.date(_startDate);
 
     return Padding(
@@ -302,59 +302,59 @@ class _AddTenancySheetState extends ConsumerState<_AddTenancySheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Add tenancy', style: AppTextStyles.headingMd),
+            Text(context.l10n.rentAddTenancy, style: AppTextStyles.headingMd),
             AppSpacing.vGapLg,
             AppTextField(
-              label: 'Listing ID',
-              hint: "Your property's listing ID",
+              label: context.l10n.maintenanceListingId,
+              hint: context.l10n.rentListingIdHint,
               controller: _listingId,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Tenant name',
-              hint: 'Full name',
+              label: context.l10n.rentTenantName,
+              hint: context.l10n.fullName,
               controller: _name,
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Tenant phone',
-              hint: 'Optional',
+              label: context.l10n.rentTenantPhone,
+              hint: context.l10n.optional,
               controller: _phone,
               keyboardType: TextInputType.phone,
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Rent amount',
-              hint: 'Monthly rent',
+              label: context.l10n.rentRentAmount,
+              hint: context.l10n.rentMonthlyRentHint,
               controller: _rent,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Deposit',
-              hint: 'Optional',
+              label: context.l10n.rentDeposit,
+              hint: context.l10n.optional,
               controller: _deposit,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
             ),
             AppSpacing.vGapMd,
             AppTextField(
-              label: 'Due day of month',
-              hint: '1–31',
+              label: context.l10n.rentDueDayOfMonth,
+              hint: context.l10n.rentDueDayHint,
               controller: _dueDay,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             AppSpacing.vGapMd,
-            const Text('Start date', style: AppTextStyles.label),
+            Text(context.l10n.rentStartDate, style: AppTextStyles.label),
             AppSpacing.vGapSm,
             _DateTile(label: dateLabel, onTap: _pickStartDate),
             AppSpacing.vGapXl,
             PrimaryButton(
-              label: 'Add tenancy',
+              label: context.l10n.rentAddTenancy,
               isLoading: _submitting,
               onPressed: _submit,
             ),

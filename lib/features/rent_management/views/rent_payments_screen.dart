@@ -19,7 +19,7 @@ class RentPaymentsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Rent Payments')),
+      appBar: AppBar(title: Text(context.l10n.rentPayments)),
       body: ref.watch(rentPaymentsProvider).when(
             loading: () => const LoadingWidget(),
             error: (e, _) => AppErrorWidget(
@@ -28,10 +28,10 @@ class RentPaymentsScreen extends ConsumerWidget {
             ),
             data: (payments) {
               if (payments.isEmpty) {
-                return const EmptyState(
+                return EmptyState(
                   icon: Icons.payments_outlined,
-                  title: 'No rent payments yet',
-                  subtitle: 'Payments appear here once tenancies are active.',
+                  title: context.l10n.rentNoPaymentsYet,
+                  subtitle: context.l10n.rentPaymentsEmptyDesc,
                 );
               }
               return ListView.separated(
@@ -74,7 +74,7 @@ class _PaymentCardState extends ConsumerState<_PaymentCard> {
           .read(rentManagementServiceProvider)
           .markPaid(widget.payment.id);
       ref.invalidate(rentPaymentsProvider);
-      if (mounted) context.showSnack('Marked as paid');
+      if (mounted) context.showSnack(context.l10n.rentMarkedAsPaid);
     } on ApiException catch (e) {
       if (mounted) {
         setState(() => _busy = false);
@@ -124,7 +124,7 @@ class _PaymentCardState extends ConsumerState<_PaymentCard> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Due ${Formatters.date(payment.dueDate)}',
+                  context.l10n.rentDueDate(Formatters.date(payment.dueDate)),
                   style: AppTextStyles.bodySm,
                 ),
               ],
@@ -153,7 +153,7 @@ class _PaymentCardState extends ConsumerState<_PaymentCard> {
               child: SizedBox(
                 width: 140,
                 child: PrimaryButton(
-                  label: 'Mark paid',
+                  label: context.l10n.rentMarkPaid,
                   height: 42,
                   isLoading: _busy,
                   onPressed: _markPaid,

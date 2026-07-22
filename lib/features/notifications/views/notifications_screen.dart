@@ -31,7 +31,7 @@ class NotificationsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(context.l10n.notifications),
         actions: [
           if (isAuthed && hasUnread)
             TextButton(
@@ -40,7 +40,7 @@ class NotificationsScreen extends ConsumerWidget {
                     .read(notificationsViewModelProvider.notifier)
                     .markAllRead(),
               ),
-              child: const Text('Mark all read'),
+              child: Text(context.l10n.notificationsMarkAllRead),
             ),
         ],
       ),
@@ -56,10 +56,10 @@ class NotificationsScreen extends ConsumerWidget {
               ),
               data: (items) {
                 if (items.isEmpty) {
-                  return const EmptyState(
+                  return EmptyState(
                     icon: Icons.notifications_none_rounded,
-                    title: 'No notifications yet',
-                    subtitle: "We'll let you know when something comes up.",
+                    title: context.l10n.notificationsNoneYet,
+                    subtitle: context.l10n.notificationsWillNotify,
                   );
                 }
                 return RefreshIndicator(
@@ -188,12 +188,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.notifications_none_rounded,
-      title: 'Sign in to see notifications',
-      subtitle: 'Log in to get updates on your visits and saved searches.',
+      title: context.l10n.notificationsSignInTitle,
+      subtitle: context.l10n.notificationsLogInDesc,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

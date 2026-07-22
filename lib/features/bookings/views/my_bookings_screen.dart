@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -25,7 +26,7 @@ class MyBookingsScreen extends ConsumerWidget {
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Bookings')),
+      appBar: AppBar(title: Text(context.l10n.bookingsTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ref.watch(bookingsViewModelProvider).when(
@@ -39,12 +40,12 @@ class MyBookingsScreen extends ConsumerWidget {
                   if (items.isEmpty) {
                     return EmptyState(
                       icon: Icons.hotel_outlined,
-                      title: 'No bookings yet',
-                      subtitle: 'Book a stay from a hotel listing.',
+                      title: context.l10n.bookingsNoBookingsYet,
+                      subtitle: context.l10n.bookingsBookStayDesc,
                       action: SizedBox(
                         width: 200,
                         child: PrimaryButton(
-                          label: 'Browse properties',
+                          label: context.l10n.browseProperties,
                           onPressed: () => context.go(AppRoutes.properties),
                         ),
                       ),
@@ -73,27 +74,14 @@ class _BookingCard extends ConsumerWidget {
   const _BookingCard({required this.booking});
   final BookingModel booking;
 
-  static const List<String> _months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  String _day(DateTime dt) => '${dt.day} ${_months[(dt.month - 1) % 12]}';
+  String _day(BuildContext context, DateTime dt) =>
+      DateFormat.MMMd(Localizations.localeOf(context).toString()).format(dt);
 
   /// e.g. "12 Aug → 15 Aug · 3 nights".
-  String get _dateRange {
-    final nightsLabel = booking.nights == 1 ? 'night' : 'nights';
-    return '${_day(booking.checkIn)} → ${_day(booking.checkOut)}'
+  String _dateRange(BuildContext context) {
+    final nightsLabel =
+        booking.nights == 1 ? context.l10n.night : context.l10n.nights;
+    return '${_day(context, booking.checkIn)} → ${_day(context, booking.checkOut)}'
         ' · ${booking.nights} $nightsLabel';
   }
 
@@ -110,7 +98,7 @@ class _BookingCard extends ConsumerWidget {
     final title = (booking.listingTitle != null &&
             booking.listingTitle!.isNotEmpty)
         ? booking.listingTitle!
-        : 'Booking #${booking.id}';
+        : context.l10n.bookingsNumberFallback(booking.id);
     final canCancel =
         booking.status == 'pending' || booking.status == 'confirmed';
     final amount = _amount;
@@ -150,7 +138,7 @@ class _BookingCard extends ConsumerWidget {
               ),
               const SizedBox(width: 6),
               Expanded(
-                child: Text(_dateRange, style: AppTextStyles.bodySm),
+                child: Text(_dateRange(context), style: AppTextStyles.bodySm),
               ),
             ],
           ),
@@ -164,7 +152,9 @@ class _BookingCard extends ConsumerWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                booking.guests == 1 ? '1 guest' : '${booking.guests} guests',
+                booking.guests == 1
+                    ? '1 ${context.l10n.guest}'
+                    : '${booking.guests} ${context.l10n.guests}',
                 style: AppTextStyles.bodySm,
               ),
             ],
@@ -201,7 +191,7 @@ class _BookingCard extends ConsumerWidget {
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.error,
                 ),
-                child: const Text('Cancel'),
+                child: Text(context.l10n.cancel),
               ),
             ),
           ],
@@ -263,12 +253,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.hotel_outlined,
-      title: 'Sign in to see your bookings',
-      subtitle: 'Log in to book stays and manage reservations.',
+      title: context.l10n.bookingsSignInToSeeBookings,
+      subtitle: context.l10n.bookingsLogInToManageReservations,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

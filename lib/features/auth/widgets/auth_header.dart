@@ -7,10 +7,18 @@ import '../../../core/theme/app_text_styles.dart';
 
 /// Branded logo badge + title/subtitle block used at the top of auth screens.
 class AuthHeader extends StatelessWidget {
-  const AuthHeader({super.key, required this.title, required this.subtitle});
+  const AuthHeader({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    this.logoSize = 60,
+    this.logoPadding = 12,
+  });
 
   final String title;
   final String subtitle;
+  final double logoSize;
+  final double logoPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +27,9 @@ class AuthHeader extends StatelessWidget {
       children: [
         Center(
           child: Container(
-            height: 60,
-            width: 60,
-            padding: const EdgeInsets.all(12),
+            height: logoSize,
+            width: logoSize,
+            padding: EdgeInsets.all(logoPadding),
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: AppRadius.brLg,

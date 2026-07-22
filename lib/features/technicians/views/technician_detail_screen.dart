@@ -59,7 +59,7 @@ class _DetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final name = (technician.name != null && technician.name!.isNotEmpty)
         ? technician.name!
-        : 'Technician #${technician.id}';
+        : context.l10n.technicianFallback(technician.id);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -95,7 +95,7 @@ class _DetailBody extends StatelessWidget {
             Center(
               child: Text(
                 '${Formatters.money(technician.hourlyRate)}'
-                '/hr',
+                '${context.l10n.technicianPerHour}',
                 style: AppTextStyles.headingMd
                     .copyWith(color: AppColors.primary),
               ),
@@ -103,13 +103,13 @@ class _DetailBody extends StatelessWidget {
           ],
           if (technician.bio != null && technician.bio!.isNotEmpty) ...[
             AppSpacing.vGapXxl,
-            const Text('About', style: AppTextStyles.headingMd),
+            Text(context.l10n.about, style: AppTextStyles.headingMd),
             AppSpacing.vGapMd,
             Text(technician.bio!, style: AppTextStyles.bodyLg),
           ],
           if (technician.skills.isNotEmpty) ...[
             AppSpacing.vGapXxl,
-            const Text('Skills', style: AppTextStyles.headingMd),
+            Text(context.l10n.skills, style: AppTextStyles.headingMd),
             AppSpacing.vGapMd,
             Wrap(
               spacing: 10,
@@ -160,13 +160,14 @@ class _StatRow extends StatelessWidget {
       (
         Icons.star_rounded,
         technician.rating.toStringAsFixed(1),
-        'Rating',
+        context.l10n.technicianRating,
       ),
       if (technician.jobsDone != null)
-        (Icons.check_circle_outline_rounded, '${technician.jobsDone}', 'Jobs'),
+        (Icons.check_circle_outline_rounded, '${technician.jobsDone}',
+            context.l10n.technicianJobs),
       if (technician.experienceYears != null)
         (Icons.workspace_premium_outlined, '${technician.experienceYears}',
-            'Yrs exp'),
+            context.l10n.technicianYrsExp),
     ];
 
     return Row(
@@ -226,13 +227,13 @@ class _RequestBar extends ConsumerWidget {
     final isAuthed =
         ref.read(authViewModelProvider.select((s) => s.isAuthenticated));
     if (!isAuthed) {
-      context.showSnack('Log in to request a service.');
+      context.showSnack(context.l10n.technicianLogInToRequest);
       unawaited(context.push(AppRoutes.login));
       return;
     }
     final ok = await BookTechnicianSheet.show(context, technicianId);
     if (ok == true && context.mounted) {
-      context.showSnack('Request sent');
+      context.showSnack(context.l10n.technicianRequestSent);
     }
   }
 
@@ -248,7 +249,7 @@ class _RequestBar extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: PrimaryButton(
-            label: 'Request service',
+            label: context.l10n.technicianRequestService,
             icon: Icons.handyman_rounded,
             onPressed: () => _request(context, ref),
           ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
 import '../../../routes/app_routes.dart';
@@ -11,6 +10,7 @@ import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/otp_field.dart';
 import '../../../shared/widgets/phone_field.dart';
 import '../../../shared/widgets/primary_button.dart';
+import '../../../shared/widgets/screen_loading_overlay.dart';
 import '../models/auth_request.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../widgets/auth_header.dart';
@@ -63,11 +63,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         .forgot(ForgotPasswordRequest.email(_email.text.trim()));
     if (!mounted) return;
     if (ok) {
-      context.showSnack(AppStrings.checkEmailForReset);
+      context.showSnack(context.l10n.checkEmailForReset);
       context.pop();
     } else {
       context.showSnack(
-        _errorMessage ?? AppStrings.somethingWentWrong,
+        _errorMessage ?? context.l10n.somethingWentWrong,
         error: true,
       );
     }
@@ -84,7 +84,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       setState(() => _otpSent = true);
     } else {
       context.showSnack(
-        _errorMessage ?? AppStrings.somethingWentWrong,
+        _errorMessage ?? context.l10n.somethingWentWrong,
         error: true,
       );
     }
@@ -93,7 +93,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Future<void> _resetWithPhone() async {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
-    final ok = await ref.read(authViewModelProvider.notifier).reset(
+    final ok = await ref
+        .read(authViewModelProvider.notifier)
+        .reset(
           ResetPasswordRequest.phone(
             phone: _phone.text.trim(),
             otp: _otp.text.trim(),
@@ -102,11 +104,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         );
     if (!mounted) return;
     if (ok) {
-      context.showSnack(AppStrings.passwordUpdated);
+      context.showSnack(context.l10n.passwordUpdated);
       context.go(AppRoutes.login);
     } else {
       context.showSnack(
-        _errorMessage ?? AppStrings.somethingWentWrong,
+        _errorMessage ?? context.l10n.somethingWentWrong,
         error: true,
       );
     }
@@ -114,41 +116,45 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isSubmitting =
-        ref.watch(authViewModelProvider.select((s) => s.isSubmitting));
+    final isSubmitting = ref.watch(
+      authViewModelProvider.select((s) => s.isSubmitting),
+    );
 
     return Scaffold(
       appBar: AppBar(leading: const BackButton()),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.xxl),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 460),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const AuthHeader(
-                      title: AppStrings.forgotPasswordTitle,
-                      subtitle: AppStrings.forgotPasswordSubtitle,
-                    ),
-                    AppSpacing.vGapXxl,
-                    if (_phoneMode)
-                      ..._phoneFields(isSubmitting)
-                    else
-                      ..._emailFields(isSubmitting),
-                    AppSpacing.vGapMd,
-                    TextButton(
-                      onPressed: isSubmitting ? null : _switchMode,
-                      child: Text(
-                        _phoneMode
-                            ? AppStrings.useEmailInstead
-                            : AppStrings.usePhoneInstead,
+      body: ScreenLoadingOverlay(
+        loading: isSubmitting,
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.xxl),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 460),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AuthHeader(
+                        title: context.l10n.forgotPasswordTitle,
+                        subtitle: context.l10n.forgotPasswordSubtitle,
                       ),
-                    ),
-                  ],
+                      AppSpacing.vGapXxl,
+                      if (_phoneMode)
+                        ..._phoneFields(isSubmitting)
+                      else
+                        ..._emailFields(isSubmitting),
+                      AppSpacing.vGapMd,
+                      TextButton(
+                        onPressed: isSubmitting ? null : _switchMode,
+                        child: Text(
+                          _phoneMode
+                              ? context.l10n.useEmailInstead
+                              : context.l10n.usePhoneInstead,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -161,7 +167,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   List<Widget> _emailFields(bool isSubmitting) {
     return [
       AppTextField(
-        label: AppStrings.email,
+        label: context.l10n.email,
         hint: 'you@example.com',
         controller: _email,
         keyboardType: TextInputType.emailAddress,
@@ -171,7 +177,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       ),
       AppSpacing.vGapLg,
       PrimaryButton(
-        label: AppStrings.resetPassword,
+        label: context.l10n.resetPassword,
         isLoading: isSubmitting,
         onPressed: _submitEmail,
       ),
@@ -181,7 +187,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   List<Widget> _phoneFields(bool isSubmitting) {
     return [
       PhoneField(
-        label: AppStrings.phone,
+        label: context.l10n.phone,
         hint: '1711 223344',
         controller: _phone,
         enabled: !_otpSent,
@@ -191,19 +197,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       if (!_otpSent) ...[
         AppSpacing.vGapLg,
         PrimaryButton(
-          label: AppStrings.sendOtp,
+          label: context.l10n.sendOtp,
           isLoading: isSubmitting,
           onPressed: _requestPhoneOtp,
         ),
       ] else ...[
         AppSpacing.vGapLg,
-        OtpField(
-          controller: _otp,
-          textInputAction: TextInputAction.next,
-        ),
+        OtpField(controller: _otp, textInputAction: TextInputAction.next),
         AppSpacing.vGapLg,
         AppTextField(
-          label: AppStrings.newPassword,
+          label: context.l10n.newPassword,
           hint: '••••••••',
           controller: _password,
           obscure: true,
@@ -213,7 +216,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         ),
         AppSpacing.vGapLg,
         PrimaryButton(
-          label: AppStrings.resetPassword,
+          label: context.l10n.resetPassword,
           isLoading: isSubmitting,
           onPressed: _resetWithPhone,
         ),
@@ -221,7 +224,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           alignment: Alignment.centerRight,
           child: TextButton(
             onPressed: isSubmitting ? null : _requestPhoneOtp,
-            child: const Text(AppStrings.resendOtp),
+            child: Text(context.l10n.resendOtp),
           ),
         ),
       ],

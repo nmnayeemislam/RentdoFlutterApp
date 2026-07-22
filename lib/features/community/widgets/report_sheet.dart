@@ -68,11 +68,11 @@ class _ReportSheetState extends ConsumerState<ReportSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Report listing', style: AppTextStyles.headingMd),
+          Text(context.l10n.propertyReportListing, style: AppTextStyles.headingMd),
           AppSpacing.vGapLg,
           DropdownButtonFormField<ReportReason>(
             initialValue: _reason,
-            decoration: const InputDecoration(labelText: 'Reason'),
+            decoration: InputDecoration(labelText: context.l10n.reason),
             items: [
               for (final r in ReportReason.values)
                 DropdownMenuItem(value: r, child: Text(r.label)),
@@ -81,14 +81,14 @@ class _ReportSheetState extends ConsumerState<ReportSheet> {
           ),
           AppSpacing.vGapLg,
           AppTextField(
-            label: 'Details (optional)',
-            hint: 'Add any context for our team',
+            label: context.l10n.reportDetailsOptional,
+            hint: context.l10n.reportDetailsHint,
             controller: _details,
             maxLines: 3,
           ),
           AppSpacing.vGapXl,
           PrimaryButton(
-            label: 'Submit report',
+            label: context.l10n.reportSubmitReport,
             isLoading: _submitting,
             onPressed: _submit,
           ),

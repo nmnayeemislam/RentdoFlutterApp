@@ -59,7 +59,7 @@ class _SubmitQuoteSheetState extends ConsumerState<SubmitQuoteSheet> {
   Future<void> _submit() async {
     final amount = num.tryParse(_amount.text.trim());
     if (amount == null || amount <= 0) {
-      context.showSnack('Enter a valid amount', error: true);
+      context.showSnack(context.l10n.quoteEnterValidAmount, error: true);
       return;
     }
     final description = _description.text.trim();
@@ -84,8 +84,8 @@ class _SubmitQuoteSheetState extends ConsumerState<SubmitQuoteSheet> {
   @override
   Widget build(BuildContext context) {
     final validLabel = _validUntil == null
-        ? 'Valid until (optional)'
-        : 'Valid until ${Formatters.date(_validUntil)}';
+        ? context.l10n.quoteValidUntilOptional
+        : context.l10n.quoteValidUntil(Formatters.date(_validUntil));
 
     return Padding(
       padding: EdgeInsets.only(
@@ -99,19 +99,19 @@ class _SubmitQuoteSheetState extends ConsumerState<SubmitQuoteSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Submit a quote', style: AppTextStyles.headingMd),
+            Text(context.l10n.quoteSubmitTitle, style: AppTextStyles.headingMd),
             AppSpacing.vGapLg,
             AppTextField(
-              label: 'Amount',
-              hint: 'What will this job cost?',
+              label: context.l10n.amount,
+              hint: context.l10n.quoteAmountHint,
               controller: _amount,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             AppSpacing.vGapLg,
             AppTextField(
-              label: 'Description',
-              hint: "What's included in this quote?",
+              label: context.l10n.description,
+              hint: context.l10n.quoteDescriptionHint,
               controller: _description,
               maxLines: 3,
             ),
@@ -142,7 +142,7 @@ class _SubmitQuoteSheetState extends ConsumerState<SubmitQuoteSheet> {
                     if (_validUntil != null)
                       IconButton(
                         icon: const Icon(Icons.close, size: 18),
-                        tooltip: 'Clear date',
+                        tooltip: context.l10n.clearDate,
                         onPressed: () => setState(() => _validUntil = null),
                       ),
                   ],
@@ -151,7 +151,7 @@ class _SubmitQuoteSheetState extends ConsumerState<SubmitQuoteSheet> {
             ),
             AppSpacing.vGapXl,
             PrimaryButton(
-              label: 'Send quote',
+              label: context.l10n.quoteSendQuote,
               isLoading: _submitting,
               onPressed: _submit,
             ),

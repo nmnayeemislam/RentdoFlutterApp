@@ -45,7 +45,7 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
     final isAuthed =
         ref.read(authViewModelProvider.select((s) => s.isAuthenticated));
     if (!isAuthed) {
-      context.showSnack('Log in to save properties.');
+      context.showSnack(context.l10n.favoriteLogInToSave);
       unawaited(context.push(AppRoutes.login));
       return;
     }
@@ -84,7 +84,9 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
 
     return Semantics(
       button: true,
-      label: _isFavorite ? 'Remove from saved' : 'Save property',
+      label: _isFavorite
+          ? context.l10n.favoriteRemoveFromSaved
+          : context.l10n.favoriteSaveProperty,
       child: InkResponse(
       onTap: _toggle,
       radius: widget.size + 8,

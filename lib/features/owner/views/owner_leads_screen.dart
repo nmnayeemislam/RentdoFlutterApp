@@ -23,16 +23,16 @@ class OwnerLeadsScreen extends ConsumerWidget {
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Leads & Activity')),
+      appBar: AppBar(title: Text(context.l10n.ownerLeadsTitle)),
       body: !isAuthed
           ? EmptyState(
               icon: Icons.insights_outlined,
-              title: 'Sign in to see leads',
-              subtitle: 'Log in to track interest in your listings.',
+              title: context.l10n.ownerSignInToSeeLeads,
+              subtitle: context.l10n.ownerLogInToTrackInterest,
               action: SizedBox(
                 width: 200,
                 child: PrimaryButton(
-                  label: 'Log in',
+                  label: context.l10n.login,
                   onPressed: () => context.push(AppRoutes.login),
                 ),
               ),
@@ -45,12 +45,13 @@ class OwnerLeadsScreen extends ConsumerWidget {
               },
               child: ListView(
                 padding: const EdgeInsets.all(AppSpacing.lg),
-                children: const [
-                  _SummaryCard(),
+                children: [
+                  const _SummaryCard(),
                   AppSpacing.vGapLg,
-                  Text('Recent activity', style: AppTextStyles.titleMd),
+                  Text(context.l10n.ownerRecentActivity,
+                      style: AppTextStyles.titleMd),
                   AppSpacing.vGapMd,
-                  _LeadsList(),
+                  const _LeadsList(),
                 ],
               ),
             ),
@@ -80,13 +81,13 @@ class _SummaryCard extends ConsumerWidget {
             ),
           ),
         ),
-        error: (_, _) => const Text('Could not load stats',
-            style: TextStyle(color: Colors.white)),
+        error: (_, _) => Text(context.l10n.ownerCouldNotLoadStats,
+            style: const TextStyle(color: Colors.white)),
         data: (s) => Row(
           children: [
-            _Stat(label: 'Views', value: '${s.totalViews}'),
+            _Stat(label: context.l10n.ownerViews, value: '${s.totalViews}'),
             Container(width: 1, height: 36, color: Colors.white24),
-            _Stat(label: 'Leads', value: '${s.totalLeads}'),
+            _Stat(label: context.l10n.ownerLeads, value: '${s.totalLeads}'),
           ],
         ),
       ),
@@ -132,11 +133,11 @@ class _LeadsList extends ConsumerWidget {
         padding: EdgeInsets.symmetric(vertical: 24),
         child: Center(child: CircularProgressIndicator(strokeWidth: 2.4)),
       ),
-      error: (e, _) => const Text('Could not load activity.',
+      error: (e, _) => Text(context.l10n.ownerCouldNotLoadActivity,
           style: AppTextStyles.bodySm),
       data: (items) {
         if (items.isEmpty) {
-          return Text('No activity yet.',
+          return Text(context.l10n.ownerNoActivityYet,
               style: AppTextStyles.bodyMd
                   .copyWith(color: AppColors.textSecondary));
         }
@@ -164,7 +165,8 @@ class _LeadsList extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${lead.typeLabel} · ${lead.userName ?? 'Someone'}',
+                          Text(
+                              '${lead.typeLabel} · ${lead.userName ?? context.l10n.ownerSomeoneFallback}',
                               style: AppTextStyles.titleSm),
                           if (lead.listingTitle != null)
                             Text(lead.listingTitle!,

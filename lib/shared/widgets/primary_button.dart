@@ -41,28 +41,17 @@ class PrimaryButton extends StatelessWidget {
                 HapticFeedback.lightImpact();
                 onPressed!();
               },
-        child: isLoading
-            ? SizedBox(
-                height: 22,
-                width: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.4,
-                  valueColor: AlwaysStoppedAnimation(
-                    Theme.of(context).colorScheme.onPrimary,
-                  ),
-                ),
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 20),
-                    const SizedBox(width: 8),
-                  ],
-                  Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-                ],
-              ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 20),
+              const SizedBox(width: 8),
+            ],
+            Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+          ],
+        ),
       ),
     );
   }
@@ -92,8 +81,7 @@ class SecondaryButton extends StatelessWidget {
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: Theme.of(context).colorScheme.outline),
-          shape:
-              const RoundedRectangleBorder(borderRadius: AppRadius.brMd),
+          shape: const RoundedRectangleBorder(borderRadius: AppRadius.brMd),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

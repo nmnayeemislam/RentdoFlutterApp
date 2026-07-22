@@ -23,6 +23,7 @@ import '../features/config/views/language_currency_screen.dart';
 import '../features/home/views/home_screen.dart';
 import '../features/maintenance/views/maintenance_screen.dart';
 import '../features/notifications/views/notifications_screen.dart';
+import '../features/onboarding/providers/onboarding_provider.dart';
 import '../features/onboarding/views/onboarding_screen.dart';
 import '../features/onboarding/views/splash_screen.dart';
 import '../features/owner/views/create_listing_screen.dart';
@@ -56,13 +57,14 @@ import '../shared/widgets/app_shell.dart';
 import 'app_routes.dart';
 
 /// Bridges a Riverpod provider to a [Listenable] so GoRouter re-evaluates
-/// redirects whenever auth state changes.
-class _AuthRefresh extends ChangeNotifier {
-  _AuthRefresh(Ref ref) {
+/// redirects whenever auth/onboarding state changes.
+class _RouterRefresh extends ChangeNotifier {
+  _RouterRefresh(Ref ref) {
     ref.listen(
       authViewModelProvider.select((s) => s.status),
       (_, _) => notifyListeners(),
     );
+    ref.listen(onboardingSeenProvider, (_, _) => notifyListeners());
   }
 }
 
@@ -71,7 +73,7 @@ final _shellKey = GlobalKey<NavigatorState>();
 
 /// Centralized GoRouter configuration.
 final routerProvider = Provider<GoRouter>((ref) {
-  final refresh = _AuthRefresh(ref);
+  final refresh = _RouterRefresh(ref);
   ref.onDispose(refresh.dispose);
 
   return GoRouter(
@@ -80,24 +82,32 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: refresh,
     redirect: (context, state) {
       final auth = ref.read(authViewModelProvider);
+      final onboardingSeen = ref.read(onboardingSeenProvider);
       final loc = state.matchedLocation;
 
-      // Wait on splash while session is being restored.
-      if (auth.status == AuthStatus.unknown) {
+      // Wait on splash while session and first-run preference are restored.
+      if (auth.status == AuthStatus.unknown || onboardingSeen.isLoading) {
         return loc == AppRoutes.splash ? null : AppRoutes.splash;
       }
 
       final loggedIn = auth.isAuthenticated;
-      final onAuthPage = loc == AppRoutes.login ||
+      final onAuthPage =
+          loc == AppRoutes.login ||
           loc == AppRoutes.register ||
           loc == AppRoutes.forgotPassword;
       final onEntry = loc == AppRoutes.splash || loc == AppRoutes.onboarding;
 
       if (!loggedIn) {
         // Guests may browse everything; Saved/Profile render their own
-        // sign-in prompts. Only redirect away from the entry/splash pages.
-        if (onAuthPage || loc == AppRoutes.onboarding) return null;
-        if (onEntry) return AppRoutes.home;
+        // sign-in prompts. Show onboarding only once after install.
+        final seenOnboarding = onboardingSeen.valueOrNull ?? false;
+        if (loc == AppRoutes.onboarding) {
+          return seenOnboarding ? AppRoutes.home : null;
+        }
+        if (onAuthPage) return null;
+        if (onEntry) {
+          return seenOnboarding ? AppRoutes.home : AppRoutes.onboarding;
+        }
         return null;
       }
 
@@ -106,18 +116,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: AppRoutes.splash,
-        builder: (_, _) => const SplashScreen(),
-      ),
+      GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashScreen()),
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (_, _) => const OnboardingScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.login,
-        builder: (_, _) => const LoginScreen(),
-      ),
+      GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(
         path: AppRoutes.register,
         builder: (_, _) => const RegisterScreen(),
@@ -143,8 +147,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.saved,
-            pageBuilder: (_, _) =>
-                const NoTransitionPage(child: SavedScreen()),
+            pageBuilder: (_, _) => const NoTransitionPage(child: SavedScreen()),
           ),
           GoRoute(
             path: AppRoutes.profile,

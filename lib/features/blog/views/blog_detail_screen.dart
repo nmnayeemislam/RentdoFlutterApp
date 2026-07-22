@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -26,12 +27,12 @@ class BlogDetailScreen extends ConsumerWidget {
     final post = ref.watch(blogPostProvider(slug));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Article')),
+      appBar: AppBar(title: Text(context.l10n.blogArticleTitle)),
       body: SafeArea(
         child: post.when(
           loading: () => const LoadingWidget(),
           error: (_, _) => AppErrorWidget(
-            message: 'Couldn\'t load this article.',
+            message: context.l10n.blogCouldntLoadArticle,
             onRetry: () => ref.invalidate(blogPostProvider(slug)),
           ),
           data: (p) => ListView(
@@ -63,7 +64,7 @@ class BlogDetailScreen extends ConsumerWidget {
                           ),
                         const Spacer(),
                         Text(
-                          '${p.readMinutes} min read',
+                          context.l10n.blogMinRead(p.readMinutes),
                           style: AppTextStyles.caption
                               .copyWith(color: AppColors.textTertiary),
                         ),
@@ -74,8 +75,10 @@ class BlogDetailScreen extends ConsumerWidget {
                     const SizedBox(height: 6),
                     Text(
                       [
-                        if (p.authorName != null) 'By ${p.authorName}',
-                        if (p.publishedAt != null) _formatDate(p.publishedAt!),
+                        if (p.authorName != null)
+                          context.l10n.blogByAuthor(p.authorName!),
+                        if (p.publishedAt != null)
+                          _formatDate(context, p.publishedAt!),
                       ].join('  ·  '),
                       style: AppTextStyles.caption
                           .copyWith(color: AppColors.textTertiary),
@@ -96,7 +99,7 @@ class BlogDetailScreen extends ConsumerWidget {
                       AppSpacing.vGapXl,
                       const Divider(),
                       AppSpacing.vGapMd,
-                      const Text('Related articles',
+                      Text(context.l10n.blogRelatedArticles,
                           style: AppTextStyles.titleMd),
                       AppSpacing.vGapMd,
                       for (final r in p.related) _RelatedTile(post: r),
@@ -111,12 +114,9 @@ class BlogDetailScreen extends ConsumerWidget {
     );
   }
 
-  static String _formatDate(DateTime d) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${months[d.month - 1]} ${d.day}, ${d.year}';
+  static String _formatDate(BuildContext context, DateTime d) {
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat.yMMMd(locale).format(d);
   }
 }
 
@@ -155,7 +155,7 @@ class _RelatedTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${post.readMinutes} min read',
+                    context.l10n.blogMinRead(post.readMinutes),
                     style: AppTextStyles.caption
                         .copyWith(color: AppColors.textTertiary),
                   ),

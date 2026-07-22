@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../routes/app_routes.dart';
+import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../auth/viewmodels/auth_viewmodel.dart';
@@ -22,7 +22,7 @@ class SavedScreen extends ConsumerWidget {
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.saved)),
+      appBar: AppBar(title: Text(context.l10n.saved)),
       body: isAuthed ? const _SavedList() : const _GuestPrompt(),
     );
   }
@@ -45,12 +45,12 @@ class _SavedList extends ConsumerWidget {
         if (items.isEmpty) {
           return EmptyState(
             icon: Icons.favorite_border_rounded,
-            title: 'No saved properties',
-            subtitle: 'Tap the heart on any listing to save it here.',
+            title: context.l10n.savedNoProperties,
+            subtitle: context.l10n.savedTapHeartDesc,
             action: SizedBox(
               width: 200,
               child: PrimaryButton(
-                label: AppStrings.explore,
+                label: context.l10n.explore,
                 onPressed: () => context.go(AppRoutes.properties),
               ),
             ),
@@ -87,12 +87,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.favorite_border_rounded,
-      title: 'Sign in to see your saved homes',
-      subtitle: 'Save properties you love and find them here.',
+      title: context.l10n.savedSignInTitle,
+      subtitle: context.l10n.savedSignInDesc,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: AppStrings.login,
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),

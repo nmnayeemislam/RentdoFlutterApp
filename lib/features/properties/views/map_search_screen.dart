@@ -110,7 +110,7 @@ class _MapSearchScreenState extends ConsumerState<MapSearchScreen> {
       if (CancelToken.isCancel(e)) return; // superseded by a newer viewport
       if (mounted) {
         setState(() => _loading = false);
-        context.showSnack('Couldn\'t load this area.', error: true);
+        context.showSnack(context.l10n.propertiesCouldntLoadArea, error: true);
       }
     }
   }
@@ -145,7 +145,7 @@ class _MapSearchScreenState extends ConsumerState<MapSearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Map'),
+        title: Text(context.l10n.map),
         actions: [
           if (_loading)
             const Padding(
@@ -163,7 +163,7 @@ class _MapSearchScreenState extends ConsumerState<MapSearchScreen> {
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go(AppRoutes.properties),
             icon: const Icon(Icons.view_list_rounded, size: 20),
-            label: const Text('List'),
+            label: Text(context.l10n.list),
           ),
           const SizedBox(width: 4),
         ],
@@ -213,11 +213,12 @@ class _MapSearchScreenState extends ConsumerState<MapSearchScreen> {
             ],
           ),
           if (_pins.isEmpty && !_loading)
-            const Positioned(
+            Positioned(
               top: 12,
               left: 0,
               right: 0,
-              child: Center(child: _Hint('No properties in this area')),
+              child: Center(
+                  child: _Hint(context.l10n.propertiesNoPropertiesInArea)),
             ),
           if (_selected != null)
             Positioned(

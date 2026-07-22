@@ -28,7 +28,7 @@ class PackagesScreen extends ConsumerWidget {
         ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Post Packages')),
+      appBar: AppBar(title: Text(context.l10n.billingPostPackagesTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
           : ref.watch(packagesProvider).when(
@@ -39,10 +39,10 @@ class PackagesScreen extends ConsumerWidget {
                 ),
                 data: (items) {
                   if (items.isEmpty) {
-                    return const EmptyState(
+                    return EmptyState(
                       icon: Icons.inventory_2_outlined,
-                      title: 'No packages available',
-                      subtitle: 'Check back later for post packages.',
+                      title: context.l10n.billingNoPackagesAvailable,
+                      subtitle: context.l10n.billingCheckBackLaterPackages,
                     );
                   }
                   return ListView.separated(
@@ -66,7 +66,9 @@ class _PackageCard extends ConsumerWidget {
   Future<void> _buy(BuildContext context, WidgetRef ref) async {
     try {
       await ref.read(billingActionsProvider.notifier).buyPackage(package.id);
-      if (context.mounted) context.showSnack('Package purchased');
+      if (context.mounted) {
+        context.showSnack(context.l10n.billingPackagePurchased);
+      }
     } on ApiException catch (e) {
       if (context.mounted) context.showSnack(e.message, error: true);
     }
@@ -115,7 +117,8 @@ class _PackageCard extends ConsumerWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  '${package.postQuota} posts · ${package.durationDays} days',
+                  context.l10n
+                      .billingPostsAndDays(package.postQuota, package.durationDays),
                   style: AppTextStyles.bodySm,
                 ),
               ),
@@ -144,7 +147,7 @@ class _PackageCard extends ConsumerWidget {
           ],
           const SizedBox(height: AppSpacing.md),
           PrimaryButton(
-            label: 'Buy',
+            label: context.l10n.buy,
             isLoading: submitting,
             onPressed: submitting
                 ? null
@@ -165,12 +168,12 @@ class _GuestPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.inventory_2_outlined,
-      title: 'Sign in to buy packages',
-      subtitle: 'Log in to purchase post packages.',
+      title: context.l10n.billingSignInToBuyPackages,
+      subtitle: context.l10n.billingLogInToPurchasePackages,
       action: SizedBox(
         width: 200,
         child: PrimaryButton(
-          label: 'Log in',
+          label: context.l10n.login,
           onPressed: () => context.push(AppRoutes.login),
         ),
       ),
