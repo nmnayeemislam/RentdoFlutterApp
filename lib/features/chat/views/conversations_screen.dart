@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -16,57 +17,98 @@ import '../../auth/viewmodels/auth_viewmodel.dart';
 import '../viewmodels/chat_viewmodel.dart';
 
 /// Lists the user's chat conversations, or a sign-in prompt for guests.
-class ConversationsScreen extends ConsumerWidget {
+class ConversationsScreen extends ConsumerStatefulWidget {
   const ConversationsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isAuthed =
-        ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
+  ConsumerState<ConversationsScreen> createState() =>
+      _ConversationsScreenState();
+}
+
+class _ConversationsScreenState extends ConsumerState<ConversationsScreen> {
+  bool _chatOpening = false;
+
+  Future<void> _openChat(int conversationId) async {
+    if (_chatOpening) return;
+    setState(() => _chatOpening = true);
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (!mounted) return;
+    await context.push(AppRoutes.chat(conversationId));
+    if (mounted) setState(() => _chatOpening = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isAuthed = ref.watch(
+      authViewModelProvider.select((s) => s.isAuthenticated),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.messages)),
-      body: !isAuthed
-          ? const _GuestPrompt()
-          : ref.watch(conversationsViewModelProvider).when(
-                loading: () => const LoadingWidget(),
-                error: (e, _) => AppErrorWidget(
-                  message: '$e',
-                  onRetry: () => ref
-                      .read(conversationsViewModelProvider.notifier)
-                      .refresh(),
-                ),
-                data: (items) {
-                  if (items.isEmpty) {
-                    return EmptyState(
-                      icon: Icons.chat_bubble_outline,
-                      title: context.l10n.chatNoMessagesYet,
-                      subtitle: context.l10n.chatStartConversationDesc,
-                    );
-                  }
-                  return RefreshIndicator(
-                    color: AppColors.primary,
-                    onRefresh: () => ref
-                        .read(conversationsViewModelProvider.notifier)
-                        .refresh(),
-                    child: ListView.separated(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      itemCount: items.length,
-                      separatorBuilder: (_, _) =>
-                          const SizedBox(height: AppSpacing.md),
-                      itemBuilder: (context, i) =>
-                          _ConversationTile(conversation: items[i]),
+      body: Stack(
+        children: [
+          !isAuthed
+              ? const _GuestPrompt()
+              : ref
+                    .watch(conversationsViewModelProvider)
+                    .when(
+                      loading: () => const SizedBox.shrink(),
+                      error: (e, _) => AppErrorWidget(
+                        message: '$e',
+                        onRetry: () => ref
+                            .read(conversationsViewModelProvider.notifier)
+                            .refresh(),
+                      ),
+                      data: (items) {
+                        if (items.isEmpty) {
+                          return EmptyState(
+                            icon: Icons.chat_bubble_outline,
+                            title: context.l10n.chatNoMessagesYet,
+                            subtitle: context.l10n.chatStartConversationDesc,
+                          );
+                        }
+                        return RefreshIndicator(
+                          color: AppColors.primary,
+                          onRefresh: () => ref
+                              .read(conversationsViewModelProvider.notifier)
+                              .refresh(),
+                          child: ListView.separated(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            itemCount: items.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: AppSpacing.md),
+                            itemBuilder: (context, i) => _ConversationTile(
+                              conversation: items[i],
+                              onTap: () => _openChat(items[i].id),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
+          if (_chatOpening)
+            Positioned.fill(
+              child: AbsorbPointer(
+                child: ColoredBox(
+                  color: const Color(0x66000000),
+                  child: Center(
+                    child: LoadingAnimationWidget.dotsTriangle(
+                      color: AppColors.primary,
+                      size: 64,
+                    ),
+                  ),
+                ),
               ),
+            ),
+        ],
+      ),
     );
   }
 }
 
 class _ConversationTile extends StatelessWidget {
-  const _ConversationTile({required this.conversation});
+  const _ConversationTile({required this.conversation, required this.onTap});
   final ConversationModel conversation;
+  final VoidCallback onTap;
 
   String get _initials {
     final name = conversation.otherPartyName?.trim() ?? '';
@@ -79,19 +121,21 @@ class _ConversationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = (conversation.otherPartyName != null &&
+    final name =
+        (conversation.otherPartyName != null &&
             conversation.otherPartyName!.isNotEmpty)
         ? conversation.otherPartyName!
         : context.l10n.chatOwnerFallback;
     final avatar = conversation.otherPartyAvatar;
     final body = conversation.lastMessageBody ?? '';
-    final preview =
-        conversation.lastMessageIsMine ? context.l10n.chatYouPrefix(body) : body;
+    final preview = conversation.lastMessageIsMine
+        ? context.l10n.chatYouPrefix(body)
+        : body;
     final hasUnread = conversation.unreadCount > 0;
 
     return InkWell(
       borderRadius: AppRadius.brLg,
-      onTap: () => context.push(AppRoutes.chat(conversation.id)),
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
@@ -131,8 +175,9 @@ class _ConversationTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.bodySm.copyWith(
-                        fontWeight:
-                            hasUnread ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight: hasUnread
+                            ? FontWeight.w600
+                            : FontWeight.w400,
                         color: hasUnread
                             ? Theme.of(context).colorScheme.onSurface
                             : AppColors.textSecondary,

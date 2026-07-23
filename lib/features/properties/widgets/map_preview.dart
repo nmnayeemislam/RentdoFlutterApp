@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -34,13 +35,22 @@ class MapPreview extends StatefulWidget {
 }
 
 class _MapPreviewState extends State<MapPreview> {
+  bool _opening = false;
+  OverlayEntry? _openingOverlay;
+
   late final WebViewController _controller = WebViewController()
     ..setJavaScriptMode(JavaScriptMode.unrestricted)
     ..setBackgroundColor(const Color(0x00000000))
     ..loadRequest(Uri.parse(_embedUrl(widget.lat, widget.lng)));
 
-  void _openFull() {
-    Navigator.of(context).push(
+  Future<void> _openFull() async {
+    if (_opening) return;
+    setState(() => _opening = true);
+    _showOpeningOverlay();
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (!mounted) return;
+    _removeOpeningOverlay();
+    await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => MapFullScreen(
           lat: widget.lat,
@@ -49,6 +59,36 @@ class _MapPreviewState extends State<MapPreview> {
         ),
       ),
     );
+    if (mounted) setState(() => _opening = false);
+  }
+
+  void _showOpeningOverlay() {
+    _openingOverlay?.remove();
+    _openingOverlay = OverlayEntry(
+      builder: (_) => Positioned.fill(
+        child: ColoredBox(
+          color: const Color(0x66000000),
+          child: Center(
+            child: LoadingAnimationWidget.dotsTriangle(
+              color: Colors.white,
+              size: 64,
+            ),
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context, rootOverlay: true).insert(_openingOverlay!);
+  }
+
+  void _removeOpeningOverlay() {
+    _openingOverlay?.remove();
+    _openingOverlay = null;
+  }
+
+  @override
+  void dispose() {
+    _removeOpeningOverlay();
+    super.dispose();
   }
 
   @override
@@ -65,9 +105,23 @@ class _MapPreviewState extends State<MapPreview> {
               // No gesture recognizers (the default) → the preview stays
               // display-only and doesn't steal the list's scroll gestures.
               WebViewWidget(controller: _controller),
+              if (_opening)
+                Positioned.fill(
+                  child: ColoredBox(
+                    color: const Color(0x66000000),
+                    child: Center(
+                      child: LoadingAnimationWidget.dotsTriangle(
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
+                  ),
+                ),
               _MapPill(
-                  label: context.l10n.mapViewMap,
-                  icon: Icons.open_in_full_rounded),
+                label: context.l10n.mapViewMap,
+                icon: Icons.open_in_full_rounded,
+                loading: _opening,
+              ),
             ],
           ),
         ),
@@ -94,31 +148,80 @@ class MapFullScreen extends StatefulWidget {
 }
 
 class _MapFullScreenState extends State<MapFullScreen> {
+  bool _pageLoading = true;
+  DateTime? _loadStartedAt;
+
   late final WebViewController _controller = WebViewController()
     ..setJavaScriptMode(JavaScriptMode.unrestricted)
+    ..setNavigationDelegate(
+      NavigationDelegate(
+        onPageStarted: (_) {
+          _loadStartedAt = DateTime.now();
+          if (mounted) setState(() => _pageLoading = true);
+        },
+        onPageFinished: (_) => _hideLoader(),
+        onWebResourceError: (_) => _hideLoader(),
+      ),
+    )
     ..loadRequest(Uri.parse(_embedUrl(widget.lat, widget.lng, zoom: 16)));
+
+  Future<void> _hideLoader() async {
+    final startedAt = _loadStartedAt;
+    if (startedAt != null) {
+      final elapsed = DateTime.now().difference(startedAt);
+      const minVisible = Duration(milliseconds: 700);
+      if (elapsed < minVisible) {
+        await Future<void>.delayed(minVisible - elapsed);
+      }
+    }
+    if (mounted) setState(() => _pageLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.label ?? context.l10n.mapLocationFallback)),
-      body: WebViewWidget(
-        controller: _controller,
-        // Eager recognizer → the interactive full-screen map claims all
-        // pan/zoom gestures.
-        gestureRecognizers: {
-          Factory<OneSequenceGestureRecognizer>(
-              () => EagerGestureRecognizer()),
-        },
+      appBar: AppBar(
+        title: Text(widget.label ?? context.l10n.mapLocationFallback),
+      ),
+      body: Stack(
+        children: [
+          WebViewWidget(
+            controller: _controller,
+            // Eager recognizer → the interactive full-screen map claims all
+            // pan/zoom gestures.
+            gestureRecognizers: {
+              Factory<OneSequenceGestureRecognizer>(
+                () => EagerGestureRecognizer(),
+              ),
+            },
+          ),
+          if (_pageLoading)
+            Positioned.fill(
+              child: ColoredBox(
+                color: const Color(0x66000000),
+                child: Center(
+                  child: LoadingAnimationWidget.dotsTriangle(
+                    color: Colors.white,
+                    size: 64,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 }
 
 class _MapPill extends StatelessWidget {
-  const _MapPill({required this.label, required this.icon});
+  const _MapPill({
+    required this.label,
+    required this.icon,
+    required this.loading,
+  });
   final String label;
   final IconData icon;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -133,17 +236,37 @@ class _MapPill extends StatelessWidget {
             borderRadius: AppRadius.brPill,
             boxShadow: [
               BoxShadow(
-                  color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 2)),
+                color: Color(0x33000000),
+                blurRadius: 8,
+                offset: Offset(0, 2),
+              ),
             ],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 14, color: AppColors.primary),
-              const SizedBox(width: 6),
-              Text(label,
+              if (loading)
+                SizedBox(
+                  width: 46,
+                  height: 18,
+                  child: Center(
+                    child: LoadingAnimationWidget.dotsTriangle(
+                      color: AppColors.primary,
+                      size: 24,
+                    ),
+                  ),
+                )
+              else ...[
+                Icon(icon, size: 14, color: AppColors.primary),
+                const SizedBox(width: 6),
+                Text(
+                  label,
                   style: AppTextStyles.caption.copyWith(
-                      color: AppColors.primary, fontWeight: FontWeight.w700)),
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ],
           ),
         ),

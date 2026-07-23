@@ -18,8 +18,9 @@ class SavedScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isAuthed =
-        ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
+    final isAuthed = ref.watch(
+      authViewModelProvider.select((s) => s.isAuthenticated),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.saved)),
@@ -36,7 +37,7 @@ class _SavedList extends ConsumerWidget {
     final saved = ref.watch(savedViewModelProvider);
 
     return saved.when(
-      loading: () => const LoadingWidget(),
+      loading: () => const SizedBox.shrink(),
       error: (e, _) => AppErrorWidget(
         message: '$e',
         onRetry: () => ref.read(savedViewModelProvider.notifier).refresh(),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
@@ -12,24 +13,50 @@ import '../extensions/context_extensions.dart';
 ///
 /// A floating white bar; the active tab's icon sits in a navy "squircle" with
 /// its label below. "Messages" opens the (full-screen) conversations list.
-class AppShell extends StatelessWidget {
+class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
 
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
   static List<_TabItem> _tabsFor(BuildContext context) {
     final l10n = context.l10n;
     return [
-      _TabItem(AppRoutes.home, Icons.home_outlined, Icons.home_rounded,
-          l10n.home),
-      _TabItem(AppRoutes.properties, Icons.search_outlined,
-          Icons.search_rounded, l10n.search),
-      _TabItem(AppRoutes.saved, Icons.favorite_border_rounded,
-          Icons.favorite_rounded, l10n.saved),
-      _TabItem(AppRoutes.conversations, Icons.chat_bubble_outline_rounded,
-          Icons.chat_bubble_rounded, l10n.messages, push: true),
-      _TabItem(AppRoutes.profile, Icons.person_outline_rounded,
-          Icons.person_rounded, l10n.profile),
+      _TabItem(
+        AppRoutes.home,
+        Icons.home_outlined,
+        Icons.home_rounded,
+        l10n.home,
+      ),
+      _TabItem(
+        AppRoutes.properties,
+        Icons.search_outlined,
+        Icons.search_rounded,
+        l10n.search,
+      ),
+      _TabItem(
+        AppRoutes.saved,
+        Icons.favorite_border_rounded,
+        Icons.favorite_rounded,
+        l10n.saved,
+      ),
+      _TabItem(
+        AppRoutes.conversations,
+        Icons.chat_bubble_outline_rounded,
+        Icons.chat_bubble_rounded,
+        l10n.messages,
+        push: true,
+      ),
+      _TabItem(
+        AppRoutes.profile,
+        Icons.person_outline_rounded,
+        Icons.person_rounded,
+        l10n.profile,
+      ),
     ];
   }
 
@@ -37,6 +64,21 @@ class AppShell extends StatelessWidget {
     final loc = GoRouterState.of(context).matchedLocation;
     final i = tabs.indexWhere((t) => !t.push && loc.startsWith(t.path));
     return i < 0 ? 0 : i;
+  }
+
+  bool _navOpening = false;
+
+  Future<void> _openWithLoader(_TabItem tab) async {
+    if (_navOpening) return;
+    setState(() => _navOpening = true);
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (!mounted) return;
+    if (tab.push) {
+      await context.push(tab.path);
+    } else {
+      context.go(tab.path);
+    }
+    if (mounted) setState(() => _navOpening = false);
   }
 
   @override
@@ -47,6 +89,10 @@ class AppShell extends StatelessWidget {
     final bool isDark = theme.brightness == Brightness.dark;
 
     void onTap(_TabItem tab) {
+      if (tab.path == AppRoutes.saved || tab.path == AppRoutes.conversations) {
+        _openWithLoader(tab);
+        return;
+      }
       if (tab.push) {
         context.push(tab.path);
       } else {
@@ -55,13 +101,34 @@ class AppShell extends StatelessWidget {
     }
 
     return Scaffold(
-      body: child,
+      body: Stack(
+        children: [
+          widget.child,
+          if (_navOpening)
+            Positioned.fill(
+              child: AbsorbPointer(
+                child: ColoredBox(
+                  color: const Color(0x66000000),
+                  child: Center(
+                    child: LoadingAnimationWidget.dotsTriangle(
+                      color: AppColors.primary,
+                      size: 64,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 12),
           child: Container(
-            padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 8),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: 6,
+              vertical: 8,
+            ),
             decoration: BoxDecoration(
               color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
               borderRadius: AppRadius.brXl,
@@ -150,8 +217,13 @@ class _NavButton extends StatelessWidget {
 }
 
 class _TabItem {
-  const _TabItem(this.path, this.icon, this.activeIcon, this.label,
-      {this.push = false});
+  const _TabItem(
+    this.path,
+    this.icon,
+    this.activeIcon,
+    this.label, {
+    this.push = false,
+  });
   final String path;
   final IconData icon;
   final IconData activeIcon;

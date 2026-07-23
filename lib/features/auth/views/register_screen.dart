@@ -48,12 +48,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _sendOtp() async {
     if (!_collectFormKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
-    final result =
-        await ref.read(authViewModelProvider.notifier).startRegister(
-              _phone.text.trim(),
-              name: _name.text.trim(),
-              email: _email.text.trim(),
-            );
+    final result = await ref
+        .read(authViewModelProvider.notifier)
+        .startRegister(
+          _phone.text.trim(),
+          name: _name.text.trim(),
+          email: _email.text.trim(),
+        );
     if (!mounted) return;
     switch (result) {
       case AuthActionResult.otpSent:
@@ -70,14 +71,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _verify() async {
     if (!_verifyFormKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
-    final result =
-        await ref.read(authViewModelProvider.notifier).verifyRegister(
-              phone: _phone.text.trim(),
-              otp: _otp.text.trim(),
-              name: _name.text.trim(),
-              email: _email.text.trim(),
-              password: _password.text,
-            );
+    final result = await ref
+        .read(authViewModelProvider.notifier)
+        .verifyRegister(
+          phone: _phone.text.trim(),
+          otp: _otp.text.trim(),
+          name: _name.text.trim(),
+          email: _email.text.trim(),
+          password: _password.text,
+        );
     if (!mounted) return;
     switch (result) {
       case AuthActionResult.success:
@@ -99,13 +101,32 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
   }
 
+  void _handleBack() {
+    FocusScope.of(context).unfocus();
+    if (_otpStep) {
+      _backToDetails();
+      return;
+    }
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.login);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isSubmitting =
-        ref.watch(authViewModelProvider.select((s) => s.isSubmitting));
+    final isSubmitting = ref.watch(
+      authViewModelProvider.select((s) => s.isSubmitting),
+    );
 
     return Scaffold(
-      appBar: AppBar(leading: const BackButton()),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: _handleBack,
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -131,6 +152,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           AuthHeader(
             title: context.l10n.createAccount,
             subtitle: context.l10n.authJoinRentdoDesc,
+            logoSize: 110,
+            logoPadding: 16,
           ),
           AppSpacing.vGapXxl,
           AppTextField(
@@ -203,10 +226,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           AuthHeader(
             title: context.l10n.createAccount,
             subtitle: context.l10n.authEnterCodeDesc,
+            logoSize: 110,
+            logoPadding: 16,
           ),
           AppSpacing.vGapXl,
-          Text(context.l10n.authVerifyingPhone(_phone.text.trim()),
-              style: AppTextStyles.titleSm),
+          Text(
+            context.l10n.authVerifyingPhone(_phone.text.trim()),
+            style: AppTextStyles.titleSm,
+          ),
           AppSpacing.vGapLg,
           OtpField(controller: _otp),
           AppSpacing.vGapXl,

@@ -27,11 +27,11 @@ class AuthHeader extends StatelessWidget {
       children: [
         Center(
           child: Container(
-            height: logoSize,
-            width: logoSize,
+            height: 170,
+            width: 170,
             padding: EdgeInsets.all(logoPadding),
             decoration: const BoxDecoration(
-              color: Colors.white,
+              // color: Colors.white,
               borderRadius: AppRadius.brLg,
               boxShadow: AppShadows.card,
             ),

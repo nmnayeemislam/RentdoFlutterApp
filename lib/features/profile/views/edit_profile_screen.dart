@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -30,12 +31,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   String? _currency;
   String? _visibility;
+  bool _saveOverlay = false;
 
   Map<String, String> _visibilityOptions(BuildContext context) => {
-        'everyone': context.l10n.profileVisibilityEveryone,
-        'registered': context.l10n.profileVisibilityRegistered,
-        'none': context.l10n.profileVisibilityNobody,
-      };
+    'everyone': context.l10n.profileVisibilityEveryone,
+    'registered': context.l10n.profileVisibilityRegistered,
+    'none': context.l10n.profileVisibilityNobody,
+  };
 
   @override
   void initState() {
@@ -80,119 +82,159 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       return;
     }
 
-    final ok =
-        await ref.read(profileViewModelProvider.notifier).updateProfile(changes);
+    setState(() => _saveOverlay = true);
+    final startedAt = DateTime.now();
+    final ok = await ref
+        .read(profileViewModelProvider.notifier)
+        .updateProfile(changes);
+    final elapsed = DateTime.now().difference(startedAt);
+    const minVisible = Duration(milliseconds: 700);
+    if (elapsed < minVisible) {
+      await Future<void>.delayed(minVisible - elapsed);
+    }
     if (!mounted) return;
+    setState(() => _saveOverlay = false);
     if (ok) {
       context.showSnack(context.l10n.profileUpdated);
       context.pop();
-    } else {
-      context.showSnack(
-        ref.read(profileViewModelProvider).error?.message ??
-            context.l10n.profileUpdateFailed,
-        error: true,
-      );
+      return;
     }
+    context.showSnack(
+      ref.read(profileViewModelProvider).error?.message ??
+          context.l10n.profileUpdateFailed,
+      error: true,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isSubmitting =
-        ref.watch(profileViewModelProvider.select((s) => s.isSubmitting));
+    final isSubmitting = ref.watch(
+      profileViewModelProvider.select((s) => s.isSubmitting),
+    );
     final currencies = ref.watch(currencyOptionsProvider);
 
     final visibilityOptions = _visibilityOptions(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.profileEditProfile)),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Center(child: _AvatarPicker()),
-                    AppSpacing.vGapXl,
-                    AppTextField(
-                      label: context.l10n.fullName,
-                      controller: _name,
-                      prefixIcon: Icons.person_outline_rounded,
-                      textInputAction: TextInputAction.next,
-                      validator: (v) => Validators.required(v, field: 'Name'),
-                    ),
-                    AppSpacing.vGapLg,
-                    AppTextField(
-                      label: context.l10n.email,
-                      hint: 'you@example.com',
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      prefixIcon: Icons.mail_outline_rounded,
-                      textInputAction: TextInputAction.next,
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? null
-                          : Validators.email(v),
-                    ),
-                    AppSpacing.vGapLg,
-                    AppTextField(
-                      label: context.l10n.phone,
-                      hint: context.l10n.profilePhoneHint,
-                      controller: _phone,
-                      keyboardType: TextInputType.phone,
-                      prefixIcon: Icons.phone_outlined,
-                      textInputAction: TextInputAction.done,
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? null
-                          : Validators.phone(v),
-                    ),
-                    if (currencies.isNotEmpty) ...[
-                      AppSpacing.vGapLg,
-                      DropdownButtonFormField<String>(
-                        initialValue: currencies.any((c) => c.code == _currency)
-                            ? _currency
-                            : null,
-                        decoration:
-                            InputDecoration(labelText: context.l10n.currency),
-                        items: [
-                          for (final c in currencies)
-                            DropdownMenuItem(
-                              value: c.code,
-                              child: Text(
-                                  context.l10n.profileCurrencyOption(c.code, c.name)),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.xxl),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Center(child: _AvatarPicker()),
+                        AppSpacing.vGapXl,
+                        AppTextField(
+                          label: context.l10n.fullName,
+                          controller: _name,
+                          prefixIcon: Icons.person_outline_rounded,
+                          textInputAction: TextInputAction.next,
+                          validator: (v) =>
+                              Validators.required(v, field: 'Name'),
+                        ),
+                        AppSpacing.vGapLg,
+                        AppTextField(
+                          label: context.l10n.email,
+                          hint: 'you@example.com',
+                          controller: _email,
+                          keyboardType: TextInputType.emailAddress,
+                          prefixIcon: Icons.mail_outline_rounded,
+                          textInputAction: TextInputAction.next,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? null
+                              : Validators.email(v),
+                        ),
+                        AppSpacing.vGapLg,
+                        AppTextField(
+                          label: context.l10n.phone,
+                          hint: context.l10n.profilePhoneHint,
+                          controller: _phone,
+                          keyboardType: TextInputType.phone,
+                          prefixIcon: Icons.phone_outlined,
+                          textInputAction: TextInputAction.done,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? null
+                              : Validators.phone(v),
+                        ),
+                        if (currencies.isNotEmpty) ...[
+                          AppSpacing.vGapLg,
+                          DropdownButtonFormField<String>(
+                            initialValue:
+                                currencies.any((c) => c.code == _currency)
+                                ? _currency
+                                : null,
+                            decoration: InputDecoration(
+                              labelText: context.l10n.currency,
                             ),
+                            items: [
+                              for (final c in currencies)
+                                DropdownMenuItem(
+                                  value: c.code,
+                                  child: Text(
+                                    context.l10n.profileCurrencyOption(
+                                      c.code,
+                                      c.name,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                            onChanged: (v) => setState(() => _currency = v),
+                          ),
                         ],
-                        onChanged: (v) => setState(() => _currency = v),
-                      ),
-                    ],
-                    AppSpacing.vGapLg,
-                    DropdownButtonFormField<String>(
-                      initialValue: visibilityOptions.containsKey(_visibility)
-                          ? _visibility
-                          : null,
-                      decoration: InputDecoration(
-                          labelText: context.l10n.profileWhoCanSeePhone),
-                      items: [
-                        for (final e in visibilityOptions.entries)
-                          DropdownMenuItem(value: e.key, child: Text(e.value)),
+                        AppSpacing.vGapLg,
+                        DropdownButtonFormField<String>(
+                          initialValue:
+                              visibilityOptions.containsKey(_visibility)
+                              ? _visibility
+                              : null,
+                          decoration: InputDecoration(
+                            labelText: context.l10n.profileWhoCanSeePhone,
+                          ),
+                          items: [
+                            for (final e in visibilityOptions.entries)
+                              DropdownMenuItem(
+                                value: e.key,
+                                child: Text(e.value),
+                              ),
+                          ],
+                          onChanged: (v) => setState(() => _visibility = v),
+                        ),
+                        AppSpacing.vGapXxl,
+                        PrimaryButton(
+                          label: context.l10n.accountSaveChanges,
+                          isLoading: isSubmitting,
+                          onPressed: _save,
+                        ),
                       ],
-                      onChanged: (v) => setState(() => _visibility = v),
                     ),
-                    AppSpacing.vGapXxl,
-                    PrimaryButton(
-                      label: context.l10n.accountSaveChanges,
-                      isLoading: isSubmitting,
-                      onPressed: _save,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+          if (_saveOverlay || isSubmitting)
+            Positioned.fill(
+              child: AbsorbPointer(
+                child: ColoredBox(
+                  color: const Color(0x66000000),
+                  child: Center(
+                    child: LoadingAnimationWidget.dotsTriangle(
+                      color: AppColors.primary,
+                      size: 64,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -218,16 +260,18 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
     );
     if (picked == null) return;
     setState(() => _uploading = true);
-    final ok =
-        await ref.read(profileViewModelProvider.notifier).uploadPhoto(picked.path);
+    final ok = await ref
+        .read(profileViewModelProvider.notifier)
+        .uploadPhoto(picked.path);
     if (!mounted) return;
     setState(() => _uploading = false);
     context.showSnack(
-        ok
-            ? context.l10n.profilePhotoUpdated
-            : ref.read(profileViewModelProvider).error?.message ??
+      ok
+          ? context.l10n.profilePhotoUpdated
+          : ref.read(profileViewModelProvider).error?.message ??
                 context.l10n.profileUploadFailed,
-        error: !ok);
+      error: !ok,
+    );
   }
 
   @override
@@ -240,14 +284,18 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
         CircleAvatar(
           radius: 44,
           backgroundColor: AppColors.primarySurface,
-          backgroundImage:
-              avatarUrl != null ? CachedNetworkImageProvider(avatarUrl) : null,
+          backgroundImage: avatarUrl != null
+              ? CachedNetworkImageProvider(avatarUrl)
+              : null,
           child: avatarUrl == null
-              ? Text(user?.initials ?? '?',
+              ? Text(
+                  user?.initials ?? '?',
                   style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary))
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                )
               : null,
         ),
         Positioned(
@@ -267,8 +315,11 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
                         valueColor: AlwaysStoppedAnimation(Colors.white),
                       ),
                     )
-                  : const Icon(Icons.camera_alt_rounded,
-                      size: 16, color: Colors.white),
+                  : const Icon(
+                      Icons.camera_alt_rounded,
+                      size: 16,
+                      color: Colors.white,
+                    ),
             ),
           ),
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_shadows.dart';
@@ -45,11 +46,24 @@ class PrimaryButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (icon != null) ...[
-              Icon(icon, size: 20),
-              const SizedBox(width: 8),
+            if (isLoading)
+              SizedBox(
+                width: 48,
+                height: 22,
+                child: Center(
+                  child: LoadingAnimationWidget.dotsTriangle(
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+              )
+            else ...[
+              if (icon != null) ...[
+                Icon(icon, size: 20),
+                const SizedBox(width: 8),
+              ],
+              Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
             ],
-            Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
           ],
         ),
       ),

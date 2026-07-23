@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/theme_provider.dart';
+import '../../../core/providers/theme_reveal_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -252,6 +253,22 @@ class ProfileScreen extends ConsumerWidget {
                 label: l10n.profileLoginRegister,
                 onPressed: () => context.go(AppRoutes.login),
               ),
+            if (isAuthenticated) ...[
+              AppSpacing.vGapMd,
+              SizedBox(
+                height: 52,
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => context.push(AppRoutes.privacyData),
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  label: Text(l10n.accountDeleteAccountTitle),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
             AppSpacing.vGapLg,
             Center(
               child: Text(l10n.profileAppVersion, style: AppTextStyles.caption),
@@ -468,24 +485,83 @@ class _AppearanceToggle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = ref.watch(themeModeProvider) == ThemeMode.dark;
+    final mode = ref.watch(themeModeProvider);
+    final tileKey = GlobalKey();
+
+    void changeTheme(ThemeMode targetMode) {
+      if (targetMode == mode) return;
+      final renderObject = tileKey.currentContext?.findRenderObject();
+      if (renderObject is RenderBox) {
+        final offset = renderObject.localToGlobal(Offset.zero);
+        final center = Offset(
+          offset.dx + renderObject.size.width / 2,
+          offset.dy + renderObject.size.height / 2,
+        );
+        ref
+            .read(themeRevealProvider.notifier)
+            .start(center: center, targetMode: targetMode);
+      }
+      ref.read(themeModeProvider.notifier).set(targetMode);
+    }
+
+    IconData iconFor(ThemeMode mode) => switch (mode) {
+      ThemeMode.light => Icons.light_mode_rounded,
+      ThemeMode.dark => Icons.dark_mode_rounded,
+      ThemeMode.system => Icons.settings_suggest_rounded,
+    };
+
+    String labelFor(ThemeMode mode) => switch (mode) {
+      ThemeMode.light => 'Light',
+      ThemeMode.dark => 'Dark',
+      ThemeMode.system => 'System',
+    };
+
     return Container(
+      key: tileKey,
+      padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: AppRadius.brLg,
         border: Border.all(color: context.colors.outline),
       ),
-      child: SwitchListTile.adaptive(
-        value: isDark,
-        activeThumbColor: AppColors.primary,
-        secondary: Icon(
-          isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-          color: AppColors.primary,
-        ),
-        title: Text(context.l10n.profileDarkMode, style: AppTextStyles.titleSm),
-        onChanged: (v) => ref
-            .read(themeModeProvider.notifier)
-            .set(v ? ThemeMode.dark : ThemeMode.light),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(iconFor(mode), color: AppColors.primary),
+              const SizedBox(width: AppSpacing.sm),
+              const Text('Theme mode', style: AppTextStyles.titleSm),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          SegmentedButton<ThemeMode>(
+            segments: [
+              for (final option in ThemeMode.values)
+                ButtonSegment<ThemeMode>(
+                  value: option,
+                  icon: Icon(iconFor(option), size: 18),
+                  label: Text(labelFor(option)),
+                ),
+            ],
+            selected: {mode},
+            showSelectedIcon: false,
+            onSelectionChanged: (selection) => changeTheme(selection.first),
+            style: ButtonStyle(
+              visualDensity: VisualDensity.compact,
+              foregroundColor: WidgetStateProperty.resolveWith((states) {
+                return states.contains(WidgetState.selected)
+                    ? Colors.white
+                    : context.colors.onSurface;
+              }),
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                return states.contains(WidgetState.selected)
+                    ? AppColors.primary
+                    : Colors.transparent;
+              }),
+            ),
+          ),
+        ],
       ),
     );
   }

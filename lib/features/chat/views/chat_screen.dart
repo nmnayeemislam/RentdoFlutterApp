@@ -57,8 +57,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final messages =
-        ref.watch(conversationMessagesProvider(widget.conversationId));
+    final messages = ref.watch(
+      conversationMessagesProvider(widget.conversationId),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.chatTitle)),
@@ -66,7 +67,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         children: [
           Expanded(
             child: messages.when(
-              loading: () => const LoadingWidget(),
+              loading: () => const SizedBox.shrink(),
               error: (e, _) => AppErrorWidget(
                 message: '$e',
                 onRetry: () => ref.invalidate(
@@ -81,13 +82,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     subtitle: context.l10n.chatSayHelloDesc,
                   );
                 }
-                WidgetsBinding.instance
-                    .addPostFrameCallback((_) => _scrollToBottom());
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _scrollToBottom(),
+                );
                 return ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   itemCount: items.length,
-                  itemBuilder: (context, i) => _MessageBubble(message: items[i]),
+                  itemBuilder: (context, i) =>
+                      _MessageBubble(message: items[i]),
                 );
               },
             ),
@@ -122,8 +125,9 @@ class _MessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
-        mainAxisAlignment:
-            isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMine
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: [
           Flexible(
             child: Container(
@@ -150,8 +154,7 @@ class _MessageBubble extends StatelessWidget {
                   Text(
                     message.body,
                     style: AppTextStyles.bodyMd.copyWith(
-                      color:
-                          isMine ? Colors.white : context.colors.onSurface,
+                      color: isMine ? Colors.white : context.colors.onSurface,
                     ),
                   ),
                   if (time.isNotEmpty) ...[
@@ -159,9 +162,7 @@ class _MessageBubble extends StatelessWidget {
                     Text(
                       time,
                       style: AppTextStyles.caption.copyWith(
-                        color: isMine
-                            ? Colors.white70
-                            : AppColors.textTertiary,
+                        color: isMine ? Colors.white70 : AppColors.textTertiary,
                       ),
                     ),
                   ],
@@ -217,8 +218,9 @@ class _InputBar extends StatelessWidget {
                   maxLines: 4,
                   textInputAction: TextInputAction.send,
                   onSubmitted: (_) => onSend(),
-                  style: AppTextStyles.bodyMd
-                      .copyWith(color: context.colors.onSurface),
+                  style: AppTextStyles.bodyMd.copyWith(
+                    color: context.colors.onSurface,
+                  ),
                   decoration: InputDecoration(
                     hintText: context.l10n.chatTypeMessageHint,
                     filled: false,

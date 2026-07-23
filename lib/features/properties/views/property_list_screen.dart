@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
@@ -33,6 +34,7 @@ class PropertyListScreen extends ConsumerStatefulWidget {
 class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
   final _scroll = ScrollController();
   final _searchController = TextEditingController();
+  bool _mapOpening = false;
 
   @override
   void initState() {
@@ -60,6 +62,15 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
     if (result != null) await controller.applyFilter(result);
   }
 
+  Future<void> _openMap() async {
+    if (_mapOpening) return;
+    setState(() => _mapOpening = true);
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (!mounted) return;
+    await context.push(AppRoutes.mapSearch);
+    if (mounted) setState(() => _mapOpening = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     // Read the notifier once; the pieces below watch only the slices they need
@@ -72,66 +83,86 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
       floatingActionButton: hideMapButton
           ? null
           : FloatingActionButton.extended(
-              onPressed: () => context.push(AppRoutes.mapSearch),
+              onPressed: _mapOpening ? null : _openMap,
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.map_outlined),
               label: Text(context.l10n.map),
             ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              child: Consumer(
-                builder: (context, ref, _) {
-                  final active = ref.watch(
-                    propertyListViewModelProvider.select(
-                      (s) => s.filter.hasActiveFilters,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final active = ref.watch(
+                        propertyListViewModelProvider.select(
+                          (s) => s.filter.hasActiveFilters,
+                        ),
+                      );
+                      return AppSearchBar(
+                        controller: _searchController,
+                        onSubmitted: controller.setSearch,
+                        onFilterTap: _openFilters,
+                        filterActive: active,
+                      );
+                    },
+                  ),
+                ),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final type = ref.watch(
+                      propertyListViewModelProvider.select(
+                        (s) => s.filter.type,
+                      ),
+                    );
+                    return TypeFilterBar(
+                      selected: type,
+                      onSelected: controller.setType,
+                    );
+                  },
+                ),
+                AppSpacing.vGapMd,
+                Consumer(
+                  builder: (context, ref, _) {
+                    final total = ref.watch(
+                      propertyListViewModelProvider.select((s) => s.total),
+                    );
+                    final filter = ref.watch(
+                      propertyListViewModelProvider.select((s) => s.filter),
+                    );
+                    return _ResultHeader(count: total, filter: filter);
+                  },
+                ),
+                Expanded(
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final state = ref.watch(propertyListViewModelProvider);
+                      return _body(state, controller);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_mapOpening)
+            Positioned.fill(
+              child: AbsorbPointer(
+                child: ColoredBox(
+                  color: const Color(0x66000000),
+                  child: Center(
+                    child: LoadingAnimationWidget.dotsTriangle(
+                      color: AppColors.primary,
+                      size: 64,
                     ),
-                  );
-                  return AppSearchBar(
-                    controller: _searchController,
-                    onSubmitted: controller.setSearch,
-                    onFilterTap: _openFilters,
-                    filterActive: active,
-                  );
-                },
+                  ),
+                ),
               ),
             ),
-            Consumer(
-              builder: (context, ref, _) {
-                final type = ref.watch(
-                  propertyListViewModelProvider.select((s) => s.filter.type),
-                );
-                return TypeFilterBar(
-                  selected: type,
-                  onSelected: controller.setType,
-                );
-              },
-            ),
-            AppSpacing.vGapMd,
-            Consumer(
-              builder: (context, ref, _) {
-                final total = ref.watch(
-                  propertyListViewModelProvider.select((s) => s.total),
-                );
-                final filter = ref.watch(
-                  propertyListViewModelProvider.select((s) => s.filter),
-                );
-                return _ResultHeader(count: total, filter: filter);
-              },
-            ),
-            Expanded(
-              child: Consumer(
-                builder: (context, ref, _) {
-                  final state = ref.watch(propertyListViewModelProvider);
-                  return _body(state, controller);
-                },
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
