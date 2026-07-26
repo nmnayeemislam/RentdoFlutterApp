@@ -53,6 +53,7 @@ import '../features/technicians/views/technician_profile_screen.dart';
 import '../features/technicians/views/technicians_screen.dart';
 import '../features/visits/views/my_visits_screen.dart';
 import '../features/wallet/views/wallet_screen.dart';
+import '../shared/extensions/context_extensions.dart';
 import '../shared/widgets/app_shell.dart';
 import 'app_routes.dart';
 
@@ -150,6 +151,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (_, _) => const NoTransitionPage(child: SavedScreen()),
           ),
           GoRoute(
+            path: AppRoutes.conversations,
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: ConversationsScreen()),
+          ),
+          GoRoute(
             path: AppRoutes.profile,
             pageBuilder: (_, _) =>
                 const NoTransitionPage(child: ProfileScreen()),
@@ -187,11 +193,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.notifications,
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const NotificationsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.conversations,
-        parentNavigatorKey: _rootKey,
-        builder: (_, _) => const ConversationsScreen(),
       ),
       GoRoute(
         path: '/conversations/:id',
@@ -288,17 +289,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.privacyPolicy,
         parentNavigatorKey: _rootKey,
-        builder: (_, _) => const CmsPageScreen(
+        builder: (context, _) => CmsPageScreen(
           slug: AppRoutes.privacyPolicySlug,
-          title: 'Privacy Policy',
+          title: context.l10n.profilePrivacyPolicy,
         ),
       ),
       GoRoute(
         path: AppRoutes.termsConditions,
         parentNavigatorKey: _rootKey,
-        builder: (_, _) => const CmsPageScreen(
+        builder: (context, _) => CmsPageScreen(
           slug: AppRoutes.termsConditionsSlug,
-          title: 'Terms & Conditions',
+          title: context.l10n.profileTermsConditions,
         ),
       ),
       GoRoute(

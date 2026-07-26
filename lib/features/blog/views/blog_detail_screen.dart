@@ -30,7 +30,7 @@ class BlogDetailScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(context.l10n.blogArticleTitle)),
       body: SafeArea(
         child: post.when(
-          loading: () => const LoadingWidget(),
+          loading: () => const SizedBox.shrink(),
           error: (_, _) => AppErrorWidget(
             message: context.l10n.blogCouldntLoadArticle,
             onRetry: () => ref.invalidate(blogPostProvider(slug)),

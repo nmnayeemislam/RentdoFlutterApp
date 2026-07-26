@@ -30,7 +30,7 @@ class SavedSearchesScreen extends ConsumerWidget {
       body: !isAuthed
           ? const _GuestPrompt()
           : searches.when(
-              loading: () => const LoadingWidget(),
+              loading: () => const SizedBox.shrink(),
               error: (e, _) => AppErrorWidget(
                 message: '$e',
                 onRetry: () => ref

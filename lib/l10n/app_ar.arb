@@ -8,6 +8,27 @@
   "retry": "إعادة المحاولة",
   "somethingWentWrong": "حدث خطأ ما",
   "noInternet": "لا يوجد اتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.",
+  "noInternetTitle": "لا يوجد اتصال بالإنترنت",
+  "noInternetSubtitle": "يبدو أنك غير متصل بالإنترنت. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
+  "openSettings": "فتح الإعدادات",
+  "profileThemeMode": "وضع المظهر",
+
+  "validatorRequired": "{field} مطلوب",
+  "@validatorRequired": {
+    "placeholders": {"field": {"type": "String"}}
+  },
+  "validatorEmailRequired": "البريد الإلكتروني مطلوب",
+  "validatorEmailInvalid": "أدخل بريدًا إلكترونيًا صالحًا",
+  "validatorPasswordRequired": "كلمة المرور مطلوبة",
+  "validatorPasswordMinLength": "يجب أن تتكون كلمة المرور من {min} أحرف على الأقل",
+  "@validatorPasswordMinLength": {
+    "placeholders": {"min": {"type": "int"}}
+  },
+  "validatorPasswordMismatch": "كلمتا المرور غير متطابقتين",
+  "validatorPhoneRequired": "رقم الهاتف مطلوب",
+  "validatorPhoneInvalid": "أدخل رقم هاتف صالحًا",
+  "validatorCodeRequired": "الرمز مطلوب",
+  "validatorCodeInvalid": "أدخل الرمز المكوّن من 6 أرقام",
   "noResults": "لم يتم العثور على نتائج",
   "seeAll": "عرض الكل",
   "explore": "استكشف العقارات",

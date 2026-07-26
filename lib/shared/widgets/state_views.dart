@@ -9,28 +9,6 @@ import '../../core/theme/app_text_styles.dart';
 import '../extensions/context_extensions.dart';
 import 'primary_button.dart';
 
-/// Centered loading indicator for async view states.
-class LoadingWidget extends StatelessWidget {
-  const LoadingWidget({super.key, this.message});
-  final String? message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const CircularProgressIndicator(strokeWidth: 2.6),
-          if (message != null) ...[
-            AppSpacing.vGapLg,
-            Text(message!, style: AppTextStyles.bodyMd),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
 /// Full-width error state with a retry action.
 class AppErrorWidget extends StatelessWidget {
   static const MethodChannel _settingsChannel = MethodChannel(
@@ -75,7 +53,7 @@ class AppErrorWidget extends StatelessWidget {
                 ),
                 AppSpacing.vGapMd,
                 Text(
-                  _noInternetTitle,
+                  context.l10n.noInternetTitle,
                   textAlign: TextAlign.center,
                   style: AppTextStyles.headingLg.copyWith(
                     fontWeight: FontWeight.w800,
@@ -86,7 +64,7 @@ class AppErrorWidget extends StatelessWidget {
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 300),
                   child: Text(
-                    _noInternetSubtitle,
+                    context.l10n.noInternetSubtitle,
                     textAlign: TextAlign.center,
                     style: AppTextStyles.bodySm.copyWith(
                       color: AppColors.textSecondary,
@@ -108,7 +86,7 @@ class AppErrorWidget extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: _openPhoneSettings,
                     icon: const Icon(Icons.settings_rounded),
-                    label: const Text('Open Settings'),
+                    label: Text(context.l10n.openSettings),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(52),
                       side: BorderSide(
@@ -154,11 +132,6 @@ class AppErrorWidget extends StatelessWidget {
         normalized.contains('internet connection') ||
         normalized.contains('ইন্টারনেট সংযোগ নেই');
   }
-
-  String get _noInternetTitle => 'No Internet Connection';
-
-  String get _noInternetSubtitle =>
-      "It looks like you're offline. Please check your internet connection and try again.";
 
   Future<void> _openPhoneSettings() async {
     if (defaultTargetPlatform == TargetPlatform.android) {

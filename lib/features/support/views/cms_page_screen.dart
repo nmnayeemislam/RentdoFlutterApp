@@ -28,7 +28,7 @@ class CmsPageScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(title)),
       body: SafeArea(
         child: page.when(
-          loading: () => const LoadingWidget(),
+          loading: () => const SizedBox.shrink(),
           error: (_, _) => AppErrorWidget(
             message: context.l10n.supportCouldntLoadPage,
             onRetry: () => ref.invalidate(cmsPageProvider(slug)),

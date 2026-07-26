@@ -61,7 +61,7 @@ class _NotificationPreferencesScreenState
       body: !isAuthed
           ? const _GuestPrompt()
           : ref.watch(notificationPreferencesProvider).when(
-                loading: () => const LoadingWidget(),
+                loading: () => const SizedBox.shrink(),
                 error: (e, _) => AppErrorWidget(
                   message: e is ApiException ? e.message : '$e',
                   onRetry: () =>

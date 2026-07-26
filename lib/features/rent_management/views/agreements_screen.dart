@@ -38,7 +38,7 @@ class AgreementsScreen extends ConsumerWidget {
         ],
       ),
       body: ref.watch(agreementsProvider).when(
-            loading: () => const LoadingWidget(),
+            loading: () => const SizedBox.shrink(),
             error: (e, _) => AppErrorWidget(
               message: '$e',
               onRetry: () => ref.invalidate(agreementsProvider),
@@ -276,7 +276,7 @@ class _TemplatesSheetState extends ConsumerState<_TemplatesSheet> {
                 style: AppTextStyles.headingMd),
             AppSpacing.vGapLg,
             templates.when(
-              loading: () => const LoadingWidget(),
+              loading: () => const SizedBox.shrink(),
               error: (e, _) => AppErrorWidget(
                 message: '$e',
                 onRetry: () => ref.invalidate(agreementTemplatesProvider),
@@ -464,7 +464,7 @@ class _GenerateAgreementSheetState
                 style: AppTextStyles.headingMd),
             AppSpacing.vGapLg,
             tenancies.when(
-              loading: () => const LoadingWidget(),
+              loading: () => const SizedBox.shrink(),
               error: (e, _) => AppErrorWidget(
                 message: '$e',
                 onRetry: () => ref.invalidate(tenanciesProvider),
@@ -486,7 +486,7 @@ class _GenerateAgreementSheetState
             ),
             AppSpacing.vGapLg,
             templates.when(
-              loading: () => const LoadingWidget(),
+              loading: () => const SizedBox.shrink(),
               error: (e, _) => AppErrorWidget(
                 message: '$e',
                 onRetry: () => ref.invalidate(agreementTemplatesProvider),

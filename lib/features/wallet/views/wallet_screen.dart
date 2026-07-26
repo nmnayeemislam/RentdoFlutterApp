@@ -136,10 +136,7 @@ class _TransactionList extends ConsumerWidget {
     final transactions = ref.watch(walletTransactionsProvider);
 
     return transactions.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-        child: LoadingWidget(),
-      ),
+      loading: () => const SizedBox.shrink(),
       error: (e, _) => AppErrorWidget(
         message: '$e',
         onRetry: () => ref.invalidate(walletTransactionsProvider),

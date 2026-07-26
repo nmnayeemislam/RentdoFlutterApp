@@ -138,10 +138,7 @@ class _PlanList extends ConsumerWidget {
     );
 
     return plans.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
-        child: LoadingWidget(),
-      ),
+      loading: () => const SizedBox.shrink(),
       error: (e, _) => AppErrorWidget(
         message: '$e',
         onRetry: () => ref.invalidate(plansProvider),

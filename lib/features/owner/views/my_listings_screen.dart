@@ -55,7 +55,7 @@ class MyListingsScreen extends ConsumerWidget {
         label: Text(context.l10n.post),
       ),
       body: listings.when(
-        loading: () => const LoadingWidget(),
+        loading: () => const SizedBox.shrink(),
         error: (e, _) => AppErrorWidget(
           message: '$e',
           onRetry: () => ref.invalidate(myListingsProvider),

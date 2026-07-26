@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/extensions/context_extensions.dart';
+import '../../../shared/widgets/app_loading_indicator.dart';
 
 /// Keyless Google Maps embed URL. The classic `output=embed` endpoint renders
 /// real Google Maps tiles inside a WebView without any API key.
@@ -65,14 +65,11 @@ class _MapPreviewState extends State<MapPreview> {
   void _showOpeningOverlay() {
     _openingOverlay?.remove();
     _openingOverlay = OverlayEntry(
-      builder: (_) => Positioned.fill(
+      builder: (_) => const Positioned.fill(
         child: ColoredBox(
-          color: const Color(0x66000000),
+          color: Color(0x66000000),
           child: Center(
-            child: LoadingAnimationWidget.dotsTriangle(
-              color: Colors.white,
-              size: 64,
-            ),
+            child: AppLoadingIndicator(color: Colors.white, size: 64),
           ),
         ),
       ),
@@ -106,14 +103,11 @@ class _MapPreviewState extends State<MapPreview> {
               // display-only and doesn't steal the list's scroll gestures.
               WebViewWidget(controller: _controller),
               if (_opening)
-                Positioned.fill(
+                const Positioned.fill(
                   child: ColoredBox(
-                    color: const Color(0x66000000),
+                    color: Color(0x66000000),
                     child: Center(
-                      child: LoadingAnimationWidget.dotsTriangle(
-                        color: Colors.white,
-                        size: 40,
-                      ),
+                      child: AppLoadingIndicator(color: Colors.white, size: 40),
                     ),
                   ),
                 ),
@@ -196,14 +190,11 @@ class _MapFullScreenState extends State<MapFullScreen> {
             },
           ),
           if (_pageLoading)
-            Positioned.fill(
+            const Positioned.fill(
               child: ColoredBox(
-                color: const Color(0x66000000),
+                color: Color(0x66000000),
                 child: Center(
-                  child: LoadingAnimationWidget.dotsTriangle(
-                    color: Colors.white,
-                    size: 64,
-                  ),
+                  child: AppLoadingIndicator(color: Colors.white, size: 64),
                 ),
               ),
             ),
@@ -246,11 +237,11 @@ class _MapPill extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (loading)
-                SizedBox(
+                const SizedBox(
                   width: 46,
                   height: 18,
                   child: Center(
-                    child: LoadingAnimationWidget.dotsTriangle(
+                    child: AppLoadingIndicator(
                       color: AppColors.primary,
                       size: 24,
                     ),

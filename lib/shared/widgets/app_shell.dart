@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_shadows.dart';
+import '../../features/chat/viewmodels/chat_viewmodel.dart';
 import '../../routes/app_routes.dart';
 import '../extensions/context_extensions.dart';
+import 'app_loading_indicator.dart';
 
 /// Persistent bottom-navigation scaffold wrapping the main tabbed sections.
 ///
 /// A floating white bar; the active tab's icon sits in a navy "squircle" with
-/// its label below. "Messages" opens the (full-screen) conversations list.
-class AppShell extends StatefulWidget {
+/// its label below.
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
 
   @override
-  State<AppShell> createState() => _AppShellState();
+  ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends ConsumerState<AppShell> {
   static List<_TabItem> _tabsFor(BuildContext context) {
     final l10n = context.l10n;
     return [
@@ -49,7 +50,6 @@ class _AppShellState extends State<AppShell> {
         Icons.chat_bubble_outline_rounded,
         Icons.chat_bubble_rounded,
         l10n.messages,
-        push: true,
       ),
       _TabItem(
         AppRoutes.profile,
@@ -62,7 +62,7 @@ class _AppShellState extends State<AppShell> {
 
   int _indexFor(BuildContext context, List<_TabItem> tabs) {
     final loc = GoRouterState.of(context).matchedLocation;
-    final i = tabs.indexWhere((t) => !t.push && loc.startsWith(t.path));
+    final i = tabs.indexWhere((t) => loc.startsWith(t.path));
     return i < 0 ? 0 : i;
   }
 
@@ -73,11 +73,7 @@ class _AppShellState extends State<AppShell> {
     setState(() => _navOpening = true);
     await Future<void>.delayed(const Duration(milliseconds: 700));
     if (!mounted) return;
-    if (tab.push) {
-      await context.push(tab.path);
-    } else {
-      context.go(tab.path);
-    }
+    context.go(tab.path);
     if (mounted) setState(() => _navOpening = false);
   }
 
@@ -87,17 +83,14 @@ class _AppShellState extends State<AppShell> {
     final tabs = _tabsFor(context);
     final current = _indexFor(context, tabs);
     final bool isDark = theme.brightness == Brightness.dark;
+    final unreadCount = ref.watch(unreadMessagesCountProvider);
 
     void onTap(_TabItem tab) {
       if (tab.path == AppRoutes.saved || tab.path == AppRoutes.conversations) {
         _openWithLoader(tab);
         return;
       }
-      if (tab.push) {
-        context.push(tab.path);
-      } else {
-        context.go(tab.path);
-      }
+      context.go(tab.path);
     }
 
     return Scaffold(
@@ -105,12 +98,12 @@ class _AppShellState extends State<AppShell> {
         children: [
           widget.child,
           if (_navOpening)
-            Positioned.fill(
+            const Positioned.fill(
               child: AbsorbPointer(
                 child: ColoredBox(
-                  color: const Color(0x66000000),
+                  color: Color(0x66000000),
                   child: Center(
-                    child: LoadingAnimationWidget.dotsTriangle(
+                    child: AppLoadingIndicator(
                       color: AppColors.primary,
                       size: 64,
                     ),
@@ -143,6 +136,9 @@ class _AppShellState extends State<AppShell> {
                     item: tabs[i],
                     selected: i == current,
                     onTap: () => onTap(tabs[i]),
+                    badgeCount: tabs[i].path == AppRoutes.conversations
+                        ? unreadCount
+                        : 0,
                   ),
               ],
             ),
@@ -158,11 +154,13 @@ class _NavButton extends StatelessWidget {
     required this.item,
     required this.selected,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   final _TabItem item;
   final bool selected;
   final VoidCallback onTap;
+  final int badgeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -185,19 +183,60 @@ class _NavButton extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 240),
-                curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.all(9),
-                decoration: BoxDecoration(
-                  color: selected ? activeColor : Colors.transparent,
-                  borderRadius: AppRadius.brMd,
-                ),
-                child: Icon(
-                  selected ? item.activeIcon : item.icon,
-                  color: selected ? Colors.white : idle,
-                  size: 24,
-                ),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 240),
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.all(9),
+                    decoration: BoxDecoration(
+                      color: selected ? activeColor : Colors.transparent,
+                      borderRadius: AppRadius.brMd,
+                    ),
+                    child: Icon(
+                      selected ? item.activeIcon : item.icon,
+                      color: selected ? Colors.white : idle,
+                      size: 24,
+                    ),
+                  ),
+                  if (badgeCount > 0)
+                    Positioned(
+                      top: -2,
+                      right: -2,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 1,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.error,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.surfaceDark
+                                : AppColors.surfaceLight,
+                            width: 1.5,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          badgeCount > 9 ? '9+' : '$badgeCount',
+                          style: const TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 4),
               Text(
@@ -217,18 +256,9 @@ class _NavButton extends StatelessWidget {
 }
 
 class _TabItem {
-  const _TabItem(
-    this.path,
-    this.icon,
-    this.activeIcon,
-    this.label, {
-    this.push = false,
-  });
+  const _TabItem(this.path, this.icon, this.activeIcon, this.label);
   final String path;
   final IconData icon;
   final IconData activeIcon;
   final String label;
-
-  /// When true the tab opens a full-screen (non-shell) route via push.
-  final bool push;
 }

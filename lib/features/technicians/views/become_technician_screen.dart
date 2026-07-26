@@ -107,7 +107,7 @@ class _BecomeTechnicianScreenState
             ),
             AppSpacing.vGapXl,
             categories.when(
-              loading: () => const LoadingWidget(),
+              loading: () => const SizedBox.shrink(),
               error: (e, _) => AppErrorWidget(
                 message: '$e',
                 onRetry: () => ref.invalidate(technicianCategoriesProvider),

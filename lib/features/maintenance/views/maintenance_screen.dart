@@ -50,7 +50,7 @@ class MaintenanceScreen extends ConsumerWidget {
               ),
             )
           : ref.watch(maintenanceViewModelProvider).when(
-                loading: () => const LoadingWidget(),
+                loading: () => const SizedBox.shrink(),
                 error: (e, _) => AppErrorWidget(
                   message: '$e',
                   onRetry: () =>

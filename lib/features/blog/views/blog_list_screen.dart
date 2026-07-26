@@ -67,7 +67,7 @@ class BlogListScreen extends ConsumerWidget {
               ),
               Expanded(
                 child: feed.when(
-                  loading: () => const LoadingWidget(),
+                  loading: () => const SizedBox.shrink(),
                   error: (_, _) => AppErrorWidget(
                     message: context.l10n.blogCouldntLoadPosts,
                     onRetry: () => ref.invalidate(blogFeedProvider),

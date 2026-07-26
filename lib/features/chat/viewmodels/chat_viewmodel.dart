@@ -139,6 +139,13 @@ class ConversationsViewModel
 final conversationsViewModelProvider = AutoDisposeAsyncNotifierProvider<
     ConversationsViewModel, List<ConversationModel>>(ConversationsViewModel.new);
 
+/// Total unread message count across all conversations, for the nav badge.
+final unreadMessagesCountProvider = Provider.autoDispose<int>((ref) {
+  final conversations = ref.watch(conversationsViewModelProvider).valueOrNull;
+  if (conversations == null) return 0;
+  return conversations.fold(0, (sum, c) => sum + c.unreadCount);
+});
+
 /// Messages for a single conversation.
 final conversationMessagesProvider = FutureProvider.autoDispose
     .family<List<MessageModel>, int>((ref, conversationId) async {

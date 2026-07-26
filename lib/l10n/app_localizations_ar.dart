@@ -30,6 +30,53 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا يوجد اتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.';
 
   @override
+  String get noInternetTitle => 'لا يوجد اتصال بالإنترنت';
+
+  @override
+  String get noInternetSubtitle =>
+      'يبدو أنك غير متصل بالإنترنت. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.';
+
+  @override
+  String get openSettings => 'فتح الإعدادات';
+
+  @override
+  String get profileThemeMode => 'وضع المظهر';
+
+  @override
+  String validatorRequired(String field) {
+    return '$field مطلوب';
+  }
+
+  @override
+  String get validatorEmailRequired => 'البريد الإلكتروني مطلوب';
+
+  @override
+  String get validatorEmailInvalid => 'أدخل بريدًا إلكترونيًا صالحًا';
+
+  @override
+  String get validatorPasswordRequired => 'كلمة المرور مطلوبة';
+
+  @override
+  String validatorPasswordMinLength(int min) {
+    return 'يجب أن تتكون كلمة المرور من $min أحرف على الأقل';
+  }
+
+  @override
+  String get validatorPasswordMismatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get validatorPhoneRequired => 'رقم الهاتف مطلوب';
+
+  @override
+  String get validatorPhoneInvalid => 'أدخل رقم هاتف صالحًا';
+
+  @override
+  String get validatorCodeRequired => 'الرمز مطلوب';
+
+  @override
+  String get validatorCodeInvalid => 'أدخل الرمز المكوّن من 6 أرقام';
+
+  @override
   String get noResults => 'لم يتم العثور على نتائج';
 
   @override

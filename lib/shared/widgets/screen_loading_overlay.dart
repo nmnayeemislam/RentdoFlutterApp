@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../core/theme/app_colors.dart';
+import 'app_loading_indicator.dart';
 
 class ScreenLoadingOverlay extends StatelessWidget {
   const ScreenLoadingOverlay({
@@ -23,8 +23,8 @@ class ScreenLoadingOverlay extends StatelessWidget {
             child: AbsorbPointer(
               child: ColoredBox(
                 color: Colors.black.withValues(alpha: 0.08),
-                child: Center(
-                  child: LoadingAnimationWidget.dotsTriangle(
+                child: const Center(
+                  child: AppLoadingIndicator(
                     color: AppColors.primary,
                     size: 54,
                   ),

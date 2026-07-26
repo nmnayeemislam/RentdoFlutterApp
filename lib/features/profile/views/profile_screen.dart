@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +14,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
+import '../../../shared/widgets/app_loading_indicator.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../../auth/models/user_model.dart';
 import '../../auth/viewmodels/auth_viewmodel.dart';
@@ -20,11 +22,28 @@ import '../../config/providers/config_providers.dart';
 
 /// Profile tab: account header, settings menu and logout. Falls back to a
 /// sign-in prompt for guests.
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _navOpening = false;
+
+  Future<void> _openWithLoader(String route) async {
+    if (_navOpening) return;
+    await HapticFeedback.selectionClick();
+    setState(() => _navOpening = true);
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (!mounted) return;
+    await context.push(route);
+    if (mounted) setState(() => _navOpening = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Watch only the slices this screen renders so unrelated auth changes
     // (e.g. isSubmitting during a login elsewhere) don't rebuild it.
     final isAuthenticated = ref.watch(
@@ -73,208 +92,244 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.profileTitle)),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            if (isAuthenticated && user != null)
-              _ProfileHeader(user: user)
-            else
-              const _GuestHeader(),
-            AppSpacing.vGapXl,
-            _MenuGroup(title: l10n.profileActivity, items: activityItems),
-            AppSpacing.vGapLg,
-            _MenuGroup(
-              title: l10n.profileLists,
-              items: [
-                (
-                  Icons.favorite_border_rounded,
-                  l10n.profileSavedProperties,
-                  AppRoutes.saved,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              children: [
+                if (isAuthenticated && user != null)
+                  _ProfileHeader(user: user)
+                else
+                  const _GuestHeader(),
+                AppSpacing.vGapXl,
+                _MenuGroup(
+                  onTapRoute: _openWithLoader,
+                  title: l10n.profileActivity,
+                  items: activityItems,
                 ),
-                (
-                  Icons.bookmark_border_rounded,
-                  l10n.profileSavedSearches,
-                  AppRoutes.savedSearches,
+                AppSpacing.vGapLg,
+                _MenuGroup(
+                  onTapRoute: _openWithLoader,
+                  title: l10n.profileLists,
+                  items: [
+                    (
+                      Icons.favorite_border_rounded,
+                      l10n.profileSavedProperties,
+                      AppRoutes.saved,
+                    ),
+                    (
+                      Icons.bookmark_border_rounded,
+                      l10n.profileSavedSearches,
+                      AppRoutes.savedSearches,
+                    ),
+                    (
+                      Icons.compare_arrows_rounded,
+                      l10n.compareTitle,
+                      AppRoutes.compare,
+                    ),
+                  ],
                 ),
-                (
-                  Icons.compare_arrows_rounded,
-                  l10n.compareTitle,
-                  AppRoutes.compare,
+                AppSpacing.vGapLg,
+                _MenuGroup(
+                  onTapRoute: _openWithLoader,
+                  title: l10n.profileOwner,
+                  items: [
+                    (
+                      Icons.home_work_outlined,
+                      l10n.ownerMyListingsTitle,
+                      AppRoutes.myListings,
+                    ),
+                    (
+                      Icons.insights_outlined,
+                      l10n.ownerLeadsTitle,
+                      AppRoutes.ownerLeads,
+                    ),
+                    (
+                      Icons.apartment_outlined,
+                      l10n.profileRentManagement,
+                      AppRoutes.rentManagement,
+                    ),
+                    (
+                      Icons.build_outlined,
+                      l10n.maintenanceTitle,
+                      AppRoutes.maintenance,
+                    ),
+                    (
+                      Icons.verified_user_outlined,
+                      l10n.accountOwnerVerificationTitle,
+                      AppRoutes.verification,
+                    ),
+                    (
+                      Icons.speed_outlined,
+                      l10n.accountUsageLimitsTitle,
+                      AppRoutes.usageLimits,
+                    ),
+                  ],
+                ),
+                AppSpacing.vGapLg,
+                _MenuGroup(
+                  onTapRoute: _openWithLoader,
+                  title: l10n.profileBilling,
+                  items: [
+                    (
+                      Icons.account_balance_wallet_outlined,
+                      l10n.profileWallet,
+                      AppRoutes.wallet,
+                    ),
+                    (
+                      Icons.workspace_premium_outlined,
+                      l10n.billingMembershipTitle,
+                      AppRoutes.plans,
+                    ),
+                    (
+                      Icons.inventory_2_outlined,
+                      l10n.billingPostPackagesTitle,
+                      AppRoutes.packages,
+                    ),
+                  ],
+                ),
+                AppSpacing.vGapLg,
+                _MenuGroup(
+                  onTapRoute: _openWithLoader,
+                  title: l10n.profileAccount,
+                  items: [
+                    (
+                      Icons.person_outline_rounded,
+                      l10n.profileEditProfile,
+                      AppRoutes.editProfile,
+                    ),
+                    (
+                      Icons.notifications_none_rounded,
+                      l10n.notifications,
+                      AppRoutes.notifications,
+                    ),
+                    (
+                      Icons.tune_rounded,
+                      l10n.accountNotificationSettingsTitle,
+                      AppRoutes.notificationPreferences,
+                    ),
+                    (
+                      Icons.language_rounded,
+                      l10n.configLanguageCurrencyTitle,
+                      AppRoutes.languageCurrency,
+                    ),
+                    (
+                      Icons.lock_outline_rounded,
+                      l10n.profileChangePassword,
+                      AppRoutes.changePassword,
+                    ),
+                    (
+                      Icons.block_rounded,
+                      l10n.communityBlockedUsersTitle,
+                      AppRoutes.blockedUsers,
+                    ),
+                    (
+                      Icons.privacy_tip_outlined,
+                      l10n.accountPrivacyDataTitle,
+                      AppRoutes.privacyData,
+                    ),
+                  ],
+                ),
+                AppSpacing.vGapLg,
+                _MenuGroup(
+                  onTapRoute: _openWithLoader,
+                  title: l10n.profileExplore,
+                  items: [
+                    (Icons.article_outlined, l10n.blogTitle, AppRoutes.blog),
+                  ],
+                ),
+                AppSpacing.vGapLg,
+                _MenuGroup(
+                  onTapRoute: _openWithLoader,
+                  title: l10n.profileSupportLegal,
+                  items: [
+                    (
+                      Icons.help_outline_rounded,
+                      l10n.profileHelpContact,
+                      AppRoutes.helpContact,
+                    ),
+                    (
+                      Icons.shield_outlined,
+                      l10n.profilePrivacyPolicy,
+                      AppRoutes.privacyPolicy,
+                    ),
+                    (
+                      Icons.description_outlined,
+                      l10n.profileTermsConditions,
+                      AppRoutes.termsConditions,
+                    ),
+                  ],
+                ),
+                AppSpacing.vGapLg,
+                const _LanguageToggle(),
+                AppSpacing.vGapLg,
+                const _AppearanceToggle(),
+                AppSpacing.vGapXl,
+                if (isAuthenticated)
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      await ref.read(authViewModelProvider.notifier).logout();
+                      if (context.mounted) context.go(AppRoutes.login);
+                    },
+                    icon: const Icon(
+                      Icons.logout_rounded,
+                      color: AppColors.error,
+                    ),
+                    label: Text(
+                      l10n.profileLogOut,
+                      style: const TextStyle(color: AppColors.error),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.error),
+                    ),
+                  )
+                else
+                  PrimaryButton(
+                    label: l10n.profileLoginRegister,
+                    onPressed: () => context.go(AppRoutes.login),
+                  ),
+                if (isAuthenticated) ...[
+                  AppSpacing.vGapMd,
+                  SizedBox(
+                    height: 52,
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => context.push(AppRoutes.privacyData),
+                      icon: const Icon(Icons.delete_outline_rounded),
+                      label: Text(l10n.accountDeleteAccountTitle),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.error,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+                AppSpacing.vGapLg,
+                Center(
+                  child: Text(
+                    l10n.profileAppVersion,
+                    style: AppTextStyles.caption,
+                  ),
                 ),
               ],
             ),
-            AppSpacing.vGapLg,
-            _MenuGroup(
-              title: l10n.profileOwner,
-              items: [
-                (
-                  Icons.home_work_outlined,
-                  l10n.ownerMyListingsTitle,
-                  AppRoutes.myListings,
-                ),
-                (
-                  Icons.insights_outlined,
-                  l10n.ownerLeadsTitle,
-                  AppRoutes.ownerLeads,
-                ),
-                (
-                  Icons.apartment_outlined,
-                  l10n.profileRentManagement,
-                  AppRoutes.rentManagement,
-                ),
-                (
-                  Icons.build_outlined,
-                  l10n.maintenanceTitle,
-                  AppRoutes.maintenance,
-                ),
-                (
-                  Icons.verified_user_outlined,
-                  l10n.accountOwnerVerificationTitle,
-                  AppRoutes.verification,
-                ),
-                (
-                  Icons.speed_outlined,
-                  l10n.accountUsageLimitsTitle,
-                  AppRoutes.usageLimits,
-                ),
-              ],
-            ),
-            AppSpacing.vGapLg,
-            _MenuGroup(
-              title: l10n.profileBilling,
-              items: [
-                (
-                  Icons.account_balance_wallet_outlined,
-                  l10n.profileWallet,
-                  AppRoutes.wallet,
-                ),
-                (
-                  Icons.workspace_premium_outlined,
-                  l10n.billingMembershipTitle,
-                  AppRoutes.plans,
-                ),
-                (
-                  Icons.inventory_2_outlined,
-                  l10n.billingPostPackagesTitle,
-                  AppRoutes.packages,
-                ),
-              ],
-            ),
-            AppSpacing.vGapLg,
-            _MenuGroup(
-              title: l10n.profileAccount,
-              items: [
-                (
-                  Icons.person_outline_rounded,
-                  l10n.profileEditProfile,
-                  AppRoutes.editProfile,
-                ),
-                (
-                  Icons.notifications_none_rounded,
-                  l10n.notifications,
-                  AppRoutes.notifications,
-                ),
-                (
-                  Icons.tune_rounded,
-                  l10n.accountNotificationSettingsTitle,
-                  AppRoutes.notificationPreferences,
-                ),
-                (
-                  Icons.language_rounded,
-                  l10n.configLanguageCurrencyTitle,
-                  AppRoutes.languageCurrency,
-                ),
-                (
-                  Icons.lock_outline_rounded,
-                  l10n.profileChangePassword,
-                  AppRoutes.changePassword,
-                ),
-                (
-                  Icons.block_rounded,
-                  l10n.communityBlockedUsersTitle,
-                  AppRoutes.blockedUsers,
-                ),
-                (
-                  Icons.privacy_tip_outlined,
-                  l10n.accountPrivacyDataTitle,
-                  AppRoutes.privacyData,
-                ),
-              ],
-            ),
-            AppSpacing.vGapLg,
-            _MenuGroup(
-              title: l10n.profileExplore,
-              items: [(Icons.article_outlined, l10n.blogTitle, AppRoutes.blog)],
-            ),
-            AppSpacing.vGapLg,
-            _MenuGroup(
-              title: l10n.profileSupportLegal,
-              items: [
-                (
-                  Icons.help_outline_rounded,
-                  l10n.profileHelpContact,
-                  AppRoutes.helpContact,
-                ),
-                (
-                  Icons.shield_outlined,
-                  l10n.profilePrivacyPolicy,
-                  AppRoutes.privacyPolicy,
-                ),
-                (
-                  Icons.description_outlined,
-                  l10n.profileTermsConditions,
-                  AppRoutes.termsConditions,
-                ),
-              ],
-            ),
-            AppSpacing.vGapLg,
-            const _LanguageToggle(),
-            AppSpacing.vGapLg,
-            const _AppearanceToggle(),
-            AppSpacing.vGapXl,
-            if (isAuthenticated)
-              OutlinedButton.icon(
-                onPressed: () async {
-                  await ref.read(authViewModelProvider.notifier).logout();
-                  if (context.mounted) context.go(AppRoutes.login);
-                },
-                icon: const Icon(Icons.logout_rounded, color: AppColors.error),
-                label: Text(
-                  l10n.profileLogOut,
-                  style: const TextStyle(color: AppColors.error),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.error),
-                ),
-              )
-            else
-              PrimaryButton(
-                label: l10n.profileLoginRegister,
-                onPressed: () => context.go(AppRoutes.login),
-              ),
-            if (isAuthenticated) ...[
-              AppSpacing.vGapMd,
-              SizedBox(
-                height: 52,
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => context.push(AppRoutes.privacyData),
-                  icon: const Icon(Icons.delete_outline_rounded),
-                  label: Text(l10n.accountDeleteAccountTitle),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.error,
-                    foregroundColor: Colors.white,
+          ),
+          if (_navOpening)
+            const Positioned.fill(
+              child: AbsorbPointer(
+                child: ColoredBox(
+                  color: Color(0x66000000),
+                  child: Center(
+                    child: AppLoadingIndicator(
+                      color: AppColors.primary,
+                      size: 64,
+                    ),
                   ),
                 ),
               ),
-            ],
-            AppSpacing.vGapLg,
-            Center(
-              child: Text(l10n.profileAppVersion, style: AppTextStyles.caption),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -531,7 +586,7 @@ class _AppearanceToggle extends ConsumerWidget {
             children: [
               Icon(iconFor(mode), color: AppColors.primary),
               const SizedBox(width: AppSpacing.sm),
-              const Text('Theme mode', style: AppTextStyles.titleSm),
+              Text(context.l10n.profileThemeMode, style: AppTextStyles.titleSm),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -568,12 +623,16 @@ class _AppearanceToggle extends ConsumerWidget {
 }
 
 class _MenuGroup extends StatelessWidget {
-  const _MenuGroup({this.title, required this.items});
+  const _MenuGroup({this.title, required this.items, required this.onTapRoute});
 
   final String? title;
 
   /// `(icon, label, route?)` — a null route shows a "coming soon" note.
   final List<(IconData, String, String?)> items;
+
+  /// Navigates to a route, showing the same brief loading overlay as the
+  /// bottom nav's Saved tab.
+  final Future<void> Function(String route) onTapRoute;
 
   @override
   Widget build(BuildContext context) {
@@ -626,7 +685,7 @@ class _MenuGroup extends StatelessWidget {
                     if (route == null) {
                       context.showSnack(context.l10n.profileComingSoon);
                     } else {
-                      context.push(route);
+                      onTapRoute(route);
                     }
                   },
                 ),

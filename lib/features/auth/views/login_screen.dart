@@ -303,7 +303,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         keyboardType: TextInputType.emailAddress,
         prefixIcon: Icons.mail_outline_rounded,
         textInputAction: TextInputAction.next,
-        validator: Validators.email,
+        validator: (v) => Validators.email(v, context.l10n),
       ),
       AppSpacing.vGapLg,
       AppTextField(
@@ -313,7 +313,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         obscure: true,
         prefixIcon: Icons.lock_outline_rounded,
         textInputAction: TextInputAction.done,
-        validator: Validators.password,
+        validator: (v) => Validators.password(v, context.l10n),
       ),
       Align(
         alignment: AlignmentDirectional.centerEnd,
@@ -341,7 +341,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         controller: _phone,
         enabled: !_otpSent,
         textInputAction: TextInputAction.next,
-        validator: Validators.phone,
+        validator: (v) => Validators.phone(v, context.l10n),
       ),
       if (!_otpSent) ...[
         AppSpacing.vGapLg,

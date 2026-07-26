@@ -29,6 +29,53 @@ class AppLocalizationsBn extends AppLocalizations {
       'ইন্টারনেট সংযোগ নেই। নেটওয়ার্ক চেক করে আবার চেষ্টা করুন।';
 
   @override
+  String get noInternetTitle => 'ইন্টারনেট সংযোগ নেই';
+
+  @override
+  String get noInternetSubtitle =>
+      'মনে হচ্ছে আপনি অফলাইনে আছেন। দয়া করে আপনার ইন্টারনেট সংযোগ চেক করে আবার চেষ্টা করুন।';
+
+  @override
+  String get openSettings => 'সেটিংস খুলুন';
+
+  @override
+  String get profileThemeMode => 'থিম মোড';
+
+  @override
+  String validatorRequired(String field) {
+    return '$field আবশ্যক';
+  }
+
+  @override
+  String get validatorEmailRequired => 'ইমেইল আবশ্যক';
+
+  @override
+  String get validatorEmailInvalid => 'সঠিক ইমেইল দিন';
+
+  @override
+  String get validatorPasswordRequired => 'পাসওয়ার্ড আবশ্যক';
+
+  @override
+  String validatorPasswordMinLength(int min) {
+    return 'পাসওয়ার্ড কমপক্ষে $min অক্ষরের হতে হবে';
+  }
+
+  @override
+  String get validatorPasswordMismatch => 'পাসওয়ার্ড মিলছে না';
+
+  @override
+  String get validatorPhoneRequired => 'ফোন নম্বর আবশ্যক';
+
+  @override
+  String get validatorPhoneInvalid => 'সঠিক ফোন নম্বর দিন';
+
+  @override
+  String get validatorCodeRequired => 'কোড আবশ্যক';
+
+  @override
+  String get validatorCodeInvalid => '৬-সংখ্যার কোড দিন';
+
+  @override
   String get noResults => 'কোনো ফলাফল পাওয়া যায়নি';
 
   @override

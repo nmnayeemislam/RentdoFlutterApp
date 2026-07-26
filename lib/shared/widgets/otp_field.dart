@@ -13,7 +13,7 @@ class OtpField extends StatelessWidget {
     this.label,
     this.hint,
     this.textInputAction = TextInputAction.done,
-    this.validator = Validators.otp,
+    this.validator,
   });
 
   final TextEditingController controller;
@@ -35,7 +35,7 @@ class OtpField extends StatelessWidget {
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(6),
       ],
-      validator: validator,
+      validator: validator ?? (v) => Validators.otp(v, context.l10n),
     );
   }
 }

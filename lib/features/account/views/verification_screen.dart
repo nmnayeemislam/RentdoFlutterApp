@@ -61,7 +61,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
       body: !isAuthed
           ? const _GuestPrompt()
           : ref.watch(verificationStatusProvider).when(
-                loading: () => const LoadingWidget(),
+                loading: () => const SizedBox.shrink(),
                 error: (e, _) => AppErrorWidget(
                   message: e is ApiException ? e.message : '$e',
                   onRetry: () => ref.invalidate(verificationStatusProvider),

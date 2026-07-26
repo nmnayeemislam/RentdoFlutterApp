@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_shadows.dart';
+import 'app_loading_indicator.dart';
 
 /// App-wide filled call-to-action button with a built-in loading state.
 class PrimaryButton extends StatelessWidget {
@@ -47,14 +47,11 @@ class PrimaryButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (isLoading)
-              SizedBox(
+              const SizedBox(
                 width: 48,
                 height: 22,
                 child: Center(
-                  child: LoadingAnimationWidget.dotsTriangle(
-                    color: Colors.white,
-                    size: 28,
-                  ),
+                  child: AppLoadingIndicator(color: Colors.white, size: 28),
                 ),
               )
             else ...[

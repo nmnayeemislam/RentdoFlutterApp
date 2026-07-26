@@ -162,7 +162,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             controller: _name,
             prefixIcon: Icons.person_outline_rounded,
             textInputAction: TextInputAction.next,
-            validator: (v) => Validators.required(v, field: 'Full name'),
+            validator: (v) =>
+                Validators.required(v, context.l10n, field: context.l10n.fullName),
           ),
           AppSpacing.vGapLg,
           AppTextField(
@@ -172,7 +173,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             keyboardType: TextInputType.emailAddress,
             prefixIcon: Icons.mail_outline_rounded,
             textInputAction: TextInputAction.next,
-            validator: Validators.email,
+            validator: (v) => Validators.email(v, context.l10n),
           ),
           AppSpacing.vGapLg,
           PhoneField(
@@ -180,7 +181,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             hint: '1711 223344',
             controller: _phone,
             textInputAction: TextInputAction.next,
-            validator: Validators.phone,
+            validator: (v) => Validators.phone(v, context.l10n),
           ),
           AppSpacing.vGapLg,
           AppTextField(
@@ -190,7 +191,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             obscure: true,
             prefixIcon: Icons.lock_outline_rounded,
             textInputAction: TextInputAction.done,
-            validator: Validators.password,
+            validator: (v) => Validators.password(v, context.l10n),
           ),
           AppSpacing.vGapXl,
           PrimaryButton(

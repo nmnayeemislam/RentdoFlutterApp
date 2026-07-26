@@ -131,7 +131,11 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
                     textInputAction: TextInputAction.next,
                     decoration:
                         InputDecoration(labelText: context.l10n.supportYourName),
-                    validator: (v) => Validators.required(v, field: 'Name'),
+                    validator: (v) => Validators.required(
+                      v,
+                      context.l10n,
+                      field: context.l10n.supportYourName,
+                    ),
                   ),
                   AppSpacing.vGapMd,
                   TextFormField(
@@ -139,7 +143,7 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(labelText: context.l10n.email),
-                    validator: Validators.email,
+                    validator: (v) => Validators.email(v, context.l10n),
                   ),
                   AppSpacing.vGapMd,
                   TextFormField(
@@ -147,7 +151,11 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
                     textInputAction: TextInputAction.next,
                     decoration:
                         InputDecoration(labelText: context.l10n.supportSubject),
-                    validator: (v) => Validators.required(v, field: 'Subject'),
+                    validator: (v) => Validators.required(
+                      v,
+                      context.l10n,
+                      field: context.l10n.supportSubject,
+                    ),
                   ),
                   AppSpacing.vGapMd,
                   TextFormField(
@@ -158,7 +166,11 @@ class _HelpContactScreenState extends ConsumerState<HelpContactScreen> {
                       labelText: context.l10n.supportMessage,
                       alignLabelWithHint: true,
                     ),
-                    validator: (v) => Validators.required(v, field: 'Message'),
+                    validator: (v) => Validators.required(
+                      v,
+                      context.l10n,
+                      field: context.l10n.supportMessage,
+                    ),
                   ),
                   AppSpacing.vGapLg,
                   PrimaryButton(

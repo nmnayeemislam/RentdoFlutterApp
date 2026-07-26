@@ -32,7 +32,7 @@ class TenanciesScreen extends ConsumerWidget {
         ],
       ),
       body: ref.watch(tenanciesProvider).when(
-            loading: () => const LoadingWidget(),
+            loading: () => const SizedBox.shrink(),
             error: (e, _) => AppErrorWidget(
               message: '$e',
               onRetry: () => ref.invalidate(tenanciesProvider),

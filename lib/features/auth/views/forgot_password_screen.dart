@@ -173,7 +173,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         keyboardType: TextInputType.emailAddress,
         prefixIcon: Icons.mail_outline_rounded,
         textInputAction: TextInputAction.done,
-        validator: Validators.email,
+        validator: (v) => Validators.email(v, context.l10n),
       ),
       AppSpacing.vGapLg,
       PrimaryButton(
@@ -192,7 +192,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         controller: _phone,
         enabled: !_otpSent,
         textInputAction: TextInputAction.next,
-        validator: Validators.phone,
+        validator: (v) => Validators.phone(v, context.l10n),
       ),
       if (!_otpSent) ...[
         AppSpacing.vGapLg,
@@ -212,7 +212,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           obscure: true,
           prefixIcon: Icons.lock_outline_rounded,
           textInputAction: TextInputAction.done,
-          validator: Validators.password,
+          validator: (v) => Validators.password(v, context.l10n),
         ),
         AppSpacing.vGapLg,
         PrimaryButton(

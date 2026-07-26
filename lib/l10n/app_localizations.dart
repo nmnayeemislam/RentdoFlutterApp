@@ -136,6 +136,90 @@ abstract class AppLocalizations {
   /// **'No internet connection. Check your network and try again.'**
   String get noInternet;
 
+  /// No description provided for @noInternetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet Connection'**
+  String get noInternetTitle;
+
+  /// No description provided for @noInternetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'It looks like you\'re offline. Please check your internet connection and try again.'**
+  String get noInternetSubtitle;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// No description provided for @profileThemeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme mode'**
+  String get profileThemeMode;
+
+  /// No description provided for @validatorRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'{field} is required'**
+  String validatorRequired(String field);
+
+  /// No description provided for @validatorEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get validatorEmailRequired;
+
+  /// No description provided for @validatorEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get validatorEmailInvalid;
+
+  /// No description provided for @validatorPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get validatorPasswordRequired;
+
+  /// No description provided for @validatorPasswordMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least {min} characters'**
+  String validatorPasswordMinLength(int min);
+
+  /// No description provided for @validatorPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get validatorPasswordMismatch;
+
+  /// No description provided for @validatorPhoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone is required'**
+  String get validatorPhoneRequired;
+
+  /// No description provided for @validatorPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number'**
+  String get validatorPhoneInvalid;
+
+  /// No description provided for @validatorCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Code is required'**
+  String get validatorCodeRequired;
+
+  /// No description provided for @validatorCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code'**
+  String get validatorCodeInvalid;
+
   /// No description provided for @noResults.
   ///
   /// In en, this message translates to:

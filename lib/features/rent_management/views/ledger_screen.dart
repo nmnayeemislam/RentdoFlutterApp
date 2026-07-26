@@ -32,7 +32,7 @@ class LedgerScreen extends ConsumerWidget {
         ],
       ),
       body: ref.watch(ledgerProvider).when(
-            loading: () => const LoadingWidget(),
+            loading: () => const SizedBox.shrink(),
             error: (e, _) => AppErrorWidget(
               message: '$e',
               onRetry: () => ref.invalidate(ledgerProvider),

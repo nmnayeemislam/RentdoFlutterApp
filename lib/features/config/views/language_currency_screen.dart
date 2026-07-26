@@ -51,7 +51,7 @@ class _LanguageCurrencyScreenState
       body: ScreenLoadingOverlay(
         loading: _busyLocale != null || _busyCurrency != null,
         child: bootstrap.when(
-          loading: () => const LoadingWidget(),
+          loading: () => const SizedBox.shrink(),
           error: (e, _) => AppErrorWidget(
             message: '$e',
             onRetry: () => ref.invalidate(bootstrapProvider),

@@ -13,6 +13,7 @@ import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/primary_button.dart';
+import '../../../shared/widgets/screen_loading_overlay.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../auth/viewmodels/auth_viewmodel.dart';
 import '../viewmodels/technician_viewmodel.dart';
@@ -24,15 +25,19 @@ class MyServiceBookingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isAuthed =
-        ref.watch(authViewModelProvider.select((s) => s.isAuthenticated));
+    final isAuthed = ref.watch(
+      authViewModelProvider.select((s) => s.isAuthenticated),
+    );
+    final bookingsState = ref.watch(technicianBookingsViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.technicianServiceBookingsTitle)),
       body: !isAuthed
           ? const _GuestPrompt()
-          : ref.watch(technicianBookingsViewModelProvider).when(
-                loading: () => const LoadingWidget(),
+          : ScreenLoadingOverlay(
+              loading: bookingsState.isLoading,
+              child: bookingsState.when(
+                loading: () => const SizedBox.shrink(),
                 error: (e, _) => AppErrorWidget(
                   message: '$e',
                   onRetry: () => ref
@@ -63,6 +68,7 @@ class MyServiceBookingsScreen extends ConsumerWidget {
                   );
                 },
               ),
+            ),
     );
   }
 }
@@ -74,7 +80,8 @@ class _BookingCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final title = booking.technicianName ?? context.l10n.propertyTechnicianFallback;
+    final title =
+        booking.technicianName ?? context.l10n.propertyTechnicianFallback;
     final scheduled = booking.scheduledAt;
 
     return Container(

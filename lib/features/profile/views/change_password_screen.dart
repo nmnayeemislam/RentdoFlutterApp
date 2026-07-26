@@ -75,8 +75,11 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                       obscure: true,
                       prefixIcon: Icons.lock_outline_rounded,
                       textInputAction: TextInputAction.next,
-                      validator: (v) =>
-                          Validators.required(v, field: 'Current password'),
+                      validator: (v) => Validators.required(
+                        v,
+                        context.l10n,
+                        field: context.l10n.profileCurrentPassword,
+                      ),
                     ),
                     AppSpacing.vGapLg,
                     AppTextField(
@@ -85,7 +88,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                       obscure: true,
                       prefixIcon: Icons.lock_reset_rounded,
                       textInputAction: TextInputAction.next,
-                      validator: Validators.password,
+                      validator: (v) => Validators.password(v, context.l10n),
                     ),
                     AppSpacing.vGapLg,
                     AppTextField(
@@ -94,7 +97,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                       obscure: true,
                       prefixIcon: Icons.lock_reset_rounded,
                       textInputAction: TextInputAction.done,
-                      validator: (v) => Validators.confirm(v, _password.text),
+                      validator: (v) =>
+                          Validators.confirm(v, _password.text, context.l10n),
                     ),
                     AppSpacing.vGapXxl,
                     PrimaryButton(

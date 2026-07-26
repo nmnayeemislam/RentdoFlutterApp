@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -10,6 +9,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/extensions/context_extensions.dart';
+import '../../../shared/widgets/app_loading_indicator.dart';
 import '../../../shared/widgets/network_image_widget.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../../../shared/widgets/state_views.dart';
@@ -86,12 +86,12 @@ class _ConversationsScreenState extends ConsumerState<ConversationsScreen> {
                       },
                     ),
           if (_chatOpening)
-            Positioned.fill(
+            const Positioned.fill(
               child: AbsorbPointer(
                 child: ColoredBox(
-                  color: const Color(0x66000000),
+                  color: Color(0x66000000),
                   child: Center(
-                    child: LoadingAnimationWidget.dotsTriangle(
+                    child: AppLoadingIndicator(
                       color: AppColors.primary,
                       size: 64,
                     ),

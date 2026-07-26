@@ -29,6 +29,53 @@ class AppLocalizationsEn extends AppLocalizations {
       'No internet connection. Check your network and try again.';
 
   @override
+  String get noInternetTitle => 'No Internet Connection';
+
+  @override
+  String get noInternetSubtitle =>
+      'It looks like you\'re offline. Please check your internet connection and try again.';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get profileThemeMode => 'Theme mode';
+
+  @override
+  String validatorRequired(String field) {
+    return '$field is required';
+  }
+
+  @override
+  String get validatorEmailRequired => 'Email is required';
+
+  @override
+  String get validatorEmailInvalid => 'Enter a valid email';
+
+  @override
+  String get validatorPasswordRequired => 'Password is required';
+
+  @override
+  String validatorPasswordMinLength(int min) {
+    return 'Password must be at least $min characters';
+  }
+
+  @override
+  String get validatorPasswordMismatch => 'Passwords do not match';
+
+  @override
+  String get validatorPhoneRequired => 'Phone is required';
+
+  @override
+  String get validatorPhoneInvalid => 'Enter a valid phone number';
+
+  @override
+  String get validatorCodeRequired => 'Code is required';
+
+  @override
+  String get validatorCodeInvalid => 'Enter the 6-digit code';
+
+  @override
   String get noResults => 'No results found';
 
   @override

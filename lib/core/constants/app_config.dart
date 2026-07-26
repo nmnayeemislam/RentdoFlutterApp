@@ -21,8 +21,7 @@ abstract final class AppConfig {
 
   /// Base host of the Laravel backend. Override with:
   /// `flutter run --dart-define=API_BASE_URL=https://api.example.com`
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
+  static const String baseUrl = String.fromEnvironment('API_BASE_URL',
     defaultValue: 'https://rentdonew.razinsoft.com',
   );
 

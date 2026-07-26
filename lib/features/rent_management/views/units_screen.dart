@@ -32,7 +32,7 @@ class UnitsScreen extends ConsumerWidget {
         ],
       ),
       body: ref.watch(rentUnitsProvider).when(
-            loading: () => const LoadingWidget(),
+            loading: () => const SizedBox.shrink(),
             error: (e, _) => AppErrorWidget(
               message: '$e',
               onRetry: () => ref.invalidate(rentUnitsProvider),

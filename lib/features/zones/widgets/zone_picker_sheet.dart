@@ -90,7 +90,7 @@ class _ZonePickerSheetState extends ConsumerState<ZonePickerSheet> {
               AppSpacing.vGapMd,
               Expanded(
                 child: results.when(
-                  loading: () => const LoadingWidget(),
+                  loading: () => const SizedBox.shrink(),
                   error: (e, _) => AppErrorWidget(
                     message: '$e',
                     onRetry: () => ref.invalidate(zoneSearchProvider(_query)),

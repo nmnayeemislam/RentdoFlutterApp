@@ -54,7 +54,7 @@ class PropertyDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       body: async.when(
-        loading: () => const LoadingWidget(),
+        loading: () => const SizedBox.shrink(),
         error: (e, _) => AppErrorWidget(
           message: e.toString(),
           onRetry: () => ref.invalidate(propertyDetailProvider(id)),

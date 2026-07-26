@@ -30,7 +30,7 @@ class MyBookingsScreen extends ConsumerWidget {
       body: !isAuthed
           ? const _GuestPrompt()
           : ref.watch(bookingsViewModelProvider).when(
-                loading: () => const LoadingWidget(),
+                loading: () => const SizedBox.shrink(),
                 error: (e, _) => AppErrorWidget(
                   message: '$e',
                   onRetry: () =>

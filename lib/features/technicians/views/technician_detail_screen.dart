@@ -35,7 +35,7 @@ class TechnicianDetailScreen extends ConsumerWidget {
         elevation: 0,
       ),
       body: async.when(
-        loading: () => const LoadingWidget(),
+        loading: () => const SizedBox.shrink(),
         error: (e, _) => AppErrorWidget(
           message: '$e',
           onRetry: () => ref.invalidate(technicianDetailProvider(id)),

@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
 import '../../../shared/extensions/context_extensions.dart';
+import '../../../shared/widgets/app_loading_indicator.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../../auth/viewmodels/auth_viewmodel.dart';
@@ -137,8 +137,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           controller: _name,
                           prefixIcon: Icons.person_outline_rounded,
                           textInputAction: TextInputAction.next,
-                          validator: (v) =>
-                              Validators.required(v, field: 'Name'),
+                          validator: (v) => Validators.required(
+                            v,
+                            context.l10n,
+                            field: context.l10n.fullName,
+                          ),
                         ),
                         AppSpacing.vGapLg,
                         AppTextField(
@@ -150,7 +153,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           textInputAction: TextInputAction.next,
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? null
-                              : Validators.email(v),
+                              : Validators.email(v, context.l10n),
                         ),
                         AppSpacing.vGapLg,
                         AppTextField(
@@ -162,7 +165,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           textInputAction: TextInputAction.done,
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? null
-                              : Validators.phone(v),
+                              : Validators.phone(v, context.l10n),
                         ),
                         if (currencies.isNotEmpty) ...[
                           AppSpacing.vGapLg,
@@ -221,12 +224,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
           ),
           if (_saveOverlay || isSubmitting)
-            Positioned.fill(
+            const Positioned.fill(
               child: AbsorbPointer(
                 child: ColoredBox(
-                  color: const Color(0x66000000),
+                  color: Color(0x66000000),
                   child: Center(
-                    child: LoadingAnimationWidget.dotsTriangle(
+                    child: AppLoadingIndicator(
                       color: AppColors.primary,
                       size: 64,
                     ),

@@ -54,7 +54,7 @@ class CompareScreen extends ConsumerWidget {
       body: !isAuthed
           ? const _GuestPrompt()
           : compare.when(
-              loading: () => const LoadingWidget(),
+              loading: () => const SizedBox.shrink(),
               error: (e, _) => AppErrorWidget(
                 message: '$e',
                 onRetry: () =>

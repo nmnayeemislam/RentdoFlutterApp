@@ -47,7 +47,7 @@ class NotificationsScreen extends ConsumerWidget {
       body: !isAuthed
           ? const _GuestPrompt()
           : notifications.when(
-              loading: () => const LoadingWidget(),
+              loading: () => const SizedBox.shrink(),
               error: (e, _) => AppErrorWidget(
                 message: '$e',
                 onRetry: () => ref

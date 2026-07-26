@@ -8,6 +8,28 @@
   "retry": "Retry",
   "somethingWentWrong": "Something went wrong",
   "noInternet": "No internet connection. Check your network and try again.",
+  "noInternetTitle": "No Internet Connection",
+  "noInternetSubtitle": "It looks like you're offline. Please check your internet connection and try again.",
+  "openSettings": "Open Settings",
+  "profileThemeMode": "Theme mode",
+
+  "validatorRequired": "{field} is required",
+  "@validatorRequired": {
+    "placeholders": {"field": {"type": "String"}}
+  },
+  "validatorEmailRequired": "Email is required",
+  "validatorEmailInvalid": "Enter a valid email",
+  "validatorPasswordRequired": "Password is required",
+  "validatorPasswordMinLength": "Password must be at least {min} characters",
+  "@validatorPasswordMinLength": {
+    "placeholders": {"min": {"type": "int"}}
+  },
+  "validatorPasswordMismatch": "Passwords do not match",
+  "validatorPhoneRequired": "Phone is required",
+  "validatorPhoneInvalid": "Enter a valid phone number",
+  "validatorCodeRequired": "Code is required",
+  "validatorCodeInvalid": "Enter the 6-digit code",
+
   "noResults": "No results found",
   "seeAll": "See all",
   "explore": "Explore Properties",

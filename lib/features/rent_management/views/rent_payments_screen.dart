@@ -21,7 +21,7 @@ class RentPaymentsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.rentPayments)),
       body: ref.watch(rentPaymentsProvider).when(
-            loading: () => const LoadingWidget(),
+            loading: () => const SizedBox.shrink(),
             error: (e, _) => AppErrorWidget(
               message: '$e',
               onRetry: () => ref.invalidate(rentPaymentsProvider),
