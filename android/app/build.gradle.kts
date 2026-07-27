@@ -17,7 +17,7 @@ if (hasReleaseKeystore) {
 }
 
 android {
-    namespace = "com.razinsoft.rentdo"
+    namespace = "com.app.rentdo"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -27,7 +27,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.razinsoft.rentdo"
+        applicationId = "com.app.rentdo"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

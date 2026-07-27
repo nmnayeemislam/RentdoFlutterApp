@@ -1,4 +1,4 @@
-package com.razinsoft.rentdo
+package com.app.rentdo
 
 import android.content.Intent
 import android.provider.Settings
